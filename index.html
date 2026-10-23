@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Lumen</title>
+<script>
+  // On a web host, "/evolving-claude" (no slash) makes the browser look for
+  // style.css and src/ in the wrong folder. Add the slash so everything loads.
+  if (location.protocol.indexOf('http') === 0 && !/\/$|\.\w+$/.test(location.pathname)) {
+    location.replace(location.pathname + '/' + location.search + location.hash);
+  }
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
