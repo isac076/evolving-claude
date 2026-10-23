@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lumen</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="panel" id="status"><span id="clock">Day 1</span><span id="restored">Lanterns lit: 0</span></div>
+  <div id="toast"></div>
+  <div id="bottom">
+    <div class="panel" id="inventory"></div>
+    <div id="hint"></div>
+  </div>
+  <div id="touch-buttons">
+    <button id="btn-gather">Gather</button>
+    <button id="btn-craft">Craft</button>
+  </div>
+</div>
+
+<div class="panel" id="craft">
+  <div class="craft-head"><h2>Craft</h2><button id="craft-close" aria-label="Close">×</button></div>
+  <div id="craft-list"></div>
+</div>
+
+<div id="title">
+  <h1>Lumen</h1>
+  <p>The world has faded to grey. You are its last small light.</p>
+  <p>Gather, craft and build — and bring the colour back, one lantern at a time.</p>
+  <div class="title-buttons">
+    <button id="btn-continue">Continue</button>
+    <button id="btn-new">New world</button>
+  </div>
+</div>
+
+<!-- Scripts load in order. New files must be added here. -->
+<script src="src/core/rng.js"></script>
+<script src="src/core/noise.js"></script>
+<script src="src/core/input.js"></script>
+<script src="src/data/content.js"></script>
+<script src="src/world/world.js"></script>
+<script src="src/game/player.js"></script>
+<script src="src/game/save.js"></script>
+<script src="src/render/sprites.js"></script>
+<script src="src/render/renderer.js"></script>
+<script src="src/ui/ui.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

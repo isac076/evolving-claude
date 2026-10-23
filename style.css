@@ -1,0 +1,85 @@
+:root {
+  --ink: #f7ecd2;
+  --ink-dim: rgba(247, 236, 210, .65);
+  --glass: rgba(16, 18, 40, .62);
+  --edge: rgba(255, 226, 160, .22);
+  --gold: #ffd77a;
+  --bad: #ff9a8a;
+}
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d20; }
+body { font-family: Georgia, 'Times New Roman', serif; color: var(--ink); user-select: none; -webkit-user-select: none; }
+canvas { display: block; touch-action: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.panel {
+  background: var(--glass); border: 1px solid var(--edge); border-radius: 12px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+}
+
+#hud { position: fixed; inset: 0; pointer-events: none; }
+body:not(.playing) #hud { display: none; }
+#status { position: absolute; top: 14px; left: 14px; padding: 8px 14px; display: flex; gap: 16px; font-size: 14px; letter-spacing: .03em; }
+#restored { color: var(--gold); }
+
+#toast {
+  position: absolute; top: 64px; left: 50%; transform: translate(-50%, -8px);
+  max-width: min(560px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 10px;
+  background: var(--glass); border: 1px solid var(--edge); text-align: center; font-size: 15px;
+  opacity: 0; transition: opacity .5s, transform .5s;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#bottom { position: absolute; bottom: 14px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#inventory { display: flex; gap: 4px; padding: 6px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px); }
+.slot { display: flex; align-items: center; gap: 6px; padding: 5px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,.04); }
+.slot b { color: var(--gold); min-width: 14px; text-align: right; }
+.slot.empty { opacity: .45; }
+.slot i, .cost i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
+#hint { font-size: 12px; color: var(--ink-dim); text-shadow: 0 1px 2px #000; }
+
+#touch-buttons { position: absolute; right: 14px; bottom: 90px; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
+#touch-buttons button {
+  width: 76px; padding: 10px 0; border-radius: 12px; background: var(--glass);
+  border: 1px solid var(--edge); font-size: 14px;
+}
+#touch-buttons button:active { background: rgba(255, 215, 122, .25); }
+
+#craft {
+  position: fixed; top: 14px; right: 14px; width: min(320px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px); overflow: auto; padding: 12px;
+  transform: translateX(calc(100% + 30px)); transition: transform .35s ease;
+}
+#craft.open { transform: none; }
+.craft-head { display: flex; justify-content: space-between; align-items: center; }
+.craft-head h2 { margin: 0 0 8px; font-weight: 400; font-size: 20px; letter-spacing: .06em; }
+#craft-close { background: none; border: 0; font-size: 22px; line-height: 1; }
+#craft-list { display: flex; flex-direction: column; gap: 8px; }
+.recipe {
+  text-align: left; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.05);
+  border: 1px solid transparent; display: flex; flex-direction: column; gap: 4px;
+}
+.recipe:hover { border-color: var(--edge); background: rgba(255,255,255,.09); }
+.recipe b { font-weight: 600; color: var(--gold); }
+.recipe small { color: var(--ink-dim); }
+.recipe div { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; }
+.cost { display: inline-flex; align-items: center; gap: 4px; }
+.cost.short { color: var(--bad); }
+.recipe.cant b { color: var(--ink-dim); }
+
+#title {
+  position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 16px; background: radial-gradient(ellipse at center, rgba(8,10,30,.35), rgba(8,10,30,.8));
+  transition: opacity .8s;
+}
+#title.hidden { opacity: 0; pointer-events: none; }
+#title h1 { font-weight: 400; font-size: clamp(48px, 12vw, 104px); margin: 0 0 10px; letter-spacing: .14em; color: #fff3d6; text-shadow: 0 0 40px rgba(255, 210, 120, .7); }
+#title p { margin: 4px 0; color: var(--ink-dim); font-size: 17px; }
+.title-buttons { margin-top: 26px; display: flex; gap: 12px; }
+.title-buttons button {
+  padding: 11px 26px; border-radius: 999px; background: rgba(255, 215, 122, .12);
+  border: 1px solid rgba(255, 215, 122, .45); font-size: 16px; letter-spacing: .04em;
+}
+.title-buttons button:hover { background: rgba(255, 215, 122, .25); }
+
+@media (hover: hover) and (pointer: fine) { #touch-buttons { display: none; } }
