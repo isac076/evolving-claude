@@ -9,6 +9,8 @@ G.UI = class {
     this.$('btn-craft').onclick = () => this.toggleCraft();
     this.$('btn-gather').onclick = () => { state.wantGather = true; };
     this.$('craft-close').onclick = () => this.toggleCraft(false);
+    this.$('btn-sound').onclick = () => this.toggleSound();
+    this.showSound();
     this.buildCraftList();
   }
 
@@ -30,9 +32,25 @@ G.UI = class {
 
   toggleCraft(force) {
     const el = this.$('craft');
-    const open = force === undefined ? !el.classList.contains('open') : force;
+    const was = el.classList.contains('open');
+    const open = force === undefined ? !was : force;
     el.classList.toggle('open', open);
+    if (open !== was) G.Sound.play(open ? 'open' : 'close');
     if (open) this.refresh();
+  }
+
+  toggleSound() {
+    const muted = G.Sound.toggleMute();
+    if (!muted) G.Sound.play('toggle');
+    this.showSound();
+    this.toast(muted ? 'Sound off (N to turn back on).' : 'Sound on.', 1.8);
+  }
+
+  showSound() {
+    const b = this.$('btn-sound'), m = G.Sound.muted;
+    b.classList.toggle('muted', m);
+    b.title = m ? 'Sound is off — click or press N' : 'Sound is on — click or press N';
+    b.setAttribute('aria-label', b.title);
   }
 
   refresh() {
@@ -71,6 +89,6 @@ G.UI = class {
     }
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
-      : 'WASD / arrows or click to move · E gather · C craft';
+      : 'WASD / arrows or click to move · E gather · C craft · N sound';
   }
 };

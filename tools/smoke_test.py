@@ -20,7 +20,7 @@ def main():
     SHOTS.mkdir(exist_ok=True)
     errors = []
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])
         page = browser.new_page(viewport={"width": 1100, "height": 680})
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
@@ -48,6 +48,30 @@ def main():
         }""")
         page.wait_for_timeout(1500)
         page.screenshot(path=str(SHOTS / "3-night.png"))
+
+        # sound: the engine should have woken on the first key press; play
+        # every effect and footstep and run the soundscape through day/night
+        result = page.evaluate("""async () => {
+            const S = G.Sound;
+            if (!S.ctx) return 'no AudioContext was created';
+            await S.ctx.resume();
+            if (S.ctx.state !== 'running') return 'AudioContext state: ' + S.ctx.state;
+            S.setMuted(false);
+            for (const k of Object.keys(G.SFX)) G.SFX[k](S, { pan: 0.3 });
+            for (const k of Object.keys(G.STEP_SOUNDS)) G.STEP_SOUNDS[k](S, { alt: true });
+            for (const t of Object.values(G.TILES)) if (t.step && !G.STEP_SOUNDS[t.step]) return 'missing step sound ' + t.step;
+            for (const o of Object.values(G.OBJECTS)) if (o.sound && !G.SFX[o.sound]) return 'missing sfx ' + o.sound;
+            for (const o of Object.values(G.STRUCTURES)) if (o.sound && !G.SFX[o.sound]) return 'missing sfx ' + o.sound;
+            for (const day of [0, 1]) for (const r of [0, 1])
+                for (let i = 0; i < 60; i++) G.Ambience.update(0.1, { restore: r, day, water: 0.5, active: true });
+            document.getElementById('btn-sound').click();
+            if (!S.muted) return 'mute button did not mute';
+            document.getElementById('btn-sound').click();
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Sound check failed: " + str(result))
+        page.wait_for_timeout(300)
         browser.close()
 
     if errors:

@@ -17,7 +17,7 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="panel" id="status"><span id="clock">Day 1</span><span id="restored">Lanterns lit: 0</span></div>
+  <div class="panel" id="status"><span id="clock">Day 1</span><span id="restored">Lanterns lit: 0</span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button></div>
   <div id="toast"></div>
   <div id="bottom">
     <div class="panel" id="inventory"></div>
@@ -48,6 +48,8 @@
 <script src="src/core/rng.js"></script>
 <script src="src/core/noise.js"></script>
 <script src="src/core/input.js"></script>
+<script src="src/audio/sound.js"></script>
+<script src="src/audio/ambience.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/game/player.js"></script>

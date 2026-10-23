@@ -25,8 +25,8 @@ as the world does.
 ## Chapter 1 — A solid, lovely foundation
 - [x] Endless seeded world with biomes, gathering, crafting, building, saving, day/night (Night 0)
 - [ ] Smooth restoration edges (colour should fade softly, not tile by tile)
-- [ ] Gentle sound effects with Web Audio (gather, build, footsteps, UI)
-- [ ] Ambient soundscape that changes with day/night and restoration
+- [x] Gentle sound effects with Web Audio (gather, build, footsteps, UI) (Night 1)
+- [x] Ambient soundscape that changes with day/night and restoration (Night 1)
 - [ ] Minimap (toggle with M) showing explored land and lanterns
 - [ ] First-time tutorial goals ("gather 3 wood", "craft a lantern"...) with a small goal tracker
 - [ ] Settings menu (volume, controls help, new world) with Esc
@@ -90,3 +90,7 @@ as the world does.
 - Fireflies can be caught in jars and used as small lights
 - Constellations in the night sky that light up as you restore the world
 - A cat that follows you around after you find it
+- Volume slider in the settings menu (G.Sound.volume already exists and is saved)
+- Each lantern gets its own soft hum / wind-chime you hear only when standing near it
+- Rain on restored land could make the soundscape patter; puddles plink
+- The ambient chord could follow the biome (highlands lower and airier, sand brighter)

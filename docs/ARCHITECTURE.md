@@ -9,6 +9,8 @@ style.css             look of the HUD, menus, title screen
 src/core/rng.js       seeded randomness (G.hash2, G.rng) + small math helpers
 src/core/noise.js     smooth noise for terrain (G.valueNoise, G.fbm)
 src/core/input.js     keyboard / mouse / touch (G.Input)
+src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noise), G.SFX effects, G.STEP_SOUNDS footsteps
+src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/game/player.js    G.Player — movement and collision
@@ -35,10 +37,18 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
 - **Drawing order**: ground → floor structures → objects/standing structures and
   the player row by row (so things lower on screen are in front) → particles →
   lighting → vignette.
+- **Sound**: nothing plays until the first click/key (browser rule) — then
+  `G.Sound.unlock()` creates the AudioContext. Play effects with
+  `G.Sound.play('name', { pan })`; it silently does nothing when muted.
+  Data entries choose their sounds: `sound` on objects/structures, `step` on
+  tiles/floor structures. main.js feeds `G.Ambience.update()` each frame with
+  how restored the spot is, the daylight and nearby water. Mute (N) is stored
+  separately in localStorage `lumen-sound`, not in the save.
 - **Debugging**: `G.state` in the browser console is the whole game state.
   Opening `index.html?autostart` skips the title screen with a fixed seed.
 
 ## Adding a thing (example: a new building)
 1. Add it to `G.STRUCTURES` and a recipe to `G.RECIPES` in `src/data/content.js`.
 2. Add a draw function with the same name to `G.STRUCTURE_SPRITES` in `src/render/sprites.js`.
+3. Optionally give it a `sound` (an effect in `G.SFX`) for when it's built.
 That's it — the crafting menu, placing, saving and lighting all pick it up.

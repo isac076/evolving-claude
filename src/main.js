@@ -15,7 +15,8 @@ window.G = window.G || {};
 
     canAfford(r) { return Object.entries(r.cost).every(([k, n]) => (this.inv[k] || 0) >= n); },
     startBuild(r) {
-      if (!this.canAfford(r)) { ui.toast(`Not enough materials for a ${G.STRUCTURES[r.builds].name}.`); return; }
+      if (!this.canAfford(r)) { G.Sound.play('deny'); ui.toast(`Not enough materials for a ${G.STRUCTURES[r.builds].name}.`); return; }
+      G.Sound.play('select');
       this.buildRecipe = r;
     },
   };
@@ -30,6 +31,7 @@ window.G = window.G || {};
     state.player = new G.Player((sp.tx + 0.5) * G.TILE, (sp.ty + 2.5) * G.TILE);
     state.inv = {}; state.time = G.DAY_LENGTH * 0.85; state.stats = { gathered: 0, built: 0 };
     afterLoad();
+    setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
   }
 
@@ -59,10 +61,14 @@ window.G = window.G || {};
     return { wx, wy, tx: Math.floor(wx / G.TILE), ty: Math.floor(wy / G.TILE) };
   }
 
+  // stereo position of a world point relative to the player: -1 left .. 1 right
+  const panAt = x => G.clamp((x - state.player.x) / 240, -1, 1);
+
   function gatherAt(tx, ty) {
     const w = state.world, o = w.harvest(tx, ty);
     if (!o) return false;
     const def = G.OBJECTS[o];
+    G.Sound.play(def.sound, { pan: panAt((tx + 0.5) * G.TILE) });
     for (const [k, n] of Object.entries(def.drops)) {
       state.inv[k] = (state.inv[k] || 0) + n;
       addFloater((tx + 0.5) * G.TILE, ty * G.TILE, `+${n} ${G.ITEMS[k].name}`, G.ITEMS[k].color);
@@ -83,7 +89,7 @@ window.G = window.G || {};
       if (d < bd && d <= REACH) { bd = d; best = { tx, ty }; }
     }
     if (best) gatherAt(best.tx, best.ty);
-    else ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5);
+    else { G.Sound.play('deny'); ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5); }
   }
 
   function addFloater(x, y, text, color) { state.floaters.push({ x, y, text, color, life: 1.4 }); }
@@ -99,10 +105,11 @@ window.G = window.G || {};
       && !(Math.abs((tx + 0.5) * G.TILE - p.x) < 20 && Math.abs((ty + 0.5) * G.TILE - p.y) < 20 && G.STRUCTURES[r.builds].solid);
     state.placing = { type: r.builds, tx, ty, ok };
     if (input.mouse.clicked) {
-      if (!ok) { ui.toast(near ? "Can't build there." : 'Too far away — move closer.', 2); return; }
+      if (!ok) { G.Sound.play('deny'); ui.toast(near ? "Can't build there." : 'Too far away — move closer.', 2); return; }
       for (const [k, n] of Object.entries(r.cost)) state.inv[k] -= n;
       state.world.build(r.builds, tx, ty);
       state.stats.built++;
+      G.Sound.play(G.STRUCTURES[r.builds].sound, { pan: panAt((tx + 0.5) * G.TILE) });
       renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
       if (r.builds === 'lantern') ui.toast('The land around the lantern remembers its colour.');
       ui.refresh();
@@ -116,6 +123,7 @@ window.G = window.G || {};
     state.world.time = state.time;
 
     if (input.hit('c')) ui.toggleCraft();
+    if (input.hit('n')) ui.toggleSound();
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
 
     if (state.buildRecipe) updateBuild();
@@ -127,7 +135,9 @@ window.G = window.G || {};
       else p.moveTarget = { x: wx, y: wy };
     }
 
+    const px = state.player.x, py = state.player.y;
     state.player.update(dt, input, state.world);
+    footsteps(Math.hypot(state.player.x - px, state.player.y - py));
     const k = 1 - Math.pow(0.02, dt);
     state.cam.x += (state.player.x - state.cam.x) * k;
     state.cam.y += (state.player.y - state.cam.y) * k;
@@ -139,6 +149,33 @@ window.G = window.G || {};
     if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
     ui.updateClock(state.time, state.world.lights.length - 1);
     ui.update(dt);
+  }
+
+  // ---------- sound ----------
+  let stepDist = 0, stepAlt = false;
+  function footsteps(moved) {
+    stepDist += moved;
+    if (stepDist < 34) return;
+    stepDist = 0; stepAlt = !stepAlt;
+    const p = state.player, st = state.world.structureAt(p.tx, p.ty);
+    const kind = (st && G.STRUCTURES[st.type].step) || G.TILES[state.world.tileAt(p.tx, p.ty).type].step;
+    if (kind) G.Sound.step(kind, { alt: stepAlt });
+  }
+
+  // how much water is near a point, 0..1 (sampled a few times a second)
+  let waterNear = 0, waterTimer = 0;
+  function updateAmbience(dt) {
+    if (!G.Sound.ctx || !state.world) return;
+    const x = state.cam.x, y = state.cam.y, w = state.world;
+    waterTimer -= dt;
+    if (waterTimer <= 0) {
+      waterTimer = 0.3;
+      const tx = Math.floor(x / G.TILE), ty = Math.floor(y / G.TILE);
+      let n = 0;
+      for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) if (w.isWater(tx + dx, ty + dy)) n++;
+      waterNear = Math.min(1, n / 40);
+    }
+    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running });
   }
 
   function drawFloaters() {
@@ -165,6 +202,7 @@ window.G = window.G || {};
       state.time += dt; state.cam.x += dt * 12;
       if (state.world) state.world.time = state.time;
     }
+    updateAmbience(dt);
     input.endFrame();
     requestAnimationFrame(frame);
   }

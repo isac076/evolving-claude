@@ -7,13 +7,14 @@ G.TILE = 32;              // pixels per tile
 G.DAY_LENGTH = 360;       // seconds for a full day/night cycle
 
 // Ground types. h/s/l = base colour when fully restored.
+// step = footstep sound (see G.STEP_SOUNDS in audio/sound.js).
 G.TILES = {
   deep:  { name: 'Deep water', h: 215, s: 55, l: 22, water: true },
   water: { name: 'Water',      h: 205, s: 55, l: 34, water: true },
-  sand:  { name: 'Sand',       h: 42,  s: 48, l: 64 },
-  grass: { name: 'Grass',      h: 104, s: 42, l: 38 },
-  forest:{ name: 'Forest',     h: 128, s: 38, l: 27 },
-  stone: { name: 'Highland',   h: 220, s: 8,  l: 46 },
+  sand:  { name: 'Sand',       h: 42,  s: 48, l: 64, step: 'sand' },
+  grass: { name: 'Grass',      h: 104, s: 42, l: 38, step: 'grass' },
+  forest:{ name: 'Forest',     h: 128, s: 38, l: 27, step: 'leaves' },
+  stone: { name: 'Highland',   h: 220, s: 8,  l: 46, step: 'stone' },
 };
 
 // Things you can carry.
@@ -25,20 +26,22 @@ G.ITEMS = {
 
 // Natural things that grow in the world and can be gathered.
 // regrow = seconds until it grows back after gathering.
+// sound = the sound effect played when gathered (see G.SFX in audio/sound.js).
 G.OBJECTS = {
-  tree:  { name: 'Tree',  solid: true,  drops: { wood: 2 },  regrow: 300 },
-  rock:  { name: 'Rock',  solid: true,  drops: { stone: 2 }, regrow: 500 },
-  bloom: { name: 'Bloom', solid: false, drops: { petal: 1 }, regrow: 200, light: 46 },
+  tree:  { name: 'Tree',  solid: true,  drops: { wood: 2 },  regrow: 300, sound: 'wood' },
+  rock:  { name: 'Rock',  solid: true,  drops: { stone: 2 }, regrow: 500, sound: 'stone' },
+  bloom: { name: 'Bloom', solid: false, drops: { petal: 1 }, regrow: 200, light: 46, sound: 'petal' },
 };
 
 // Things the player can build.
 // on: 'land' or 'water'.  restore = radius (tiles) of colour brought back.
 // light = glow radius (px) at night.  floor = drawn under everything.
+// sound = played when built.  step = footstep sound when walking on it.
 G.STRUCTURES = {
-  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320 },
-  lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230 },
-  path:    { name: 'Stone path',  solid: false, on: 'land', floor: true },
-  bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true },
+  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern' },
+  lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230, sound: 'lantern' },
+  path:    { name: 'Stone path',  solid: false, on: 'land', floor: true, sound: 'placeStone', step: 'stone' },
+  bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true, sound: 'placeWood', step: 'wood' },
 };
 
 // Crafting recipes. Each builds a structure.

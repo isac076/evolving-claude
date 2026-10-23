@@ -21,6 +21,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
 body:not(.playing) #hud { display: none; }
 #status { position: absolute; top: 14px; left: 14px; padding: 8px 14px; display: flex; gap: 16px; font-size: 14px; letter-spacing: .03em; }
 #restored { color: var(--gold); }
+#status { align-items: center; }
+#btn-sound { pointer-events: auto; background: none; border: 0; padding: 0 2px; margin: -4px -4px -4px 0; display: flex; opacity: .85; }
+#btn-sound:hover { opacity: 1; }
+#btn-sound svg { overflow: visible; }
+#btn-sound .spk { fill: var(--gold); }
+#btn-sound .wave, #btn-sound .slash { fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; }
+#btn-sound .slash { display: none; }
+#btn-sound.muted { opacity: .5; }
+#btn-sound.muted .wave { display: none; }
+#btn-sound.muted .slash { display: inline; }
 
 #toast {
   position: absolute; top: 64px; left: 50%; transform: translate(-50%, -8px);
