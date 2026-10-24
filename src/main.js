@@ -9,7 +9,8 @@ window.G = window.G || {};
   const BUILD_REACH = 5 * G.TILE;   // how far away the player can build
 
   const state = {
-    world: null, player: null, inv: {}, time: 0, stats: { gathered: 0, built: 0 },
+    world: null, player: null, inv: {}, time: 0, stats: { gathered: 0, built: 0, got: {} },
+    explored: new G.Explored(), goalsDone: [], goalsHidden: false,
     cam: { x: 0, y: 0 }, placing: null, buildRecipe: null, wantGather: false,
     floaters: [], running: false, saveTimer: 0,
 
@@ -22,6 +23,8 @@ window.G = window.G || {};
   };
   G.state = state;   // handy for debugging in the browser console
   const ui = new G.UI(state);
+  const map = new G.Minimap(state);
+  const goals = new G.Goals(state, ui);
 
   // ---------- starting / loading ----------
   function newGame(seed) {
@@ -29,7 +32,9 @@ window.G = window.G || {};
     const sp = state.world.findSpawn();
     state.world.build('heart', sp.tx, sp.ty);
     state.player = new G.Player((sp.tx + 0.5) * G.TILE, (sp.ty + 2.5) * G.TILE);
-    state.inv = {}; state.time = G.DAY_LENGTH * 0.85; state.stats = { gathered: 0, built: 0 };
+    state.inv = {}; state.time = G.DAY_LENGTH * 0.85; state.stats = { gathered: 0, built: 0, got: {} };
+    state.explored = new G.Explored(); state.explored.reveal(sp.tx, sp.ty, 12);
+    state.goalsDone = []; state.goalsHidden = false;
     afterLoad();
     setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
@@ -41,7 +46,13 @@ window.G = window.G || {};
     state.world.rebuildLights();
     for (const [k, t] of d.harvested || []) state.world.harvested.set(k, t);
     state.player = new G.Player(d.player.x, d.player.y);
-    state.inv = d.inv || {}; state.time = d.time || 0; state.stats = d.stats || { gathered: 0, built: 0 };
+    state.inv = d.inv || {}; state.time = d.time || 0; state.stats = d.stats;
+    state.explored = new G.Explored();
+    if (d.explored) state.explored.load(d.explored);
+    else {   // older save: reveal the land around you and around every lantern
+      for (const L of state.world.lights) if (L.restore) state.explored.reveal(Math.floor(L.x / G.TILE), Math.floor(L.y / G.TILE), L.restore + 4);
+    }
+    state.goalsDone = d.goalsDone; state.goalsHidden = !!d.goalsHidden;
     afterLoad();
     ui.toast('Welcome back.');
   }
@@ -71,6 +82,7 @@ window.G = window.G || {};
     G.Sound.play(def.sound, { pan: panAt((tx + 0.5) * G.TILE) });
     for (const [k, n] of Object.entries(def.drops)) {
       state.inv[k] = (state.inv[k] || 0) + n;
+      state.stats.got[k] = (state.stats.got[k] || 0) + n;
       addFloater((tx + 0.5) * G.TILE, ty * G.TILE, `+${n} ${G.ITEMS[k].name}`, G.ITEMS[k].color);
     }
     const c = o === 'bloom' ? 'rgba(255,220,140,A)' : o === 'tree' ? 'rgba(150,220,120,A)' : 'rgba(200,205,220,A)';
@@ -108,6 +120,7 @@ window.G = window.G || {};
       if (!ok) { G.Sound.play('deny'); ui.toast(near ? "Can't build there." : 'Too far away — move closer.', 2); return; }
       for (const [k, n] of Object.entries(r.cost)) state.inv[k] -= n;
       state.world.build(r.builds, tx, ty);
+      map.touch(tx, ty);
       state.stats.built++;
       G.Sound.play(G.STRUCTURES[r.builds].sound, { pan: panAt((tx + 0.5) * G.TILE) });
       renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
@@ -126,7 +139,9 @@ window.G = window.G || {};
     if (input.hit('n')) ui.toggleSound();
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
 
-    if (state.buildRecipe) updateBuild();
+    if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
+    if (map.isOpen && input.hit('escape')) map.toggle(false);
+    else if (state.buildRecipe) updateBuild();
     else if (input.mouse.clicked || input.mouse.down) {
       const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
       const p = state.player;
@@ -149,6 +164,8 @@ window.G = window.G || {};
     if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
     ui.updateClock(state.time, state.world.lights.length - 1);
     ui.update(dt);
+    map.update(dt, state.time);
+    goals.update(dt);
   }
 
   // ---------- sound ----------

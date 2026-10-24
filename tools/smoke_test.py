@@ -49,6 +49,45 @@ def main():
         page.wait_for_timeout(1500)
         page.screenshot(path=str(SHOTS / "3-night.png"))
 
+        # goals + map: finish the first goals, walk to reveal the map, open it
+        result = page.evaluate("""() => {
+            const s = G.state;
+            if (!document.querySelector('#goals .goal-text')) return 'goal tracker is empty';
+            s.stats.got = { wood: 5, stone: 5, petal: 5 };
+            if (s.explored.count < 300) return 'start area not explored: ' + s.explored.count;
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Goals check failed: " + str(result))
+        page.keyboard.down("d"); page.wait_for_timeout(1500); page.keyboard.up("d")
+        page.wait_for_timeout(5000)   # goals celebrate one by one
+        page.screenshot(path=str(SHOTS / "4-goals-minimap.png"))
+        page.keyboard.press("m"); page.wait_for_timeout(700)
+        page.screenshot(path=str(SHOTS / "5-map.png"))
+        result = page.evaluate("""() => {
+            const s = G.state;
+            const need = ['wood', 'stone', 'petal', 'lantern', 'map'];
+            for (const id of need) if (!s.goalsDone.includes(id)) return 'goal not done: ' + id + ' (done: ' + s.goalsDone + ')';
+            if (!document.body.classList.contains('map-open')) return 'map did not open';
+            // save, then load the save back and compare the explored map
+            G.Save.write(s);
+            const d = G.Save.read();
+            if (d.version !== G.Save.VERSION) return 'bad save version';
+            const e = new G.Explored(); e.load(d.explored);
+            if (e.count !== s.explored.count) return 'explored map did not survive saving: ' + e.count + ' vs ' + s.explored.count;
+            // an old version-1 save must still load
+            const old = { version: 1, seed: 5, time: 10, player: { x: 0, y: 0 }, inv: { wood: 1 }, stats: { gathered: 1, built: 1 },
+                          structures: [['heart', 0, 0], ['lantern', 3, 0]], harvested: [] };
+            localStorage.setItem(G.Save.KEY, JSON.stringify(old));
+            const u = G.Save.read();
+            if (!u || u.version !== 2 || !u.goalsDone.includes('lantern') || !u.stats.got) return 'v1 save did not upgrade';
+            G.Save.write(s);
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Map/save check failed: " + str(result))
+        page.keyboard.press("m"); page.wait_for_timeout(300)
+
         # sound: the engine should have woken on the first key press; play
         # every effect and footstep and run the soundscape through day/night
         result = page.evaluate("""async () => {
@@ -72,6 +111,22 @@ def main():
         if result != "ok":
             errors.append("Sound check failed: " + str(result))
         page.wait_for_timeout(300)
+
+        # continue an old version-1 save from the title screen
+        page.evaluate("""() => {
+            window.onbeforeunload = null;
+            G.state.running = false;
+            localStorage.setItem('lumen-save', JSON.stringify({ version: 1, seed: 12345, time: 100,
+              player: { x: G.state.world.lights[0].x, y: G.state.world.lights[0].y + 64 }, inv: { wood: 2 },
+              stats: { gathered: 3, built: 1 }, structures: [['heart', G.state.world.lights[0].x / 32 - 0.5, G.state.world.lights[0].y / 32 - 0.5]], harvested: [] }));
+        }""")
+        page.goto((ROOT / "index.html").as_uri())
+        page.wait_for_timeout(400)
+        page.click("#btn-continue")
+        page.wait_for_timeout(1200)
+        result = page.evaluate("() => G.state.running && G.state.explored.count > 100 ? 'ok' : 'old save did not continue'")
+        if result != "ok":
+            errors.append(result)
         browser.close()
 
     if errors:

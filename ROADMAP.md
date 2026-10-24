@@ -27,8 +27,8 @@ as the world does.
 - [ ] Smooth restoration edges (colour should fade softly, not tile by tile)
 - [x] Gentle sound effects with Web Audio (gather, build, footsteps, UI) (Night 1)
 - [x] Ambient soundscape that changes with day/night and restoration (Night 1)
-- [ ] Minimap (toggle with M) showing explored land and lanterns
-- [ ] First-time tutorial goals ("gather 3 wood", "craft a lantern"...) with a small goal tracker
+- [x] Minimap (toggle with M) showing explored land and lanterns (Night 2)
+- [x] First-time tutorial goals ("gather 3 wood", "craft a lantern"...) with a small goal tracker (Night 2)
 - [ ] Settings menu (volume, controls help, new world) with Esc
 - [ ] Remove/pick up placed buildings (refund materials)
 
@@ -94,3 +94,7 @@ as the world does.
 - Each lantern gets its own soft hum / wind-chime you hear only when standing near it
 - Rain on restored land could make the soundscape patter; puddles plink
 - The ambient chord could follow the biome (highlands lower and airier, sand brighter)
+- Map pins: click the big map to drop a named marker ("big lake", "go here later")
+- After the first-steps goals, a gentle second chapter of goals (Chapter 2/3 features) using the same G.GOALS tracker
+- The minimap could show villagers / lost spirits as soft dots once Chapter 4 arrives
+- Lantern fast travel (Chapter 5) could live right on the big map: click a lantern to travel

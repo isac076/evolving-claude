@@ -35,6 +35,7 @@ G.UI = class {
     const was = el.classList.contains('open');
     const open = force === undefined ? !was : force;
     el.classList.toggle('open', open);
+    document.body.classList.toggle('craft-open', open);
     if (open !== was) G.Sound.play(open ? 'open' : 'close');
     if (open) this.refresh();
   }
@@ -89,6 +90,6 @@ G.UI = class {
     }
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
-      : 'WASD / arrows or click to move · E gather · C craft · N sound';
+      : 'WASD / arrows or click to move · E gather · C craft · M map · N sound';
   }
 };

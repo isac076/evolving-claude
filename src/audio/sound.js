@@ -208,6 +208,15 @@ G.SFX = {
     S.tone(G.note(2, 3), { type: 'triangle', dur: 0.3, gain: 0.07, t: 0.12, rev: 0.2 });
   },
   toggle(S) { S.bell(G.note(2, 5), { gain: 0.08, dur: 0.5, rev: 0.3 }); },
+  goal(S) {     // a small, happy "ta-da" when a goal is done
+    [4, 7, 9].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.08, dur: 1.4, t: k * 0.09, rev: 0.5 }));
+    S.bell(G.note(12, 4), { gain: 0.06, dur: 2.2, t: 0.3, rev: 0.6 });
+  },
+  mapOpen(S) {  // paper unfolding and a soft chime
+    S.noise({ filter: 'bandpass', freq: 1400, freqTo: 3200, q: 0.9, attack: 0.03, dur: 0.18, gain: 0.07 });
+    S.noise({ filter: 'bandpass', freq: 2600, freqTo: 1200, q: 0.9, attack: 0.03, dur: 0.16, gain: 0.05, t: 0.12 });
+    S.bell(G.note(2, 5), { gain: 0.04, dur: 0.9, t: 0.14, rev: 0.5 });
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

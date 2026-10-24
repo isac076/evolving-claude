@@ -4,7 +4,7 @@ window.G = window.G || {};
 
 G.Save = {
   KEY: 'lumen-save',
-  VERSION: 1,
+  VERSION: 2,   // 2: explored map + first-steps goals (Night 2)
 
   write(state) {
     try {
@@ -18,6 +18,9 @@ G.Save = {
         stats: state.stats,
         structures: [...w.structures.values()].map(s => [s.type, s.tx, s.ty]),
         harvested: [...w.harvested.entries()].filter(([, t]) => t > state.time),
+        explored: state.explored.serialize(),
+        goalsDone: state.goalsDone,
+        goalsHidden: !!state.goalsHidden,
       };
       localStorage.setItem(this.KEY, JSON.stringify(data));
     } catch (e) { /* storage unavailable — game still works, just won't save */ }
@@ -29,8 +32,24 @@ G.Save = {
       if (!raw) return null;
       const d = JSON.parse(raw);
       if (!d || typeof d.seed !== 'number') return null;
-      return d;
+      return this.upgrade(d);
     } catch (e) { return null; }
+  },
+
+  // Bring saves from older versions up to date.
+  upgrade(d) {
+    d.stats = d.stats || { gathered: 0, built: 0 };
+    d.stats.got = d.stats.got || {};
+    if (!(d.version >= 2)) {
+      // v1 had no map or goals: the map starts from what's around you and your
+      // lanterns, and anyone who already lit a lantern skips the first lessons.
+      d.explored = null;
+      const lit = (d.structures || []).some(s => s[0] === 'lantern');
+      d.goalsDone = lit ? ['wood', 'stone', 'petal', 'lantern'] : [];
+      d.version = 2;
+    }
+    d.goalsDone = Array.isArray(d.goalsDone) ? d.goalsDone : [];
+    return d;
   },
 
   clear() { try { localStorage.removeItem(this.KEY); } catch (e) {} },

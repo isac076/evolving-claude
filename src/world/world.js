@@ -11,6 +11,7 @@ G.World = class {
     this.harvested = new Map();   // key -> game time when it regrows
     this.structures = new Map();  // key -> { type, tx, ty }
     this.lights = [];             // derived from structures
+    this.lightsVersion = 0;       // bumps when lights change (the map recolours)
     this.time = 0;                // game time in seconds (set by main)
   }
 
@@ -89,10 +90,14 @@ G.World = class {
 
   build(type, tx, ty) {
     this.structures.set(G.key(tx, ty), { type, tx, ty });
-    this.rebuildLights();
+    const def = G.STRUCTURES[type];
+    if (def.restore || def.light) this.rebuildLights();
   }
 
+  count(type) { let n = 0; for (const s of this.structures.values()) if (s.type === type) n++; return n; }
+
   rebuildLights() {
+    this.lightsVersion++;
     this.lights = [];
     for (const st of this.structures.values()) {
       const def = G.STRUCTURES[st.type];

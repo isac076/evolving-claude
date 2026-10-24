@@ -12,12 +12,16 @@ src/core/input.js     keyboard / mouse / touch (G.Input)
 src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noise), G.SFX effects, G.STEP_SOUNDS footsteps
 src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
+src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
+src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
+src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
+src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
@@ -44,6 +48,17 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   tiles/floor structures. main.js feeds `G.Ambience.update()` each frame with
   how restored the spot is, the daylight and nearby water. Mute (N) is stored
   separately in localStorage `lumen-sound`, not in the save.
+- **Map**: `state.explored` (G.Explored) remembers seen tiles in 16×16 chunks
+  (`G.CHUNK`). The minimap reveals a circle around the player whenever they step
+  onto a new tile. Each explored chunk is drawn once into a tiny canvas (one pixel
+  per tile, coloured by restoration) and redrawn a few per frame when it is
+  "dirty" (new tiles seen, something built there via `map.touch`) or when
+  `world.lightsVersion` changes. Structures can set `map: [h, s, l]`.
+- **Goals**: `G.GOALS` in data, done in order; finished ids go in
+  `state.goalsDone` (saved). Progress functions read `state.stats.got[item]`
+  (items ever gathered), `world.count(type)`, `stats.mapOpened`, `explored.count`.
+- **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
+  `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.
   Opening `index.html?autostart` skips the title screen with a fixed seed.
 

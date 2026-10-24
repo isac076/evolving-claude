@@ -37,11 +37,12 @@ G.OBJECTS = {
 // on: 'land' or 'water'.  restore = radius (tiles) of colour brought back.
 // light = glow radius (px) at night.  floor = drawn under everything.
 // sound = played when built.  step = footstep sound when walking on it.
+// map = [h, s, l] colour on the map (lights with restore show as glowing dots).
 G.STRUCTURES = {
   heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern' },
   lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230, sound: 'lantern' },
-  path:    { name: 'Stone path',  solid: false, on: 'land', floor: true, sound: 'placeStone', step: 'stone' },
-  bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true, sound: 'placeWood', step: 'wood' },
+  path:    { name: 'Stone path',  solid: false, on: 'land', floor: true, sound: 'placeStone', step: 'stone', map: [38, 18, 70] },
+  bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true, sound: 'placeWood', step: 'wood', map: [30, 45, 44] },
 };
 
 // Crafting recipes. Each builds a structure.
