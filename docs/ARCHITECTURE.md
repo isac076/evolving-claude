@@ -13,11 +13,14 @@ src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noi
 src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
+src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
+src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/render/sprites.js how each tile / object / structure / the player is drawn
+src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -38,9 +41,11 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   sprite takes this as `f` and uses `G.shade(h, s, l, f)` for its colours.
 - **Lighting**: `G.daylight(time)` gives 0 (night) … 1 (day). At night the
   renderer darkens the screen and cuts holes for light sources (`light` in data).
-- **Drawing order**: ground → floor structures → objects/standing structures and
-  the player row by row (so things lower on screen are in front) → particles →
-  lighting → vignette.
+- **Drawing order**: ground → fish + ripples → floor structures → objects/standing
+  structures, ground creatures and the player row by row (so things lower on screen
+  are in front) → flying creatures → particles → lighting → vignette.
+- **Soft colour edges**: the renderer also computes restoration at every tile
+  corner; `G.drawGround` fills a tile as 4×4 blended squares when its corners differ.
 - **Sound**: nothing plays until the first click/key (browser rule) — then
   `G.Sound.unlock()` creates the AudioContext. Play effects with
   `G.Sound.play('name', { pan })`; it silently does nothing when muted.
@@ -57,6 +62,13 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
 - **Goals**: `G.GOALS` in data, done in order; finished ids go in
   `state.goalsDone` (saved). Progress functions read `state.stats.got[item]`
   (items ever gathered), `world.count(type)`, `stats.mapOpened`, `explored.count`.
+- **Creatures** (`state.creatures`, not saved): every 0.2s `trySpawn` samples a
+  random point on screen per kind; if it suits (tile type, restoration, time of day)
+  and the kind is under its cap (scaled by how much of the view suits it), a group
+  spawns. Each kind's `move` names a behaviour method on G.Creatures ('flutter',
+  'moth', 'bird', 'hop', 'swim'). They fade out when the time or land stops suiting
+  them, and vanish when far off screen. Meeting a kind up close sets
+  `state.stats.met[kind]` (saved inside stats; feeds the 'wildlife' goal).
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.

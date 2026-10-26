@@ -48,6 +48,9 @@ def main():
         }""")
         page.wait_for_timeout(1500)
         page.screenshot(path=str(SHOTS / "3-night.png"))
+        result = page.evaluate("() => G.state.creatures.list.some(c => c.kind === 'moth') ? 'ok' : 'no moths around the lantern at night'")
+        if result != "ok":
+            errors.append(result)
 
         # goals + map: finish the first goals, walk to reveal the map, open it
         result = page.evaluate("""() => {
@@ -111,6 +114,56 @@ def main():
         if result != "ok":
             errors.append("Sound check failed: " + str(result))
         page.wait_for_timeout(300)
+
+        # wildlife: by day in restored land, creatures arrive and behave
+        result = page.evaluate("""() => {
+            const s = G.state, w = s.world, T = G.TILE;
+            // find a shore (grass beside water) near the start and restore it
+            const p0 = s.player;
+            let spot = null;
+            for (let r = 2; r < 60 && !spot; r++) for (let dx = -r; dx <= r && !spot; dx++) for (const dy of [-r, r]) {
+                const tx = p0.tx + dx, ty = p0.ty + dy;
+                if (w.tileAt(tx, ty).type === 'grass' && w.isWater(tx + 3, ty) && !w.isSolid(tx, ty)) { spot = { tx, ty }; break; }
+            }
+            if (!spot) return 'no shore found';
+            for (const [ox, oy] of [[-2, -2], [-6, 3], [2, 5], [-9, -4]])
+                if (w.canBuild('lantern', spot.tx + ox, spot.ty + oy)) w.build('lantern', spot.tx + ox, spot.ty + oy);
+            s.player.x = (spot.tx + 0.5) * T; s.player.y = (spot.ty + 0.5) * T;
+            s.cam.x = s.player.x; s.cam.y = s.player.y;
+            s.time = Math.floor(s.time / G.DAY_LENGTH + 1) * G.DAY_LENGTH + 5;   // bright morning
+            const L = s.creatures;
+            L.clear();
+            const x = s.player.x, y = s.player.y;
+            L.spawn('rabbit', x - 130, y + 40); L.spawn('butterfly', x + 20, y - 70); L.spawn('butterfly', x - 60, y - 30);
+            L.spawn('fish', (spot.tx + 3.5) * T, (spot.ty + 0.5) * T);
+            window.__spot = spot;
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Wildlife setup failed: " + str(result))
+        page.wait_for_timeout(4000)
+        page.screenshot(path=str(SHOTS / "6-wildlife.png"))
+        result = page.evaluate("""() => {
+            const s = G.state, L = s.creatures;
+            const kinds = new Set(L.list.map(c => c.kind));
+            for (const k of ['rabbit', 'butterfly', 'fish']) if (!kinds.has(k)) return 'missing ' + k + ' (have ' + [...kinds] + ')';
+            if (L.list.length < 5) return 'too few creatures arrived: ' + L.list.length;
+            if (Object.keys(s.stats.met).length < 2) return 'meeting creatures was not counted: ' + JSON.stringify(s.stats.met);
+            for (const k in G.CREATURES) {
+                if (!G.CREATURE_SPRITES[k]) return 'no sprite for ' + k;
+                if (typeof L[G.CREATURES[k].move] !== 'function') return 'no behaviour ' + G.CREATURES[k].move;
+                if (G.CREATURES[k].sound && !G.SFX[G.CREATURES[k].sound]) return 'missing sfx ' + G.CREATURES[k].sound;
+            }
+            // walking up to birds startles them
+            const b = L.spawn('bird', s.player.x + 150, s.player.y); b.state = 'peck'; b.x = b.tx; b.y = b.ty; b.z = 0;
+            for (let i = 0; i < 20; i++) L.update(0.05, s, 1100, 680);
+            s.player.x = b.x - 20; s.player.y = b.y;
+            for (let i = 0; i < 4; i++) L.update(0.05, s, 1100, 680);
+            if (b.state !== 'fly') return 'bird did not fly away (' + b.state + ')';
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Wildlife check failed: " + str(result))
 
         # continue an old version-1 save from the title screen
         page.evaluate("""() => {

@@ -24,7 +24,7 @@ as the world does.
 
 ## Chapter 1 — A solid, lovely foundation
 - [x] Endless seeded world with biomes, gathering, crafting, building, saving, day/night (Night 0)
-- [ ] Smooth restoration edges (colour should fade softly, not tile by tile)
+- [x] Smooth restoration edges (colour should fade softly, not tile by tile) (Night 3)
 - [x] Gentle sound effects with Web Audio (gather, build, footsteps, UI) (Night 1)
 - [x] Ambient soundscape that changes with day/night and restoration (Night 1)
 - [x] Minimap (toggle with M) showing explored land and lanterns (Night 2)
@@ -33,9 +33,9 @@ as the world does.
 - [ ] Remove/pick up placed buildings (refund materials)
 
 ## Chapter 2 — A living world
-- [ ] Butterflies and birds that only appear in restored land
-- [ ] Fish visible in restored water; ripples when walking near water
-- [ ] Wildlife that reacts to the player (rabbits, deer that flee and return)
+- [x] Butterflies and birds that only appear in restored land (Night 3, plus moths at lanterns by night)
+- [x] Fish visible in restored water; ripples when walking near water (Night 3 — fish leap too)
+- [x] Wildlife that reacts to the player (rabbits, deer that flee and return) (Night 3: rabbits, startled birds — deer still to come)
 - [ ] Weather: rain, wind, fog — with visuals and sound
 - [ ] Seasons that slowly change colours, plants and weather
 - [ ] Regrowth looks alive: saplings grow into trees over time
@@ -98,3 +98,8 @@ as the world does.
 - After the first-steps goals, a gentle second chapter of goals (Chapter 2/3 features) using the same G.GOALS tracker
 - The minimap could show villagers / lost spirits as soft dots once Chapter 4 arrives
 - Lantern fast travel (Chapter 5) could live right on the big map: click a lantern to travel
+- Deer, frogs on lily pads, ducks on lakes, owls at night — each is a G.CREATURES entry + sprite (+ move type if new)
+- A "creature book" page in the discoveries journal listing every kind you've met (stats.met already tracks it)
+- Stand still near a butterfly long enough and it lands on the spirit
+- Creatures could have their own little sounds (rabbit thump, bird chirp near you) and seasons could change which ones appear
+- Performance: the renderer now computes restoration at tile corners too — cache per chunk when lights don't change

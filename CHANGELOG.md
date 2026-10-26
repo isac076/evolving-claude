@@ -2,6 +2,14 @@
 
 What changed each night, newest first.
 
+## Night 3 — 2026-10-26 — Life returns
+Restored land now fills with life: butterflies flutter and rest on flowers, songbirds glide
+in and peck the grass (walk too close and the whole flock takes off), rabbits hop about and
+dash away from you, then come back. Fish swim in coloured water and sometimes leap with a splash,
+moths dance around lanterns at night, and water ripples as you walk along the shore.
+Colour now fades in softly at the edge of a lantern's glow instead of in square blocks,
+and there's a new goal: meet three kinds of returning wildlife.
+
 ## Night 2 — 2026-10-24 — Finding your way
 A round map now sits in the top-right corner and fills in as you wander — grey where
 the world is faded, green and bright around your lanterns. Press M (or tap it) to open

@@ -23,6 +23,10 @@ G.GOALS = [
   { id: 'lanterns', text: 'Light 3 lanterns', target: 3,
     progress: s => s.world.count('lantern'), hint: 'Each one brings back a little more of the world.',
     reward: { petal: 3 } },
+  { id: 'wildlife', text: 'Meet 3 kinds of returning wildlife', target: 3,
+    progress: s => Object.keys(s.stats.met || {}).length,
+    hint: 'Butterflies, birds, rabbits and fish live in restored land. Moths visit lanterns at night.',
+    reward: { petal: 2, wood: 2 } },
   { id: 'bridge', text: 'Build a bridge over water', target: 1,
     progress: s => s.world.count('bridge'), hint: 'Bridges let you reach new lands.' },
 ];

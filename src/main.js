@@ -26,6 +26,19 @@ window.G = window.G || {};
   const map = new G.Minimap(state);
   const goals = new G.Goals(state, ui);
 
+  // creatures that return to restored land (not saved — they come and go)
+  const life = new G.Creatures();
+  state.creatures = life;
+  life.fx = {
+    burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    sound: (name, x) => { if (state.running) G.Sound.play(name, { pan: panAt(x) }); },
+  };
+  life.onMeet = kind => {
+    const def = G.CREATURES[kind];
+    G.Sound.play('meet');
+    ui.toast(def.meet, 5);
+  };
+
   // ---------- starting / loading ----------
   function newGame(seed) {
     state.world = new G.World(seed);
@@ -35,6 +48,7 @@ window.G = window.G || {};
     state.inv = {}; state.time = G.DAY_LENGTH * 0.85; state.stats = { gathered: 0, built: 0, got: {} };
     state.explored = new G.Explored(); state.explored.reveal(sp.tx, sp.ty, 12);
     state.goalsDone = []; state.goalsHidden = false;
+    state.stats.met = {};
     afterLoad();
     setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
@@ -58,6 +72,8 @@ window.G = window.G || {};
   }
 
   function afterLoad() {
+    life.clear();
+    state.stats.met = state.stats.met || {};
     state.world.time = state.time;
     state.cam.x = state.player.x; state.cam.y = state.player.y;
     state.running = true;
@@ -219,6 +235,7 @@ window.G = window.G || {};
       state.time += dt; state.cam.x += dt * 12;
       if (state.world) state.world.time = state.time;
     }
+    life.update(dt, state, renderer.W, renderer.H);
     updateAmbience(dt);
     input.endFrame();
     requestAnimationFrame(frame);

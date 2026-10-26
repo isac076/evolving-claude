@@ -217,6 +217,19 @@ G.SFX = {
     S.noise({ filter: 'bandpass', freq: 2600, freqTo: 1200, q: 0.9, attack: 0.03, dur: 0.16, gain: 0.05, t: 0.12 });
     S.bell(G.note(2, 5), { gain: 0.04, dur: 0.9, t: 0.14, rev: 0.5 });
   },
+  flutter(S, o) {  // a little flock of wings taking off
+    for (let i = 0; i < 6; i++) {
+      S.noise({ filter: 'bandpass', freq: G.rand(1300, 2100), q: 1.4, attack: 0.008, dur: 0.06, gain: 0.07, t: i * 0.045 + Math.random() * 0.02, pan: o.pan, rev: 0.15 });
+    }
+    S.tone(G.note(9, 5), { dur: 0.08, gain: 0.025, t: 0.05, pan: o.pan, rev: 0.4 });
+  },
+  splash(S, o) {   // a fish leaps: a bright plip and a small splash
+    S.tone(900, { glide: 380, dur: 0.12, gain: 0.07, pan: o.pan, rev: 0.35 });
+    S.noise({ filter: 'lowpass', freq: 2400, freqTo: 500, attack: 0.005, dur: 0.28, gain: 0.07, t: 0.03, pan: o.pan, rev: 0.3 });
+  },
+  meet(S) {        // a gentle, curious little phrase: someone new is here
+    [7, 9, 12].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.05, dur: 1, t: k * 0.12, rev: 0.6 }));
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

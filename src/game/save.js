@@ -40,6 +40,7 @@ G.Save = {
   upgrade(d) {
     d.stats = d.stats || { gathered: 0, built: 0 };
     d.stats.got = d.stats.got || {};
+    d.stats.met = d.stats.met || {};   // creature kinds met (Night 3) — optional, no version bump needed
     if (!(d.version >= 2)) {
       // v1 had no map or goals: the map starts from what's around you and your
       // lanterns, and anyone who already lit a lantern skips the first lessons.

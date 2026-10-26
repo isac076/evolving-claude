@@ -58,18 +58,39 @@ G.Renderer = class {
       fmap[(ty - ty0) * cols + (tx - tx0)] = f;
     }
     const fAt = (tx, ty) => fmap[(ty - ty0) * cols + (tx - tx0)];
+    // and at tile corners, so the ground can blend smoothly between tiles
+    const ccols = cols + 1, cmap = new Float32Array(ccols * (ty1 - ty0 + 2));
+    for (let ty = ty0; ty <= ty1 + 1; ty++) for (let tx = tx0; tx <= tx1 + 1; tx++) {
+      const px = tx * T, py = ty * T;
+      let f = world.restoreAt(px, py, lights);
+      const dp = Math.hypot(px - player.x, py - player.y) / T;
+      f = Math.max(f, 0.3 * G.clamp(1 - (dp - 1.5) / 2, 0, 1));
+      cmap[(ty - ty0) * ccols + (tx - tx0)] = f;
+    }
+    const fc = [0, 0, 0, 0];
+    const cornersAt = (tx, ty) => {
+      const i = (ty - ty0) * ccols + (tx - tx0);
+      fc[0] = cmap[i]; fc[1] = cmap[i + 1]; fc[2] = cmap[i + ccols]; fc[3] = cmap[i + ccols + 1];
+      return fc;
+    };
 
-    // ground + floor structures
+    // ground, then fish + ripples under the surface, then floor structures (paths, bridges)
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
-      const x = tx * T - camX, y = ty * T - camY, f = fAt(tx, ty);
-      G.drawGround(ctx, world.tileAt(tx, ty), x, y, f, time, tx, ty);
+      G.drawGround(ctx, world.tileAt(tx, ty), tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, cornersAt(tx, ty));
+    }
+    const life = state.creatures;
+    if (life) life.drawWater(ctx, camX, camY, time);
+    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const st = world.structureAt(tx, ty);
-      if (st && G.STRUCTURES[st.type].floor) G.STRUCTURE_SPRITES[st.type](ctx, x, y, f, time, st);
+      if (st && G.STRUCTURES[st.type].floor) G.STRUCTURE_SPRITES[st.type](ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), time, st);
     }
 
     // objects, standing structures and the player, row by row (back to front)
     const nightGlows = [];
+    const groundLife = life ? life.groundRows() : null;
     for (let ty = ty0; ty <= ty1; ty++) {
+      const critters = groundLife && groundLife.get(ty);
+      if (critters) for (const c of critters) life.drawOne(ctx, c, camX, camY, time);
       for (let tx = tx0; tx <= tx1; tx++) {
         const x = tx * T - camX, y = ty * T - camY, f = fAt(tx, ty);
         const st = world.structureAt(tx, ty);
@@ -82,6 +103,8 @@ G.Renderer = class {
       }
       if (player.ty === ty) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
+
+    if (life) life.drawAir(ctx, camX, camY, time);
 
     // build preview
     if (state.placing) {

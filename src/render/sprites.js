@@ -18,12 +18,26 @@ function shadow(ctx, x, y, w, h, a = 0.22) {
 G.circle = circle;
 
 // ---------- ground ----------
-G.drawGround = function (ctx, tile, x, y, f, t, tx, ty) {
+// fc = optional restoration at the four corners [top-left, top-right,
+// bottom-left, bottom-right]: where they differ (the edge of a lantern's
+// colour) the tile is filled in small blended squares so colour fades softly.
+G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc) {
   const T = G.TILE, d = G.TILES[tile.type];
   let l = d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
   if (d.water) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
-  ctx.fillStyle = G.shade(d.h, d.s, l, f);
-  ctx.fillRect(x, y, T, T);
+  if (fc && Math.max(fc[0], fc[1], fc[2], fc[3]) - Math.min(fc[0], fc[1], fc[2], fc[3]) > 0.03) {
+    const N = 4, S = T / N;
+    for (let j = 0; j < N; j++) {
+      const v = (j + 0.5) / N, fl = fc[0] + (fc[2] - fc[0]) * v, fr = fc[1] + (fc[3] - fc[1]) * v;
+      for (let i = 0; i < N; i++) {
+        ctx.fillStyle = G.shade(d.h, d.s, l, fl + (fr - fl) * (i + 0.5) / N);
+        ctx.fillRect(x + i * S, y + j * S, S + 0.5, S + 0.5);
+      }
+    }
+  } else {
+    ctx.fillStyle = G.shade(d.h, d.s, l, f);
+    ctx.fillRect(x, y, T, T);
+  }
 
   if (tile.type === 'grass' || tile.type === 'forest') {
     if (tile.v > 0.72) {
