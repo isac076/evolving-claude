@@ -22,15 +22,25 @@ G.ITEMS = {
   wood:  { name: 'Wood',       color: '#b07a43' },
   stone: { name: 'Stone',      color: '#9aa1ad' },
   petal: { name: 'Glow petal', color: '#ffd77a' },
+  fibre: { name: 'Fibre',      color: '#c9d77a' },
+  crystal:{ name: 'Crystal',   color: '#9fe6ff' },
+  // tools: crafted once, kept forever. They show as badges, not counts.
+  axe:   { name: 'Axe',        color: '#e0a060', tool: true, desc: 'Trees give an extra piece of wood.' },
+  pick:  { name: 'Pick',       color: '#b9c4d6', tool: true, desc: 'Rocks give extra stone, and you can mine crystal.' },
 };
 
 // Natural things that grow in the world and can be gathered.
 // regrow = seconds until it grows back after gathering.
 // sound = the sound effect played when gathered (see G.SFX in audio/sound.js).
+// tool = a tool that adds `bonus` to the drops.  needs = a tool you must own to gather it.
+// glowHue = fixed colour of its night glow (otherwise each one has its own hue).
 G.OBJECTS = {
-  tree:  { name: 'Tree',  solid: true,  drops: { wood: 2 },  regrow: 300, sound: 'wood' },
-  rock:  { name: 'Rock',  solid: true,  drops: { stone: 2 }, regrow: 500, sound: 'stone' },
+  tree:  { name: 'Tree',  solid: true,  drops: { wood: 2 },  regrow: 300, sound: 'wood', tool: 'axe', bonus: { wood: 1 } },
+  rock:  { name: 'Rock',  solid: true,  drops: { stone: 2 }, regrow: 500, sound: 'stone', tool: 'pick', bonus: { stone: 1 } },
   bloom: { name: 'Bloom', solid: false, drops: { petal: 1 }, regrow: 200, light: 46, sound: 'petal' },
+  reeds: { name: 'Reeds', solid: false, drops: { fibre: 2 }, regrow: 240, sound: 'fibre' },
+  crystal:{ name: 'Crystal cluster', solid: false, drops: { crystal: 1 }, regrow: 900, light: 60, glowHue: 195,
+            sound: 'crystal', needs: 'pick', tool: 'pick', bonus: { crystal: 1 } },
 };
 
 // Things the player can build.
@@ -38,17 +48,36 @@ G.OBJECTS = {
 // light = glow radius (px) at night.  floor = drawn under everything.
 // sound = played when built.  step = footstep sound when walking on it.
 // map = [h, s, l] colour on the map (lights with restore show as glowing dots).
+// fixed = can never be picked up.  workbench = recipes marked `at: 'workbench'` work near it.
 G.STRUCTURES = {
-  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern' },
+  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern', fixed: true },
   lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230, sound: 'lantern' },
+  beacon:  { name: 'Crystal Beacon', solid: true, on: 'land', restore: 11, light: 360, sound: 'beacon' },
   path:    { name: 'Stone path',  solid: false, on: 'land', floor: true, sound: 'placeStone', step: 'stone', map: [38, 18, 70] },
   bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true, sound: 'placeWood', step: 'wood', map: [30, 45, 44] },
+  workbench:{ name: 'Workbench',  solid: true,  on: 'land', sound: 'craft', workbench: true, map: [30, 50, 50] },
+  fence:   { name: 'Fence',       solid: true,  on: 'land', sound: 'placeWood', map: [30, 35, 52] },
+  flowerbed:{ name: 'Flower bed', solid: false, on: 'land', sound: 'petal', light: 70, map: [330, 60, 66] },
+  bench:   { name: 'Bench',       solid: true,  on: 'land', sound: 'placeWood', map: [30, 40, 48] },
 };
 
-// Crafting recipes. Each builds a structure.
+// Crafting recipes. Each either builds a structure (placed in the world) or
+// makes an item (a tool). at: 'workbench' = only while standing near a workbench.
 G.RECIPES = [
   { id: 'lantern', cost: { wood: 3, stone: 2, petal: 2 }, builds: 'lantern',
     desc: 'Brings colour and light back to the land around it.' },
   { id: 'path', cost: { stone: 1 }, builds: 'path', desc: 'A tidy stone path.' },
   { id: 'bridge', cost: { wood: 3 }, builds: 'bridge', desc: 'Cross water to reach new lands.' },
+  { id: 'workbench', cost: { wood: 4, stone: 2 }, builds: 'workbench',
+    desc: 'Stand near it to craft tools, beacons and more.' },
+  { id: 'fence', cost: { wood: 1 }, builds: 'fence', desc: 'Joins up with fences beside it.' },
+  { id: 'flowerbed', cost: { petal: 1, fibre: 1 }, builds: 'flowerbed', desc: 'A little bed of glowing flowers.' },
+  { id: 'axe', cost: { wood: 2, stone: 2, fibre: 2 }, makes: 'axe', at: 'workbench',
+    desc: 'Trees give an extra piece of wood.' },
+  { id: 'pick', cost: { wood: 2, stone: 3, fibre: 2 }, makes: 'pick', at: 'workbench',
+    desc: 'More stone from rocks — and lets you mine glowing crystal in the highlands.' },
+  { id: 'bench', cost: { wood: 3, fibre: 1 }, builds: 'bench', at: 'workbench', desc: 'A place to sit and watch the world return.' },
+  { id: 'beacon', cost: { wood: 4, stone: 4, petal: 3, crystal: 3 }, builds: 'beacon', at: 'workbench',
+    desc: 'A great crystal light. Restores a much wider land than a lantern.' },
 ];
+G.WORKBENCH_REACH = 4;   // tiles

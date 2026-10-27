@@ -36,8 +36,9 @@ G.World = class {
     let obj = null;
     if (type === 'forest') obj = o < 0.32 ? 'tree' : o > 0.975 ? 'bloom' : null;
     else if (type === 'grass') obj = o < 0.035 ? 'tree' : o > 0.978 ? 'bloom' : o < 0.045 ? 'rock' : null;
-    else if (type === 'stone') obj = o < 0.14 ? 'rock' : null;
-    else if (type === 'sand') obj = o < 0.015 ? 'rock' : null;
+    else if (type === 'stone') obj = o < 0.14 ? 'rock' : o > 0.99 ? 'crystal' : null;
+    else if (type === 'sand') obj = o < 0.015 ? 'rock' : o > 0.93 ? 'reeds' : null;
+    if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
 
     const soft = G.valueNoise(tx * 0.15, ty * 0.15, s + 55);  // gentle colour patches
     t = { type, v, soft, obj, hue: Math.floor(G.hash2(tx, ty, s + 99) * 360) };
@@ -94,6 +95,18 @@ G.World = class {
     if (def.restore || def.light) this.rebuildLights();
   }
 
+  remove(tx, ty) {
+    const k = G.key(tx, ty), st = this.structures.get(k);
+    if (!st) return null;
+    this.structures.delete(k);
+    const def = G.STRUCTURES[st.type];
+    if (def.restore || def.light) this.rebuildLights();
+    return st;
+  }
+
+  // lights that bring colour back, not counting the Heart Stone
+  litCount() { let n = 0; for (const L of this.lights) if (L.restore && L.type !== 'heart') n++; return n; }
+
   count(type) { let n = 0; for (const s of this.structures.values()) if (s.type === type) n++; return n; }
 
   rebuildLights() {
@@ -103,7 +116,7 @@ G.World = class {
       const def = G.STRUCTURES[st.type];
       if (def.restore || def.light) {
         this.lights.push({
-          x: (st.tx + 0.5) * G.TILE, y: (st.ty + 0.5) * G.TILE,
+          type: st.type, x: (st.tx + 0.5) * G.TILE, y: (st.ty + 0.5) * G.TILE,
           restore: def.restore || 0, light: def.light || 0,
         });
       }

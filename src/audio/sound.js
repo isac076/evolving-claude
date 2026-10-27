@@ -230,6 +230,32 @@ G.SFX = {
   meet(S) {        // a gentle, curious little phrase: someone new is here
     [7, 9, 12].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.05, dur: 1, t: k * 0.12, rev: 0.6 }));
   },
+  fibre(S, o) {    // a soft swish of reeds
+    S.noise({ filter: 'bandpass', freq: 2600, freqTo: 1200, q: 0.8, attack: 0.03, dur: 0.22, gain: 0.08, pan: o.pan, rev: 0.1 });
+    S.noise({ filter: 'bandpass', freq: 3400, freqTo: 1800, q: 0.8, attack: 0.02, dur: 0.16, gain: 0.05, t: 0.1, pan: o.pan, rev: 0.1 });
+  },
+  crystal(S, o) {  // glassy, ringing chimes
+    const i = Math.floor(Math.random() * 5);
+    [0, 2, 4].forEach((n, k) => S.bell(G.note(i + n, 6), { gain: 0.06, dur: 2.2, t: k * 0.06, pan: o.pan, rev: 0.7 }));
+    S.tone(G.note(i, 5) * 1.5, { dur: 0.05, gain: 0.05, pan: o.pan, rev: 0.4 });
+  },
+  craft(S, o) {    // tap tap tap at the workbench, then a bright little bell
+    [0, 0.13, 0.26].forEach((t, k) => {
+      S.tone(320 + k * 30, { type: 'triangle', glide: 200, dur: 0.07, gain: 0.16, t, pan: o.pan, rev: 0.15 });
+      S.noise({ filter: 'bandpass', freq: 2400, q: 3, dur: 0.03, gain: 0.08, t, pan: o.pan });
+    });
+    S.bell(G.note(7, 4), { gain: 0.07, dur: 1.4, t: 0.42, rev: 0.5 });
+    S.bell(G.note(9, 4), { gain: 0.05, dur: 1.6, t: 0.5, rev: 0.5 });
+  },
+  beacon(S, o) {   // a lantern's chime, but deeper, wider and shimmering with crystal
+    [0, 2, 4, 5, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.08, dur: 2.6, t: k * 0.1, pan: o.pan, rev: 0.7 }));
+    for (const n of [0, 3, 5]) S.tone(G.note(n, 2), { type: 'triangle', attack: 0.7, dur: 3.6, gain: 0.06, rev: 0.8 });
+    for (let k = 0; k < 5; k++) S.bell(G.note(10 + k * 2, 5), { gain: 0.025, dur: 1.8, t: 0.7 + k * 0.08, rev: 0.8 });
+  },
+  pickup(S, o) {   // a falling little "boop": back into your pocket
+    S.tone(G.note(7, 4), { type: 'triangle', glide: G.note(2, 4), dur: 0.16, gain: 0.1, pan: o.pan, rev: 0.2 });
+    S.bell(G.note(2, 5), { gain: 0.05, dur: 0.6, t: 0.08, pan: o.pan, rev: 0.3 });
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

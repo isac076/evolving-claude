@@ -16,6 +16,7 @@ function shadow(ctx, x, y, w, h, a = 0.22) {
   ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, 6.2832); ctx.fill();
 }
 G.circle = circle;
+G.shadow = shadow;
 
 // ---------- ground ----------
 // fc = optional restoration at the four corners [top-left, top-right,

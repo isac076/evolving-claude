@@ -19,7 +19,9 @@ src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk 
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
+src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
+src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
 src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
@@ -69,13 +71,26 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   'moth', 'bird', 'hop', 'swim'). They fade out when the time or land stops suiting
   them, and vanish when far off screen. Meeting a kind up close sets
   `state.stats.met[kind]` (saved inside stats; feeds the 'wildlife' goal).
+- **Crafting**: a recipe either `builds` a structure (you then place it) or `makes` an
+  item (a tool, straight into `inv`). `at: 'workbench'` recipes need a structure with
+  `workbench: true` within `G.WORKBENCH_REACH` tiles. Tools are items with `tool: true`;
+  objects can say `tool` + `bonus` (extra drops when you own it) and `needs` (can't gather
+  without it). `G.Crafting.blocker(state, r)` says why a recipe can't be used ('owned',
+  'far', 'cost'). Pick-up mode (X, `state.removing`) refunds the building's recipe cost;
+  structures with `fixed` (the Heart Stone) can't be picked up. `world.remove()` does it.
+- **Lights** carry their structure `type`; `world.litCount()` counts restoring lights
+  except the Heart Stone (the HUD and big map use it). Beacons glow cyan.
+- **Goal chapters**: goals can set `chapter` ('The workshop'); the tracker shows that
+  heading and one row of pips per chapter. If new goals appear after a player finished
+  everything, the hidden tracker comes back by itself.
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.
   Opening `index.html?autostart` skips the title screen with a fixed seed.
 
 ## Adding a thing (example: a new building)
-1. Add it to `G.STRUCTURES` and a recipe to `G.RECIPES` in `src/data/content.js`.
+1. Add it to `G.STRUCTURES` and a recipe to `G.RECIPES` in `src/data/content.js`
+   (add `at: 'workbench'` if it should need a workbench).
 2. Add a draw function with the same name to `G.STRUCTURE_SPRITES` in `src/render/sprites.js`.
 3. Optionally give it a `sound` (an effect in `G.SFX`) for when it's built.
 That's it — the crafting menu, placing, saving and lighting all pick it up.

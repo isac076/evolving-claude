@@ -76,6 +76,21 @@ body:not(.playing) #hud { display: none; }
 .cost { display: inline-flex; align-items: center; gap: 4px; }
 .cost.short { color: var(--bad); }
 .recipe.cant b { color: var(--ink-dim); }
+.recipe .tag { font-size: 10px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); border: 1px solid var(--edge); border-radius: 6px; padding: 0 5px; margin-left: 4px; vertical-align: 2px; }
+.recipe .owned { display: none; float: right; font-weight: 400; font-size: 12px; color: #a8e6a0; }
+.recipe.is-owned .owned { display: inline; }
+.recipe.is-owned { opacity: .6; }
+.recipe.is-owned .cost { display: none; }
+.recipe.far { opacity: .55; }
+.craft-group { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 2px -2px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); }
+.craft-group:first-child { margin-top: 0; }
+.craft-group em { font-style: normal; letter-spacing: .04em; text-transform: none; font-size: 12px; }
+.craft-group.near em { color: #a8e6a0; }
+#btn-pickup { margin-top: 10px; width: 100%; padding: 9px; border-radius: 10px; background: rgba(255, 215, 122, .08); border: 1px dashed rgba(255, 215, 122, .4); font-size: 14px; }
+#btn-pickup:hover { background: rgba(255, 215, 122, .18); }
+#btn-pickup small { color: var(--ink-dim); }
+.slot.tool { border: 1px solid rgba(255, 215, 122, .45); background: rgba(255, 215, 122, .1); color: var(--gold); }
+body.removing #game { cursor: pointer; }
 
 #title {
   position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -153,3 +168,5 @@ body.map-open #minimap, body.craft-open #minimap { opacity: 0; pointer-events: n
   #goals { top: auto; bottom: 150px; width: min(260px, calc(100vw - 120px)); }
 }
 @media (max-width: 960px) and (min-width: 601px) { #toast { top: 190px; } }
+@media (min-width: 761px) { body.craft-open #bottom { right: 350px; } }
+#bottom { transition: right .35s ease; }

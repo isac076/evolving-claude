@@ -10,23 +10,43 @@ G.UI = class {
     this.$('btn-gather').onclick = () => { state.wantGather = true; };
     this.$('craft-close').onclick = () => this.toggleCraft(false);
     this.$('btn-sound').onclick = () => this.toggleSound();
+    this.$('btn-pickup').onclick = () => { state.setRemoving(); this.toggleCraft(false); };
+    this.nearTimer = 0; this.wasNear = null;
     this.showSound();
     this.buildCraftList();
   }
 
+  // Recipes in two groups: things you can make anywhere, and things that
+  // need a workbench nearby.
   buildCraftList() {
     const list = this.$('craft-list');
     list.innerHTML = '';
-    for (const r of G.RECIPES) {
-      const def = G.STRUCTURES[r.builds];
-      const b = document.createElement('button');
-      b.className = 'recipe';
-      b.dataset.id = r.id;
-      const cost = Object.entries(r.cost).map(([k, n]) =>
-        `<span class="cost" data-item="${k}" data-n="${n}"><i style="background:${G.ITEMS[k].color}"></i>${n} ${G.ITEMS[k].name}</span>`).join('');
-      b.innerHTML = `<b>${def.name}</b><small>${r.desc}</small><div>${cost}</div>`;
-      b.onclick = () => { this.state.startBuild(r); this.toggleCraft(false); };
-      list.appendChild(b);
+    const groups = [
+      { title: 'Anywhere', recipes: G.RECIPES.filter(r => !r.at) },
+      { title: 'At a workbench', id: 'bench-head', recipes: G.RECIPES.filter(r => r.at === 'workbench') },
+    ];
+    for (const g of groups) {
+      const h = document.createElement('div');
+      h.className = 'craft-group';
+      if (g.id) h.id = g.id;
+      h.innerHTML = `<span>${g.title}</span><em></em>`;
+      list.appendChild(h);
+      for (const r of g.recipes) {
+        const name = r.builds ? G.STRUCTURES[r.builds].name : G.ITEMS[r.makes].name;
+        const b = document.createElement('button');
+        b.className = 'recipe' + (r.makes ? ' tool' : '');
+        b.dataset.id = r.id;
+        const cost = Object.entries(r.cost).map(([k, n]) =>
+          `<span class="cost" data-item="${k}" data-n="${n}"><i style="background:${G.ITEMS[k].color}"></i>${n} ${G.ITEMS[k].name}</span>`).join('');
+        b.innerHTML = `<b>${name}${r.makes ? ' <span class="tag">tool</span>' : ''}<span class="owned">✓ Yours</span></b><small>${r.desc}</small><div>${cost}</div>`;
+        b.onclick = () => {
+          const why = G.Crafting.blocker(this.state, r);
+          this.state.startBuild(r);
+          if (!why && r.builds) this.toggleCraft(false);
+          else this.refresh();
+        };
+        list.appendChild(b);
+      }
     }
   }
 
@@ -56,14 +76,34 @@ G.UI = class {
 
   refresh() {
     const inv = this.state.inv;
-    // inventory bar
+    // inventory bar: materials always (new ones once you've found some), tools once you own them
+    const got = this.state.stats.got || {};
     const bar = this.$('inventory');
-    bar.innerHTML = Object.keys(G.ITEMS).map(k =>
-      `<span class="slot${inv[k] ? '' : ' empty'}"><i style="background:${G.ITEMS[k].color}"></i>${G.ITEMS[k].name}<b>${inv[k] || 0}</b></span>`).join('');
-    // recipe affordability
+    bar.innerHTML = Object.keys(G.ITEMS).map(k => {
+      const it = G.ITEMS[k];
+      if (it.tool) return inv[k] ? `<span class="slot tool" title="${it.desc}"><i style="background:${it.color}"></i>${it.name}</span>` : '';
+      if (!inv[k] && !got[k] && !['wood', 'stone', 'petal'].includes(k)) return '';
+      return `<span class="slot${inv[k] ? '' : ' empty'}"><i style="background:${it.color}"></i>${it.name}<b>${inv[k] || 0}</b></span>`;
+    }).join('');
+    this.refreshRecipes();
+  }
+
+  // recipe affordability, workbench distance, tools already owned
+  refreshRecipes() {
+    const inv = this.state.inv, near = G.Crafting.nearWorkbench(this.state);
+    this.wasNear = near;
+    const head = this.$('bench-head');
+    if (head) {
+      head.classList.toggle('near', near);
+      head.querySelector('em').textContent = near ? 'workbench nearby ✓' : this.state.world && this.state.world.count('workbench')
+        ? 'walk to your workbench' : 'build a workbench first';
+    }
     for (const b of document.querySelectorAll('.recipe')) {
       const r = G.RECIPES.find(x => x.id === b.dataset.id);
-      b.classList.toggle('cant', !this.state.canAfford(r));
+      const why = G.Crafting.blocker(this.state, r);
+      b.classList.toggle('cant', !!why);
+      b.classList.toggle('far', why === 'far');
+      b.classList.toggle('is-owned', why === 'owned');
       for (const c of b.querySelectorAll('.cost')) c.classList.toggle('short', (inv[c.dataset.item] || 0) < +c.dataset.n);
     }
   }
@@ -88,8 +128,15 @@ G.UI = class {
       this.toastTimer -= dt;
       if (this.toastTimer <= 0) this.$('toast').classList.remove('show');
     }
+    // keep the workbench groups up to date while the craft panel is open
+    if (this.$('craft').classList.contains('open') && (this.nearTimer -= dt) <= 0) {
+      this.nearTimer = 0.3;
+      if (G.Crafting.nearWorkbench(this.state) !== this.wasNear) this.refreshRecipes();
+    }
+    document.body.classList.toggle('removing', !!this.state.removing);
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
-      : 'WASD / arrows or click to move · E gather · C craft · M map · N sound';
+      : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
+      : 'WASD / arrows or click to move · E gather · C craft · X pick up · M map · N sound';
   }
 };

@@ -165,6 +165,92 @@ def main():
         if result != "ok":
             errors.append("Wildlife check failed: " + str(result))
 
+        # workshop: build a workbench, craft tools there, mine crystal,
+        # raise a beacon, decorate, and pick a building back up
+        result = page.evaluate("""() => {
+            const s = G.state, w = s.world, T = G.TILE;
+            s.creatures.clear();
+            // an open patch of grass near the heart stone
+            const h = w.lights.find(L => L.type === 'heart'), htx = Math.floor(h.x / T), hty = Math.floor(h.y / T);
+            let spot = null;
+            for (let r = 3; r < 80 && !spot; r++) for (let dx = -r; dx <= r && !spot; dx++) for (const dy of [-r, r]) {
+                const tx = htx + dx, ty = hty + dy; let ok = true;
+                for (let x = -4; x <= 4 && ok; x++) for (let y = -3; y <= 3 && ok; y++)
+                    if (w.isWater(tx + x, ty + y) || w.objectAt(tx + x, ty + y) || w.structureAt(tx + x, ty + y)) ok = false;
+                if (ok) { spot = { tx, ty }; break; }
+            }
+            if (!spot) return 'no open spot for the workshop';
+            s.player.x = (spot.tx + 0.5) * T; s.player.y = (spot.ty + 1.5) * T;
+            s.cam.x = s.player.x; s.cam.y = s.player.y;
+            s.inv = { wood: 40, stone: 40, petal: 20, fibre: 20, crystal: 0 };
+            const bench = G.RECIPES.find(r => r.id === 'workbench');
+            if (G.Crafting.blocker(s, G.RECIPES.find(r => r.id === 'axe')) !== 'far') return 'axe should need a workbench';
+            w.build('workbench', spot.tx - 1, spot.ty);
+            if (!G.Crafting.nearWorkbench(s)) return 'workbench not noticed';
+            for (const id of ['axe', 'pick']) s.startBuild(G.RECIPES.find(r => r.id === id));
+            if (!s.inv.axe || !s.inv.pick) return 'tools were not crafted: ' + JSON.stringify(s.inv);
+            if (G.Crafting.blocker(s, G.RECIPES.find(r => r.id === 'axe')) !== 'owned') return 'axe should be owned';
+            const d = G.Crafting.dropsFor(s, 'tree');
+            if (d.wood !== 3) return 'axe gave no bonus: ' + JSON.stringify(d);
+            s.inv.crystal = 6;
+            w.build('beacon', spot.tx + 3, spot.ty - 1);
+            for (let x = -4; x <= 0; x++) w.build('fence', spot.tx + x, spot.ty + 3);
+            w.build('fence', spot.tx - 4, spot.ty + 2);
+            w.build('flowerbed', spot.tx + 1, spot.ty + 3); w.build('flowerbed', spot.tx + 2, spot.ty + 3);
+            w.build('bench', spot.tx + 1, spot.ty - 1);
+            // pick up a bench: it disappears and refunds its cost
+            w.build('bench', spot.tx + 4, spot.ty + 2);
+            const before = s.inv.wood;
+            if (G.Crafting.pickupBlocker(s, w.structureAt(htx, hty)) === null) return 'heart stone could be picked up';
+            G.Crafting.pickUp(s, spot.tx + 4, spot.ty + 2);
+            if (w.structureAt(spot.tx + 4, spot.ty + 2) || s.inv.wood !== before + 3) return 'pick up did not refund';
+            s.time = Math.floor(s.time / G.DAY_LENGTH + 1) * G.DAY_LENGTH + 10;
+            for (const k in G.STRUCTURES) if (!G.STRUCTURE_SPRITES[k]) return 'no sprite for ' + k;
+            for (const k in G.OBJECTS) if (!G.OBJECT_SPRITES[k]) return 'no sprite for ' + k;
+            for (const r of G.RECIPES) { for (const k in r.cost) if (!G.ITEMS[k]) return 'unknown item ' + k; if (!r.builds === !r.makes) return 'bad recipe ' + r.id; }
+            window.__shop = spot;
+            G.state.goalsDone = G.GOALS.map(g => g.id).filter(id => id !== 'decor');
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Workshop check failed: " + str(result))
+        page.keyboard.press("c"); page.wait_for_timeout(900)
+        page.evaluate("() => { document.getElementById('craft').scrollTop = 9999; }")
+        page.wait_for_timeout(100)
+        page.screenshot(path=str(SHOTS / "7-workshop.png"))
+        page.keyboard.press("c")
+        page.evaluate("() => { const s = G.state; s.time = Math.floor(s.time / G.DAY_LENGTH) * G.DAY_LENGTH + G.DAY_LENGTH * 0.5; }")
+        page.wait_for_timeout(900)
+        page.screenshot(path=str(SHOTS / "8-beacon-night.png"))
+        # find a crystal in the highlands; it needs the pick
+        result = page.evaluate("""() => {
+            const s = G.state, w = s.world, T = G.TILE;
+            let c = null;
+            for (let r = 0; r < 300 && !c; r += 1) for (let a = 0; a < 64 && !c; a++) {
+                const tx = Math.round(Math.cos(a / 64 * 6.283) * r), ty = Math.round(Math.sin(a / 64 * 6.283) * r);
+                if (w.objectAt(tx, ty) === 'crystal') c = { tx, ty };
+            }
+            if (!c) return 'no crystal found in the world';
+            const had = s.inv.pick; s.inv.pick = 0;
+            if (!G.Crafting.gatherBlocker(s, 'crystal')) return 'crystal could be mined without a pick';
+            s.inv.pick = had;
+            s.player.x = (c.tx + 0.5) * T; s.player.y = (c.ty + 0.7) * T; s.cam.x = s.player.x; s.cam.y = s.player.y - 40;
+            s.time = Math.floor(s.time / G.DAY_LENGTH) * G.DAY_LENGTH + G.DAY_LENGTH * 0.29;
+            window.__crystal = c;
+            return 'ok';
+        }""")
+        if result != "ok":
+            errors.append("Crystal check failed: " + str(result))
+        page.wait_for_timeout(700)
+        page.screenshot(path=str(SHOTS / "9-crystal.png"))
+        result = page.evaluate("""() => {
+            const s = G.state, n = s.inv.crystal || 0;
+            s.wantGather = true;
+            return new Promise(res => setTimeout(() => res((s.inv.crystal || 0) > n ? 'ok' : 'gathering crystal gave nothing; got ' + JSON.stringify(s.stats.got) + ' toast ' + document.getElementById('toast').textContent), 300));
+        }""")
+        if result != "ok":
+            errors.append("Crystal check failed: " + str(result))
+
         # continue an old version-1 save from the title screen
         page.evaluate("""() => {
             window.onbeforeunload = null;

@@ -118,19 +118,20 @@ G.Minimap = class {
       if (!L.restore) continue;
       const x = toX(L.x), y = toY(L.y);
       if (!big && Math.hypot(x - sx, y - sy) > 90) continue;
-      const heart = L.restore >= 9;
-      const r = (heart ? 9 : 6) * (big ? 1.2 : 1);
+      const heart = L.type === 'heart', beacon = L.type === 'beacon';
+      const r = (heart || beacon ? 9 : 6) * (big ? 1.2 : 1);
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, heart ? 'rgba(255,240,190,.95)' : 'rgba(255,214,130,.9)');
-      g.addColorStop(1, 'rgba(255,190,90,0)');
+      g.addColorStop(0, heart ? 'rgba(255,240,190,.95)' : beacon ? 'rgba(170,240,255,.95)' : 'rgba(255,214,130,.9)');
+      g.addColorStop(1, beacon ? 'rgba(90,190,255,0)' : 'rgba(255,190,90,0)');
       ctx.fillStyle = g; G.circle(ctx, x, y, r);
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const L of world.lights) {
       if (!L.restore) continue;
       const x = toX(L.x), y = toY(L.y);
-      ctx.fillStyle = L.restore >= 9 ? '#fff6dc' : '#ffd77a';
-      if (L.restore >= 9) { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3, y); ctx.fill(); }
+      const big9 = L.type === 'heart' || L.type === 'beacon';
+      ctx.fillStyle = L.type === 'heart' ? '#fff6dc' : L.type === 'beacon' ? '#dff8ff' : '#ffd77a';
+      if (big9) { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3, y); ctx.fill(); }
       else G.circle(ctx, x, y, 1.6);
     }
     // the player: a soft pulsing light
@@ -184,7 +185,7 @@ G.Minimap = class {
     const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.7);
     g.addColorStop(0, 'rgba(11,14,38,0)'); g.addColorStop(1, 'rgba(11,14,38,.7)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    const ex = this.state.explored.count, lit = this.state.world.lights.length - 1;
+    const ex = this.state.explored.count, lit = this.state.world.litCount();
     document.getElementById('bigmap-info').textContent =
       `${ex.toLocaleString()} tiles explored · ${lit} lantern${lit === 1 ? '' : 's'} lit`;
   }

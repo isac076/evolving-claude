@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 4 — 2026-10-27 — The workshop
+Reeds now grow by shores and in meadows, and blue crystals glow in the grey highlands. Build a
+Workbench, and while you stand near it you can craft an Axe (more wood) and a Pick (more stone,
+and it lets you mine crystal) — then raise a Crystal Beacon that brings colour back to a huge area.
+Decorate with fences that join together, glowing flower beds and benches, and press X to pick any
+building back up and get its materials back. A new set of "Workshop" goals guides you through it all.
+
 ## Night 3 — 2026-10-26 — Life returns
 Restored land now fills with life: butterflies flutter and rest on flowers, songbirds glide
 in and peck the grass (walk too close and the whole flock takes off), rabbits hop about and

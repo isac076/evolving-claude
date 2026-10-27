@@ -30,7 +30,7 @@ as the world does.
 - [x] Minimap (toggle with M) showing explored land and lanterns (Night 2)
 - [x] First-time tutorial goals ("gather 3 wood", "craft a lantern"...) with a small goal tracker (Night 2)
 - [ ] Settings menu (volume, controls help, new world) with Esc
-- [ ] Remove/pick up placed buildings (refund materials)
+- [x] Remove/pick up placed buildings (refund materials) (Night 4 — press X)
 
 ## Chapter 2 — A living world
 - [x] Butterflies and birds that only appear in restored land (Night 3, plus moths at lanterns by night)
@@ -41,12 +41,14 @@ as the world does.
 - [ ] Regrowth looks alive: saplings grow into trees over time
 
 ## Chapter 3 — Deeper crafting & building
-- [ ] Tools: an axe and pick that gather faster / more
-- [ ] Workbench: more recipes unlock when standing near it
-- [ ] New materials: fibre, clay, crystal, seeds
+- [x] Tools: an axe and pick that gather faster / more (Night 4 — the pick also unlocks crystal)
+- [x] Workbench: more recipes unlock when standing near it (Night 4)
+- [x] New materials: fibre (reeds) and crystal (highlands) (Night 4)
+- [ ] More materials: clay (riverbanks), seeds (from grown plants)
 - [ ] Gardens: plant seeds, water them, watch them grow
-- [ ] Decorations: fences, flower beds, benches, banners, signposts
-- [ ] Bigger lanterns / beacons with larger restore radius
+- [x] Decorations: fences that join up, flower beds, benches (Night 4)
+- [ ] More decorations: banners, signposts (with a name you type), stepping stones
+- [x] Bigger lanterns / beacons with larger restore radius (Night 4 — Crystal Beacon)
 - [ ] Storage chest
 
 ## Chapter 4 — The return of the villagers
@@ -103,3 +105,9 @@ as the world does.
 - Stand still near a butterfly long enough and it lands on the spirit
 - Creatures could have their own little sounds (rabbit thump, bird chirp near you) and seasons could change which ones appear
 - Performance: the renderer now computes restoration at tile corners too — cache per chunk when lights don't change
+- Sit on a bench (walk into it and wait): the camera eases out and time speeds up a little — a cozy "rest" moment
+- Fences could keep rabbits in a garden; flower beds could attract more butterflies (creature `where` could check nearby structures)
+- Tool upgrades: a crystal axe / crystal pick; a watering can for gardens
+- A second workbench tier (a "crystal workbench") for Chapter 4/5 recipes
+- Pick-up mode could also work on touch screens with a long-press
+- Crystals could hum softly when you're near them at night (Ambience reading nearby crystal objects)

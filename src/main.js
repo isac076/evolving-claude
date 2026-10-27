@@ -11,14 +11,31 @@ window.G = window.G || {};
   const state = {
     world: null, player: null, inv: {}, time: 0, stats: { gathered: 0, built: 0, got: {} },
     explored: new G.Explored(), goalsDone: [], goalsHidden: false,
-    cam: { x: 0, y: 0 }, placing: null, buildRecipe: null, wantGather: false,
+    cam: { x: 0, y: 0 }, placing: null, buildRecipe: null, wantGather: false, removing: false, removeHover: null,
     floaters: [], running: false, saveTimer: 0,
 
     canAfford(r) { return Object.entries(r.cost).every(([k, n]) => (this.inv[k] || 0) >= n); },
     startBuild(r) {
-      if (!this.canAfford(r)) { G.Sound.play('deny'); ui.toast(`Not enough materials for a ${G.STRUCTURES[r.builds].name}.`); return; }
+      const why = G.Crafting.blocker(this, r);
+      const name = r.builds ? G.STRUCTURES[r.builds].name : G.ITEMS[r.makes].name;
+      if (why) {
+        G.Sound.play('deny');
+        ui.toast(why === 'owned' ? `You already have a ${name}.`
+          : why === 'far' ? `Stand near a Workbench to make a ${name}.`
+          : `Not enough materials for a ${name}.`);
+        return;
+      }
+      this.setRemoving(false);
+      if (r.makes) { craftItem(r); return; }
       G.Sound.play('select');
       this.buildRecipe = r;
+    },
+    setRemoving(on) {
+      on = on === undefined ? !this.removing : on;
+      if (on === this.removing) return;
+      this.removing = on; this.removeHover = null;
+      if (on) { this.buildRecipe = null; this.placing = null; G.Sound.play('select'); ui.toast('Click a building near you to pick it up — you get its materials back. Esc or X to stop.', 4); }
+      ui.update(0);
     },
   };
   G.state = state;   // handy for debugging in the browser console
@@ -92,16 +109,20 @@ window.G = window.G || {};
   const panAt = x => G.clamp((x - state.player.x) / 240, -1, 1);
 
   function gatherAt(tx, ty) {
-    const w = state.world, o = w.harvest(tx, ty);
-    if (!o) return false;
+    const w = state.world, obj = w.objectAt(tx, ty);
+    if (!obj) return false;
+    const why = G.Crafting.gatherBlocker(state, obj);
+    if (why) { G.Sound.play('deny'); ui.toast(why, 3); return true; }
+    const drops = G.Crafting.dropsFor(state, obj);
+    const o = w.harvest(tx, ty);
     const def = G.OBJECTS[o];
     G.Sound.play(def.sound, { pan: panAt((tx + 0.5) * G.TILE) });
-    for (const [k, n] of Object.entries(def.drops)) {
+    for (const [k, n] of Object.entries(drops)) {
       state.inv[k] = (state.inv[k] || 0) + n;
       state.stats.got[k] = (state.stats.got[k] || 0) + n;
       addFloater((tx + 0.5) * G.TILE, ty * G.TILE, `+${n} ${G.ITEMS[k].name}`, G.ITEMS[k].color);
     }
-    const c = o === 'bloom' ? 'rgba(255,220,140,A)' : o === 'tree' ? 'rgba(150,220,120,A)' : 'rgba(200,205,220,A)';
+    const c = { bloom: 'rgba(255,220,140,A)', tree: 'rgba(150,220,120,A)', reeds: 'rgba(210,225,130,A)', crystal: 'rgba(160,235,255,A)' }[o] || 'rgba(200,205,220,A)';
     renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, c);
     state.stats.gathered++;
     ui.refresh();
@@ -109,15 +130,53 @@ window.G = window.G || {};
   }
 
   function gatherNearest() {
-    const p = state.player; let best = null, bd = Infinity;
+    const p = state.player; let best = null, bd = Infinity, locked = null;
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
-      const tx = p.tx + dx, ty = p.ty + dy;
-      if (!state.world.objectAt(tx, ty)) continue;
+      const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
+      if (!o) continue;
       const d = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y);
-      if (d < bd && d <= REACH) { bd = d; best = { tx, ty }; }
+      if (d > REACH) continue;
+      if (G.Crafting.gatherBlocker(state, o)) { locked = { tx, ty }; continue; }   // skip what you can't gather yet
+      if (d < bd) { bd = d; best = { tx, ty }; }
     }
-    if (best) gatherAt(best.tx, best.ty);
+    if (best || locked) gatherAt((best || locked).tx, (best || locked).ty);
     else { G.Sound.play('deny'); ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5); }
+  }
+
+  // make an item (a tool) straight into your pockets
+  function craftItem(r) {
+    for (const [k, n] of Object.entries(r.cost)) state.inv[k] -= n;
+    state.inv[r.makes] = (state.inv[r.makes] || 0) + 1;
+    state.stats.crafted = state.stats.crafted || {};
+    state.stats.crafted[r.makes] = (state.stats.crafted[r.makes] || 0) + 1;
+    const it = G.ITEMS[r.makes], p = state.player;
+    G.Sound.play('craft');
+    renderer.burst(p.x, p.y - 10, 'rgba(255,225,150,A)', 18);
+    addFloater(p.x, p.y - 26, `${it.name}!`, it.color);
+    ui.toast(`You made a ${it.name}. ${it.desc || ''}`, 4.5);
+    ui.refresh();
+  }
+
+  // pick-up mode: click a building near you to take it back
+  function updateRemove() {
+    if (input.hit('escape')) { state.setRemoving(false); return; }
+    const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
+    const p = state.player, st = state.world.structureAt(tx, ty);
+    const near = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= BUILD_REACH;
+    state.removeHover = st ? { tx, ty, ok: near && !G.Crafting.pickupBlocker(state, st) } : null;
+    if (!input.mouse.clicked) return;
+    if (!st) { p.moveTarget = { x: wx, y: wy }; return; }
+    const why = G.Crafting.pickupBlocker(state, st);
+    if (why || !near) { G.Sound.play('deny'); ui.toast(why || 'Too far away — move closer.', 2.5); return; }
+    const refund = G.Crafting.pickUp(state, tx, ty);
+    map.touch(tx, ty);
+    const x = (tx + 0.5) * G.TILE, y = (ty + 0.5) * G.TILE;
+    G.Sound.play('pickup', { pan: panAt(x) });
+    renderer.burst(x, y, 'rgba(255,240,200,A)', 12);
+    let k = 0;
+    for (const [item, n] of Object.entries(refund)) { addFloater(x, y - 6 - k * 14, `+${n} ${G.ITEMS[item].name}`, G.ITEMS[item].color); k++; }
+    state.removeHover = null;
+    ui.refresh();
   }
 
   function addFloater(x, y, text, color) { state.floaters.push({ x, y, text, color, life: 1.4 }); }
@@ -141,6 +200,8 @@ window.G = window.G || {};
       G.Sound.play(G.STRUCTURES[r.builds].sound, { pan: panAt((tx + 0.5) * G.TILE) });
       renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
       if (r.builds === 'lantern') ui.toast('The land around the lantern remembers its colour.');
+      if (r.builds === 'beacon') ui.toast('The crystal sings, and the land far around it remembers its colour.', 5);
+      if (r.builds === 'workbench') ui.toast('A workbench! Stand near it and open Craft (C) for tools and more.', 5);
       ui.refresh();
       if (!state.canAfford(r)) { state.buildRecipe = null; state.placing = null; }
     }
@@ -152,12 +213,14 @@ window.G = window.G || {};
     state.world.time = state.time;
 
     if (input.hit('c')) ui.toggleCraft();
+    if (input.hit('x')) state.setRemoving();
     if (input.hit('n')) ui.toggleSound();
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
     if (map.isOpen && input.hit('escape')) map.toggle(false);
     else if (state.buildRecipe) updateBuild();
+    else if (state.removing) updateRemove();
     else if (input.mouse.clicked || input.mouse.down) {
       const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
       const p = state.player;
@@ -178,7 +241,7 @@ window.G = window.G || {};
 
     state.saveTimer += dt;
     if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
-    ui.updateClock(state.time, state.world.lights.length - 1);
+    ui.updateClock(state.time, state.world.litCount());
     ui.update(dt);
     map.update(dt, state.time);
     goals.update(dt);

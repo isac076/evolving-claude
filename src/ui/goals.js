@@ -19,10 +19,11 @@ G.Goals = class {
   // Build the pips + panel for the goal that's showing now.
   render(goal, value, justDone) {
     const done = this.state.goalsDone;
-    const pips = G.GOALS.map(g =>
+    const chapter = goal ? goal.chapter || 'First steps' : 'First steps';
+    const pips = G.GOALS.filter(g => !goal || (g.chapter || 'First steps') === chapter).map(g =>
       `<i class="${done.includes(g.id) ? 'on' : ''}${goal && g.id === goal.id ? ' now' : ''}"></i>`).join('');
     if (!goal) {
-      this.el.innerHTML = `<div class="goal-head">First steps <span class="pips">${pips}</span></div>
+      this.el.innerHTML = `<div class="goal-head">All goals <span class="pips">${pips}</span></div>
         <div class="goal-text">All done — the world is yours to bring back.</div>`;
       return;
     }
@@ -30,7 +31,7 @@ G.Goals = class {
     const count = goal.percent ? `${Math.floor(frac * 100)}%` : `${Math.min(value, goal.target)} / ${goal.target}`;
     const reward = goal.reward ? Object.entries(goal.reward).map(([k, n]) =>
       `<span class="reward"><i style="background:${G.ITEMS[k].color}"></i>+${n}</span>`).join('') : '';
-    this.el.innerHTML = `<div class="goal-head">First steps <span class="pips">${pips}</span></div>
+    this.el.innerHTML = `<div class="goal-head">${chapter} <span class="pips">${pips}</span></div>
       <div class="goal-text">${justDone ? '✓ ' : ''}${goal.text}<b>${justDone ? 'Done!' : count}</b></div>
       <div class="goal-bar"><span style="width:${(justDone ? 1 : frac) * 100}%"></span></div>
       <div class="goal-hint">${goal.hint || ''}${reward ? ' <span class="rewards">Reward ' + reward + '</span>' : ''}</div>`;
@@ -38,7 +39,10 @@ G.Goals = class {
 
   update(dt) {
     const s = this.state;
-    if (s.goalsHidden) return;
+    if (s.goalsHidden) {
+      if (!this.current) return;
+      s.goalsHidden = false;   // new goals arrived since the tracker was put away
+    }
     if (this.celebrate > 0) {
       this.celebrate -= dt;
       if (this.celebrate <= 0) { this.el.classList.remove('done'); this.shownId = null; }
