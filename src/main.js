@@ -10,7 +10,7 @@ window.G = window.G || {};
 
   const state = {
     world: null, player: null, inv: {}, time: 0, stats: { gathered: 0, built: 0, got: {} },
-    explored: new G.Explored(), goalsDone: [], goalsHidden: false,
+    explored: new G.Explored(), goalsDone: [], goalsHidden: false, weather: null,
     cam: { x: 0, y: 0 }, placing: null, buildRecipe: null, wantGather: false, removing: false, removeHover: null,
     floaters: [], running: false, saveTimer: 0,
 
@@ -56,6 +56,27 @@ window.G = window.G || {};
     ui.toast(def.meet, 5);
   };
 
+  // the sky: weather drifts on its own; tell the player when it changes
+  function makeWeather() {
+    const wx = new G.Weather();
+    wx.onChange = kind => {
+      if (!state.running) return;
+      const def = G.WEATHER[kind], seen = state.stats.weatherSeen || (state.stats.weatherSeen = {});
+      const firstTime = !seen[kind];
+      seen[kind] = 1;
+      const msg = firstTime ? def.first : def.say;
+      if (msg) ui.toast(msg, firstTime ? 6 : 3.5);
+    };
+    wx.onRainbow = () => {
+      if (!state.running) return;
+      state.stats.rainbows = (state.stats.rainbows || 0) + 1;
+      G.Sound.play('rainbow');
+      ui.toast('A rainbow! The rain has washed the sky clean.', 5);
+    };
+    return wx;
+  }
+  state.weather = makeWeather();
+
   // ---------- starting / loading ----------
   function newGame(seed) {
     state.world = new G.World(seed);
@@ -66,6 +87,7 @@ window.G = window.G || {};
     state.explored = new G.Explored(); state.explored.reveal(sp.tx, sp.ty, 12);
     state.goalsDone = []; state.goalsHidden = false;
     state.stats.met = {};
+    state.weather = makeWeather();   // a new world begins under a clear sky
     afterLoad();
     setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
@@ -84,6 +106,8 @@ window.G = window.G || {};
       for (const L of state.world.lights) if (L.restore) state.explored.reveal(Math.floor(L.x / G.TILE), Math.floor(L.y / G.TILE), L.restore + 4);
     }
     state.goalsDone = d.goalsDone; state.goalsHidden = !!d.goalsHidden;
+    state.weather = makeWeather();
+    state.weather.load(d.weather);   // older saves have no weather: it starts clear
     afterLoad();
     ui.toast('Welcome back.');
   }
@@ -239,9 +263,11 @@ window.G = window.G || {};
     for (const f of state.floaters) { f.life -= dt; f.y -= 22 * dt; }
     state.floaters = state.floaters.filter(f => f.life > 0);
 
+    if (state.weather.rain > 0.3) state.stats.rainTime = (state.stats.rainTime || 0) + dt;
+
     state.saveTimer += dt;
     if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
-    ui.updateClock(state.time, state.world.litCount());
+    ui.updateClock(state.time, state.world.litCount(), state.weather);
     ui.update(dt);
     map.update(dt, state.time);
     goals.update(dt);
@@ -271,7 +297,9 @@ window.G = window.G || {};
       for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) if (w.isWater(tx + dx, ty + dy)) n++;
       waterNear = Math.min(1, n / 40);
     }
-    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running });
+    const wv = state.weather.v;
+    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running,
+      rain: wv.rain, wind: G.windNow || 0, fog: wv.fog });
   }
 
   function drawFloaters() {
@@ -289,6 +317,7 @@ window.G = window.G || {};
   let prev = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    if (state.world) state.weather.update(dt, state);
     if (state.running) {
       update(dt);
       renderer.render(state, dt);
@@ -318,7 +347,7 @@ window.G = window.G || {};
 
   // a peaceful world drifts behind the title screen
   state.world = new G.World(saved ? saved.seed : 12345);
-  if (saved) { for (const [t, x, y] of saved.structures || []) if (G.STRUCTURES[t]) state.world.structures.set(G.key(x, y), { type: t, tx: x, ty: y }); state.world.rebuildLights(); }
+  if (saved) { for (const [t, x, y] of saved.structures || []) if (G.STRUCTURES[t]) state.world.structures.set(G.key(x, y), { type: t, tx: x, ty: y }); state.world.rebuildLights(); state.weather.load(saved.weather); }
   else { const sp = state.world.findSpawn(); state.world.build('heart', sp.tx, sp.ty); }
   state.player = new G.Player(-9999, -9999);
   const l0 = state.world.lights[0] || { x: 0, y: 0 };

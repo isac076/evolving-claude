@@ -108,12 +108,18 @@ G.UI = class {
     }
   }
 
-  updateClock(time, lanterns) {
+  updateClock(time, lanterns, weather) {
     const day = Math.floor(time / G.DAY_LENGTH) + 1;
     const phase = (time % G.DAY_LENGTH) / G.DAY_LENGTH;
     const names = ['Noon', 'Afternoon', 'Dusk', 'Night', 'Night', 'Night', 'Dawn', 'Morning'];
     const name = names[Math.floor(((phase + 0.0625) % 1) * 8)];
     this.$('clock').textContent = `Day ${day} · ${name}`;
+    const wname = weather ? weather.def.name : '';
+    if (wname !== this.wname) {
+      this.wname = wname;
+      const el = this.$('weather');
+      el.textContent = wname; el.dataset.kind = weather ? weather.kind : '';
+    }
     this.$('restored').textContent = `Lanterns lit: ${lanterns}`;
   }
 

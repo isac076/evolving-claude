@@ -18,6 +18,13 @@ function shadow(ctx, x, y, w, h, a = 0.22) {
 G.circle = circle;
 G.shadow = shadow;
 
+// How far a plant leans: its own gentle sway, plus the wind (G.windNow 0..1,
+// set by world/weather.js) bending it downwind and making it shake faster.
+G.sway = function (t, seed, amp) {
+  const w = G.windNow || 0, dir = G.windDir || 1;
+  return Math.sin(t + seed) * amp * (1 + w * 1.2) + Math.sin(t * 2.7 + seed * 1.3) * amp * w * 0.7 + dir * w * amp * 2.2;
+};
+
 // ---------- ground ----------
 // fc = optional restoration at the four corners [top-left, top-right,
 // bottom-left, bottom-right]: where they differ (the edge of a lantern's
@@ -45,7 +52,7 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc) {
       ctx.strokeStyle = G.shade(d.h + 6, d.s + 8, d.l + 9, f);
       ctx.lineWidth = 1.2;
       const ox = x + 6 + tile.v * 14, oy = y + 10 + (tile.v * 97 % 1) * 14;
-      const sw = Math.sin(t * 2 + tx) * 1.2;
+      const sw = G.sway(t * 2, tx, 1.2);
       ctx.beginPath();
       ctx.moveTo(ox, oy + 6); ctx.lineTo(ox - 2 + sw, oy);
       ctx.moveTo(ox + 3, oy + 6); ctx.lineTo(ox + 4 + sw, oy - 1);
@@ -66,7 +73,7 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc) {
 G.OBJECT_SPRITES = {
   tree(ctx, x, y, f, t, tile) {
     const cx = x + 16, by = y + 28;
-    const sway = Math.sin(t * 1.1 + tile.v * 10) * 1.3;
+    const sway = G.sway(t * 1.1, tile.v * 10, 1.3);
     const h = 112 + tile.v * 34;
     shadow(ctx, cx, by, 13, 5);
     ctx.fillStyle = G.shade(28, 38, 26, f);
@@ -84,7 +91,7 @@ G.OBJECT_SPRITES = {
     ctx.beginPath(); ctx.ellipse(cx - 3, by - 8, w * 0.5, 3.5, -0.2, 0, 6.2832); ctx.fill();
   },
   bloom(ctx, x, y, f, t, tile) {
-    const cx = x + 16, by = y + 26, sway = Math.sin(t * 1.6 + tile.v * 20) * 1.5;
+    const cx = x + 16, by = y + 26, sway = G.sway(t * 1.6, tile.v * 20, 1.5);
     ctx.strokeStyle = G.shade(130, 40, 32, f); ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.moveTo(cx, by); ctx.quadraticCurveTo(cx, by - 6, cx + sway, by - 12); ctx.stroke();
     const hue = tile.hue, px = cx + sway, py = by - 13;

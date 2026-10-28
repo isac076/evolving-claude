@@ -256,6 +256,10 @@ G.SFX = {
     S.tone(G.note(7, 4), { type: 'triangle', glide: G.note(2, 4), dur: 0.16, gain: 0.1, pan: o.pan, rev: 0.2 });
     S.bell(G.note(2, 5), { gain: 0.05, dur: 0.6, t: 0.08, pan: o.pan, rev: 0.3 });
   },
+  rainbow(S) {  // a rainbow: a slow, shimmering climb through every colour
+    [0, 1, 2, 3, 4, 5, 6].forEach((n, k) => S.bell(G.note(n + 2, 4), { gain: 0.05, dur: 2.6, t: k * 0.16, pan: -0.7 + k * 0.23, rev: 0.8 }));
+    S.tone(G.note(0, 3), { type: 'sine', attack: 1, dur: 4, gain: 0.05, rev: 0.9 });
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

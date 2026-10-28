@@ -13,7 +13,7 @@ window.G = window.G || {};
       for (let i = 0; i < n; i++) {
         const r = G.hash2(tile.hue, i, 3);
         const bx = x + 7 + (i / (n - 1)) * 18 + (r - 0.5) * 3;
-        const h = 14 + r * 10, sway = Math.sin(t * 1.3 + tile.v * 9 + i * 0.7) * (1.5 + h * 0.06);
+        const h = 14 + r * 10, sway = G.sway(t * 1.3, tile.v * 9 + i * 0.7, 1.5 + h * 0.06);
         ctx.strokeStyle = G.shade(70 + r * 20, 40, 34 + r * 12, f); ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx, by - h * 0.6, bx + sway, by - h); ctx.stroke();
         if (r > 0.45) {   // a fluffy seed head on some stems
@@ -132,7 +132,7 @@ window.G = window.G || {};
       for (let i = 0; i < 6; i++) {
         const r = G.hash2(st.tx * 7 + i, st.ty, 41);
         const fx = x + 8 + (i % 3) * 8 + (r - 0.5) * 3, fy = y + 15 + Math.floor(i / 3) * 7;
-        const sway = Math.sin(t * 1.5 + i + r * 5) * 0.8;
+        const sway = G.sway(t * 1.5, i + r * 5, 0.8);
         ctx.strokeStyle = G.shade(120, 45, 32, f); ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(fx, fy + 3); ctx.lineTo(fx + sway, fy - 2); ctx.stroke();
         ctx.fillStyle = G.shade(Math.floor(r * 360), 80, 68, g);

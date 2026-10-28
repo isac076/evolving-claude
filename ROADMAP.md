@@ -36,7 +36,7 @@ as the world does.
 - [x] Butterflies and birds that only appear in restored land (Night 3, plus moths at lanterns by night)
 - [x] Fish visible in restored water; ripples when walking near water (Night 3 — fish leap too)
 - [x] Wildlife that reacts to the player (rabbits, deer that flee and return) (Night 3: rabbits, startled birds — deer still to come)
-- [ ] Weather: rain, wind, fog — with visuals and sound
+- [x] Weather: rain, wind, fog — with visuals and sound (Night 5 — plus overcast skies, drifting cloud shadows, rainbows, and frogs that only come out in the rain)
 - [ ] Seasons that slowly change colours, plants and weather
 - [ ] Regrowth looks alive: saplings grow into trees over time
 
@@ -111,3 +111,10 @@ as the world does.
 - A second workbench tier (a "crystal workbench") for Chapter 4/5 recipes
 - Pick-up mode could also work on touch screens with a long-press
 - Crystals could hum softly when you're near them at night (Ambience reading nearby crystal objects)
+- Puddles that form on paths in heavy rain and slowly dry up afterwards (reflecting lantern light at night)
+- A gentle thunderstorm far away: distant rumbles and a soft flash on the horizon (never scary)
+- Snow in the coming snowy peaks biome / in winter, using the same G.WeatherFX drop system with slow, swaying flakes
+- Seasons could change the weather weights (more rain in spring, fog in autumn) — G.WEATHER weights are plain data
+- A rain barrel or watering can that fills up in the rain, for gardens
+- Sitting on a bench in the rain under a little roof: a "shelter" structure (pergola) that keeps creatures near you in the rain
+- A weather vane decoration that points with G.windDir and spins faster with G.windNow

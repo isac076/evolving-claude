@@ -15,6 +15,7 @@ G.Creatures = class {
     this.fx = null;          // { burst(x, y, color, n), sound(name, x) } — set by main
     this.onMeet = null;      // called with a kind the first time the player meets it
     this.rippleDist = 0; this.lastPX = null; this.lastPY = null;
+    this.rain = 0;           // how rainy it is (kinds with `shelter` hide)
   }
 
   clear() { this.list = []; this.ripples = []; this.frac = {}; }
@@ -30,6 +31,8 @@ G.Creatures = class {
     return world.isWater(tx, ty) && !world.structureAt(tx, ty);
   }
   timeOk(def, day, leaving) {
+    if (def.shelter && this.rain > (leaving ? 0.45 : 0.25)) return false;   // hiding from the rain
+    if (def.rainy && this.rain < (leaving ? 0.15 : 0.3)) return false;      // only out in the rain
     if (def.when === 'day') return day > (leaving ? 0.38 : 0.5);
     if (def.when === 'night') return day < (leaving ? 0.42 : 0.3);
     return true;
@@ -60,6 +63,7 @@ G.Creatures = class {
     if (!world) return;
     this.view = { x0: state.cam.x - W / 2 - 40, y0: state.cam.y - H / 2 - 40, x1: state.cam.x + W / 2 + 40, y1: state.cam.y + H / 2 + 60 };
     const day = G.daylight(state.time), p = state.player;
+    this.rain = state.weather ? state.weather.rain : 0;
     this.timer -= dt;
     if (this.timer <= 0) { this.timer = 0.2; this.trySpawn(world, day, p); }
 

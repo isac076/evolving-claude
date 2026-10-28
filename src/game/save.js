@@ -21,6 +21,7 @@ G.Save = {
         explored: state.explored.serialize(),
         goalsDone: state.goalsDone,
         goalsHidden: !!state.goalsHidden,
+        weather: state.weather ? state.weather.serialize() : null,   // optional (Night 5): older saves start clear
       };
       localStorage.setItem(this.KEY, JSON.stringify(data));
     } catch (e) { /* storage unavailable — game still works, just won't save */ }

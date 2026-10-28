@@ -2,6 +2,14 @@
 
 What changed each night, newest first.
 
+## Night 5 — 2026-10-28 — Rain, wind and rainbows
+The sky now has moods that come and go on their own: clear days with cloud shadows gliding over
+the land, breezy spells that bend the trees and blow leaves and petals past, grey overcast skies,
+soft drizzle and pouring rain (with splashes, ripples on lakes and a pattering soundscape), and
+quiet rolling fog where lantern light glows wider. Rain helps plants grow back faster, butterflies
+and rabbits shelter while it falls — but little frogs hop out to play — and when the rain clears on
+a sunny day, a rainbow arcs across the sky. A new "Sky & weather" chapter of goals celebrates it all.
+
 ## Night 4 — 2026-10-27 — The workshop
 Reeds now grow by shores and in meadows, and blue crystals glow in the grey highlands. Build a
 Workbench, and while you stand near it you can craft an Axe (more wood) and a Pick (more stone,

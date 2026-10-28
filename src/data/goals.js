@@ -49,4 +49,15 @@ G.GOALS = [
   { id: 'decor', chapter: 'The workshop', text: 'Make it homely: fences, flower beds, benches', target: 5,
     progress: s => s.world.count('fence') + s.world.count('flowerbed') + s.world.count('bench'),
     hint: 'Changed your mind? Press X to pick a building back up.' },
+
+  // ---- Sky & weather (Night 5) ----
+  { id: 'rain', chapter: 'Sky & weather', text: 'Stand out in the rain', target: 20,
+    progress: s => Math.floor(s.stats.rainTime || 0),
+    hint: 'Rain comes and goes on its own. Plants grow back faster while it falls.' },
+  { id: 'frog', chapter: 'Sky & weather', text: 'Find a frog in the rain', target: 1,
+    progress: s => (s.stats.met && s.stats.met.frog) ? 1 : 0,
+    hint: 'Frogs come out on coloured land when it rains.', reward: { petal: 2 } },
+  { id: 'rainbow', chapter: 'Sky & weather', text: 'See a rainbow', target: 1,
+    progress: s => s.stats.rainbows || 0,
+    hint: 'When the rain clears on a sunny day, look up at the sky.', reward: { petal: 3, fibre: 2 } },
 ];

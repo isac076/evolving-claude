@@ -14,15 +14,18 @@ src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a wa
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
+src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
+src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
 src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
+src/render/weather_fx.js G.WeatherFX — draws cloud shadows, grey skies, rain + splashes, wind-blown leaves, fog, rainbow
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -45,7 +48,7 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   renderer darkens the screen and cuts holes for light sources (`light` in data).
 - **Drawing order**: ground → fish + ripples → floor structures → objects/standing
   structures, ground creatures and the player row by row (so things lower on screen
-  are in front) → flying creatures → particles → lighting → vignette.
+  are in front) → flying creatures → weather (G.WeatherFX) → particles → lighting → vignette.
 - **Soft colour edges**: the renderer also computes restoration at every tile
   corner; `G.drawGround` fills a tile as 4×4 blended squares when its corners differ.
 - **Sound**: nothing plays until the first click/key (browser rule) — then
@@ -83,6 +86,17 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
 - **Goal chapters**: goals can set `chapter` ('The workshop'); the tracker shows that
   heading and one row of pips per chapter. If new goals appear after a player finished
   everything, the hidden tracker comes back by itself.
+- **Weather** (`state.weather`, G.Weather): one kind from `G.WEATHER` at a time; when its time runs
+  out the next is picked by weight (or by its `after` weights). `weather.v` holds the blended values
+  `rain wind fog cloud shadows` (0..1) that ease toward the current kind, so everything fades in and out.
+  Readers: the renderer (`G.WeatherFX.draw` runs after flying creatures, before lighting; fog widens the
+  night glows), `G.Ambience` (rain hiss/patter, drips, frog croaks, stronger wind; birds hush in rain/fog),
+  G.Creatures (`shelter` kinds hide in rain, `rainy` kinds such as the frog only come out in it),
+  plant sprites (`G.sway(t, seed, amp)` bends them with `G.windNow` / `G.windDir`). Rain also pulls
+  `world.harvested` regrow times closer (plants, not rocks/crystal). A rainbow appears when a rainy kind
+  ends on a bright day (`weather.rainbow` seconds, `rainbowA` visibility). Stats: `stats.rainTime`,
+  `stats.rainbows`, `stats.weatherSeen`. The save stores `weather: {kind, left, rainbow}` — optional,
+  older saves simply start clear (no version bump). Tests can call `state.weather.set(kind, true)`.
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.

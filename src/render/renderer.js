@@ -15,6 +15,7 @@ G.Renderer = class {
     this.light = document.createElement('canvas');
     this.lctx = this.light.getContext('2d');
     this.particles = [];
+    this.weatherFx = new G.WeatherFX();
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -110,6 +111,9 @@ G.Renderer = class {
 
     if (life) life.drawAir(ctx, camX, camY, time);
 
+    // weather: cloud shadows, grey skies, rain, wind-blown leaves, mist, rainbows
+    this.weatherFx.draw(ctx, state, camX, camY, W, H, dt, this.dpr);
+
     // build preview
     if (state.placing) {
       const p = state.placing;
@@ -132,7 +136,8 @@ G.Renderer = class {
 
     // particles
     const dark = 1 - G.daylight(time);
-    this.updateParticles(dt, dark, camX, camY, lights, world);
+    const wv = state.weather ? state.weather.v : { rain: 0, fog: 0 };
+    this.updateParticles(dt, dark * (1 - wv.rain * 0.8), camX, camY, lights, world);
     ctx.globalCompositeOperation = 'lighter';
     for (const p of this.particles) {
       ctx.fillStyle = p.color.replace('A', Math.max(0, p.life * (p.firefly ? 0.4 + dark * 0.6 : 1)).toFixed(2));
@@ -140,7 +145,7 @@ G.Renderer = class {
     }
     ctx.globalCompositeOperation = 'source-over';
 
-    this.drawLighting(dark, camX, camY, lights, nightGlows, player, time);
+    this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
 
     // soft vignette
     const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
@@ -166,7 +171,7 @@ G.Renderer = class {
     this.particles = this.particles.filter(p => p.life > 0);
   }
 
-  drawLighting(dark, camX, camY, lights, nightGlows, player, time) {
+  drawLighting(dark, camX, camY, lights, nightGlows, player, time, fog = 0) {
     const ctx = this.ctx, W = this.W, H = this.H;
     // warm/cool tint through the day (golden at dusk, blue at night)
     const daylight = 1 - dark;
@@ -192,17 +197,18 @@ G.Renderer = class {
     for (const g of nightGlows) hole(g.x, g.y, g.r, 0.8);
     ctx.drawImage(this.light, 0, 0, W, H);
 
-    // warm glow on top
+    // warm glow on top (lights bloom wider in the mist)
     ctx.globalCompositeOperation = 'lighter';
+    const fb = 1 + fog * 0.9;
     const glow = (x, y, r, c) => {
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     };
-    glow(player.x - camX, player.y - camY - 8, 50, `rgba(255,210,140,${0.25 * dark})`);
+    glow(player.x - camX, player.y - camY - 8, 50 * fb, `rgba(255,210,140,${0.25 * dark})`);
     for (const L of lights) if (L.light) {
-      if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4, `rgba(140,215,255,${0.32 * dark})`);
-      else glow(L.x - camX, L.y - camY - 18, L.light * 0.35, `rgba(255,190,110,${0.3 * dark})`);
+      if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);
+      else glow(L.x - camX, L.y - camY - 18, L.light * 0.35 * fb, `rgba(255,190,110,${0.3 * dark})`);
     }
     for (const g of nightGlows) glow(g.x, g.y, 18, `hsla(${g.hue},90%,65%,${0.5 * dark})`);
     ctx.globalCompositeOperation = 'source-over';

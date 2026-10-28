@@ -74,6 +74,29 @@ window.G = window.G || {};
       ctx.beginPath(); ctx.moveTo(sx - 1, y + 3); ctx.lineTo(sx - 1, sy); ctx.moveTo(sx + 1.2, y + 3); ctx.lineTo(sx + 1.2, sy); ctx.stroke();
     },
 
+    frog(ctx, c, sx, sy, t) {   // a little round frog that only comes out in the rain
+      const f = c.face, h = c.hue, hop = c.state === 'hop';
+      groundShadow(ctx, sx, sy, 7, c.z, 0.24);
+      ctx.save(); ctx.translate(sx, sy); ctx.scale(1.3, 1.3); ctx.translate(-sx, -sy);
+      const y = sy - c.z - 3;
+      const skin = `hsl(${h},55%,40%)`, light = `hsl(${h + 8},60%,58%)`, belly = `hsl(${h + 20},40%,72%)`;
+      // back legs: tucked when sitting, stretched out in a hop
+      ctx.fillStyle = skin;
+      if (hop) { ctx.beginPath(); ctx.ellipse(sx - f * 6, y + 2, 4.5, 1.4, f * 0.5, 0, 6.2832); ctx.fill(); }
+      else { ctx.beginPath(); ctx.ellipse(sx - f * 3.5, y + 2, 3.4, 2.4, 0, 0, 6.2832); ctx.fill(); }
+      // body
+      ctx.beginPath(); ctx.ellipse(sx, y, 5.6, hop ? 3.4 : 4, 0, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = light; ctx.beginPath(); ctx.ellipse(sx - f * 0.6, y - 1.6, 3.4, 1.8, 0, 0, 6.2832); ctx.fill();
+      // throat puffs out as it croaks
+      const puff = !hop ? Math.max(0, Math.sin(t * 2.2 + c.seed * 9) * 3 - 2) : 0;
+      ctx.fillStyle = belly; circle(ctx, sx + f * 3.4, y + 1.5, 1.6 + puff * puff * 1.8);
+      // eyes on top of the head
+      for (const ex of [1.4, 4.2]) {
+        ctx.fillStyle = light; circle(ctx, sx + f * ex, y - 3.6, 1.7);
+        ctx.fillStyle = '#16141c'; circle(ctx, sx + f * (ex + 0.4), y - 3.8, 0.8);
+      }
+      ctx.restore();
+    },
     rabbit(ctx, c, sx, sy) {
       const f = c.face, h = c.hue;
       groundShadow(ctx, sx, sy, 8, c.z, 0.24);
