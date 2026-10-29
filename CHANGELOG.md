@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 6 — 2026-10-29 — Friends come home
+Pale, grey spirits now wander the faded land, sad and lost (look for soft dots on your map, or a shimmer in the dark).
+Walk up to one and it takes hold of your light — lead it into the colour around a lantern, beacon or the Heart Stone
+and it makes a home there. Friends stroll about, visit things they love (flower beds, benches, workbenches, paths, lanterns),
+sleep beside their light at night, and chat when you click them — with a little gift each day and hints about where other
+lost spirits are waiting. A new "Returning friends" chapter of goals guides the way.
+
 ## Night 5 — 2026-10-28 — Rain, wind and rainbows
 The sky now has moods that come and go on their own: clear days with cloud shadows gliding over
 the land, breezy spells that bend the trees and blow leaves and petals past, grey overcast skies,

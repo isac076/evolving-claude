@@ -13,6 +13,7 @@ Open `index.html` in a browser (or play it on GitHub Pages if it's turned on).
 - **Move:** WASD / arrow keys, or click/tap where to go
 - **Gather:** E or Space near a tree, rock or bloom (or click it)
 - **Craft:** C, then pick something and click where to build
+- **Friends:** walk up to a lost grey spirit and lead it to a lantern; click a friend (or press E beside them) to talk
 - Progress saves automatically.
 
 ## How it grows

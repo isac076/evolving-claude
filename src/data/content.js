@@ -49,10 +49,11 @@ G.OBJECTS = {
 // sound = played when built.  step = footstep sound when walking on it.
 // map = [h, s, l] colour on the map (lights with restore show as glowing dots).
 // fixed = can never be picked up.  workbench = recipes marked `at: 'workbench'` work near it.
+// homes = how many rescued spirits can make their home by this light (see data/villagers.js).
 G.STRUCTURES = {
-  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern', fixed: true },
-  lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230, sound: 'lantern' },
-  beacon:  { name: 'Crystal Beacon', solid: true, on: 'land', restore: 11, light: 360, sound: 'beacon' },
+  heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern', fixed: true, homes: 3 },
+  lantern: { name: 'Lantern',     solid: true,  on: 'land', restore: 6, light: 230, sound: 'lantern', homes: 2 },
+  beacon:  { name: 'Crystal Beacon', solid: true, on: 'land', restore: 11, light: 360, sound: 'beacon', homes: 4 },
   path:    { name: 'Stone path',  solid: false, on: 'land', floor: true, sound: 'placeStone', step: 'stone', map: [38, 18, 70] },
   bridge:  { name: 'Bridge',      solid: false, on: 'water', floor: true, bridge: true, sound: 'placeWood', step: 'wood', map: [30, 45, 44] },
   workbench:{ name: 'Workbench',  solid: true,  on: 'land', sound: 'craft', workbench: true, map: [30, 50, 50] },

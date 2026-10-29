@@ -56,6 +56,27 @@ window.G = window.G || {};
     ui.toast(def.meet, 5);
   };
 
+  // lost spirits and the friends who live by your lanterns (saved)
+  const folk = new G.Villagers();
+  state.villagers = folk;
+  folk.fx = {
+    burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    sound: (name, x, o) => { if (state.running) G.Sound.play(name, { ...(o || {}), pan: panAt(x) }); },
+    floater: (x, y, text, color) => addFloater(x, y, text, color),
+    toast: (msg, secs) => { if (state.running) ui.toast(msg, secs); },
+    refresh: () => ui.refresh(),
+  };
+  folk.onFound = v => {
+    const first = (state.stats.spiritsFound || 0) <= 1;
+    ui.toast(first ? 'A lost spirit! It holds on to your light. Lead it into the colour around a lantern and it will make a home there.'
+      : `${v.name} takes hold of your light. Lead them to a lantern with room for one more.`, first ? 8 : 5);
+  };
+  folk.onSettle = (v, L) => {
+    map.touch(Math.floor(L.x / G.TILE), Math.floor(L.y / G.TILE));
+    ui.toast(`${v.name} has made a home by your ${G.STRUCTURES[L.type].name}. Click them to say hello!`, 6);
+    ui.refresh();
+  };
+
   // the sky: weather drifts on its own; tell the player when it changes
   function makeWeather() {
     const wx = new G.Weather();
@@ -88,6 +109,7 @@ window.G = window.G || {};
     state.goalsDone = []; state.goalsHidden = false;
     state.stats.met = {};
     state.weather = makeWeather();   // a new world begins under a clear sky
+    folk.reset();
     afterLoad();
     setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
@@ -108,6 +130,7 @@ window.G = window.G || {};
     state.goalsDone = d.goalsDone; state.goalsHidden = !!d.goalsHidden;
     state.weather = makeWeather();
     state.weather.load(d.weather);   // older saves have no weather: it starts clear
+    folk.load(d.villagers, state.world, state.player);   // older saves have nobody yet
     afterLoad();
     ui.toast('Welcome back.');
   }
@@ -153,8 +176,15 @@ window.G = window.G || {};
     return true;
   }
 
+  function talkTo(v) {
+    folk.talk(v, state);
+    ui.refresh();
+  }
+
   function gatherNearest() {
     const p = state.player; let best = null, bd = Infinity, locked = null;
+    const friend = folk.nearest(p.x, p.y, 46);
+    if (friend) { talkTo(friend); return; }
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
       if (!o) continue;
@@ -249,7 +279,12 @@ window.G = window.G || {};
       const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
       const p = state.player;
       const close = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= REACH;
-      if (input.mouse.clicked && close && state.world.objectAt(tx, ty)) gatherAt(tx, ty);
+      const friend = input.mouse.clicked && folk.at(wx, wy);
+      if (friend) {
+        if (Math.hypot(friend.x - p.x, friend.y - p.y) < 3 * G.TILE) talkTo(friend);
+        else p.moveTarget = { x: friend.x, y: friend.y + 14 };
+      }
+      else if (input.mouse.clicked && close && state.world.objectAt(tx, ty)) gatherAt(tx, ty);
       else p.moveTarget = { x: wx, y: wy };
     }
 
@@ -267,7 +302,7 @@ window.G = window.G || {};
 
     state.saveTimer += dt;
     if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
-    ui.updateClock(state.time, state.world.litCount(), state.weather);
+    ui.updateClock(state.time, state.world.litCount(), state.weather, folk.list.length);
     ui.update(dt);
     map.update(dt, state.time);
     goals.update(dt);
@@ -302,6 +337,13 @@ window.G = window.G || {};
       rain: wv.rain, wind: G.windNow || 0, fog: wv.fog });
   }
 
+  // followers' threads of light and everyone's speech bubbles, above the night
+  function drawFolk() {
+    const ctx = renderer.ctx, camX = Math.round(state.cam.x - renderer.W / 2), camY = Math.round(state.cam.y - renderer.H / 2);
+    G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
+    for (const v of folk.all()) if (v.say) G.drawSpeech(ctx, v, v.x - camX, v.y - camY, renderer.W, renderer.H);
+  }
+
   function drawFloaters() {
     const ctx = renderer.ctx;
     ctx.font = '600 13px Georgia, serif'; ctx.textAlign = 'center';
@@ -321,6 +363,7 @@ window.G = window.G || {};
     if (state.running) {
       update(dt);
       renderer.render(state, dt);
+      drawFolk();
       drawFloaters();
     } else {
       renderer.render(state, dt);   // title screen: world drifts behind the menu
@@ -328,6 +371,7 @@ window.G = window.G || {};
       if (state.world) state.world.time = state.time;
     }
     life.update(dt, state, renderer.W, renderer.H);
+    folk.update(dt, state, renderer.W, renderer.H);
     updateAmbience(dt);
     input.endFrame();
     requestAnimationFrame(frame);
@@ -347,7 +391,7 @@ window.G = window.G || {};
 
   // a peaceful world drifts behind the title screen
   state.world = new G.World(saved ? saved.seed : 12345);
-  if (saved) { for (const [t, x, y] of saved.structures || []) if (G.STRUCTURES[t]) state.world.structures.set(G.key(x, y), { type: t, tx: x, ty: y }); state.world.rebuildLights(); state.weather.load(saved.weather); }
+  if (saved) { for (const [t, x, y] of saved.structures || []) if (G.STRUCTURES[t]) state.world.structures.set(G.key(x, y), { type: t, tx: x, ty: y }); state.world.rebuildLights(); state.weather.load(saved.weather); folk.load(saved.villagers, state.world, null); }
   else { const sp = state.world.findSpawn(); state.world.build('heart', sp.tx, sp.ty); }
   state.player = new G.Player(-9999, -9999);
   const l0 = state.world.lights[0] || { x: 0, y: 0 };

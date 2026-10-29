@@ -17,7 +17,7 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="panel" id="status"><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button></div>
+  <div class="panel" id="status"><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button></div>
   <div class="panel" id="goals"></div>
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
@@ -68,10 +68,12 @@
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
 <script src="src/data/weather.js"></script>
+<script src="src/data/villagers.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/explore.js"></script>
 <script src="src/world/creatures.js"></script>
 <script src="src/world/weather.js"></script>
+<script src="src/world/villagers.js"></script>
 <script src="src/game/player.js"></script>
 <script src="src/game/save.js"></script>
 <script src="src/game/crafting.js"></script>
@@ -79,6 +81,7 @@
 <script src="src/render/workshop_sprites.js"></script>
 <script src="src/render/creature_sprites.js"></script>
 <script src="src/render/weather_fx.js"></script>
+<script src="src/render/villager_sprites.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>

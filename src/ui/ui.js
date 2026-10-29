@@ -108,7 +108,7 @@ G.UI = class {
     }
   }
 
-  updateClock(time, lanterns, weather) {
+  updateClock(time, lanterns, weather, friends = 0) {
     const day = Math.floor(time / G.DAY_LENGTH) + 1;
     const phase = (time % G.DAY_LENGTH) / G.DAY_LENGTH;
     const names = ['Noon', 'Afternoon', 'Dusk', 'Night', 'Night', 'Night', 'Dawn', 'Morning'];
@@ -121,6 +121,7 @@ G.UI = class {
       el.textContent = wname; el.dataset.kind = weather ? weather.kind : '';
     }
     this.$('restored').textContent = `Lanterns lit: ${lanterns}`;
+    this.$('friends').textContent = friends ? `Friends: ${friends}` : '';
   }
 
   toast(msg, secs = 3.5) {
@@ -143,6 +144,6 @@ G.UI = class {
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
       : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
-      : 'WASD / arrows or click to move · E gather · C craft · X pick up · M map · N sound';
+      : 'WASD / arrows or click to move · E gather / talk · C craft · X pick up · M map · N sound';
   }
 };

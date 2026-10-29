@@ -89,6 +89,7 @@ G.Renderer = class {
     // objects, standing structures and the player, row by row (back to front)
     const nightGlows = [];
     const groundLife = life ? life.groundRows() : null;
+    const folk = state.villagers ? state.villagers.rows() : null;
     for (let ty = ty0; ty <= ty1; ty++) {
       const critters = groundLife && groundLife.get(ty);
       if (critters) for (const c of critters) life.drawOne(ctx, c, camX, camY, time);
@@ -106,8 +107,11 @@ G.Renderer = class {
           }
         }
       }
+      const people = folk && folk.get(ty);
+      if (people) for (const v of people) G.drawVillager(ctx, v, v.x - camX, v.y - camY, time);
       if (player.ty === ty) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
+    if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
 
     if (life) life.drawAir(ctx, camX, camY, time);
 

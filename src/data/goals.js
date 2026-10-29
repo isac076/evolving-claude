@@ -60,4 +60,22 @@ G.GOALS = [
   { id: 'rainbow', chapter: 'Sky & weather', text: 'See a rainbow', target: 1,
     progress: s => s.stats.rainbows || 0,
     hint: 'When the rain clears on a sunny day, look up at the sky.', reward: { petal: 3, fibre: 2 } },
+
+  // ---- Returning friends (Night 6) ----
+  { id: 'spirit', chapter: 'Returning friends', text: 'Find a lost spirit in the grey', target: 1,
+    progress: s => s.stats.spiritsFound || 0,
+    hint: 'Lost spirits wander faded land. Pale dots on your map show the ones you have seen.' },
+  { id: 'home', chapter: 'Returning friends', text: 'Lead a lost spirit home', target: 1,
+    progress: s => s.villagers ? s.villagers.list.length : 0,
+    hint: 'Walk them into the colour around a lantern. Each lantern has room for 2.', reward: { petal: 3 } },
+  { id: 'talk', chapter: 'Returning friends', text: 'Talk with your friends', target: 3,
+    progress: s => s.stats.talks || 0, hint: 'Click a friend, or stand beside them and press E. They often have a gift.' },
+  { id: 'loved', chapter: 'Returning friends', text: 'Build something a friend loves', target: 1,
+    progress: s => s.stats.visits || 0,
+    hint: 'Ask what they love — a flower bed, a bench, a workbench, a path… — and build it near their home.',
+    reward: { wood: 4, fibre: 2 } },
+  { id: 'village', chapter: 'Returning friends', text: 'Welcome 5 friends home', target: 5,
+    progress: s => s.villagers ? s.villagers.list.length : 0,
+    hint: 'Friends sometimes hear where other lost spirits are. Beacons have room for 4.',
+    reward: { crystal: 2, petal: 3 } },
 ];

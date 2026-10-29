@@ -134,6 +134,30 @@ G.Minimap = class {
       if (big9) { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3, y); ctx.fill(); }
       else G.circle(ctx, x, y, 1.6);
     }
+    // lost spirits you have seen (pale, pulsing) and friends at home (their own colour)
+    const folk = this.state.villagers;
+    if (folk) {
+      const ex = this.state.explored, pulse2 = 0.5 + 0.5 * Math.sin(t * 2.2), lost = [];
+      const f = folk.firstSpot(world); if (f) lost.push(f);
+      const C = G.CHUNK, hw = (big ? this.bcanvas.clientWidth / 2 : 90) / s, hh = (big ? this.bcanvas.clientHeight / 2 : 90) / s;
+      for (let cy = Math.floor((oy - hh) / C); cy <= Math.floor((oy + hh) / C); cy++)
+        for (let cx = Math.floor((ox - hw) / C); cx <= Math.floor((ox + hw) / C); cx++) {
+          if (!ex.chunks.has(cx + ',' + cy)) continue;
+          const sp = folk.spotOf(world, cx, cy); if (sp) lost.push(sp);
+        }
+      for (const sp of lost) {
+        if (folk.taken(sp.id) || !ex.has(sp.tx, sp.ty)) continue;
+        const x = toX((sp.tx + 0.5) * T), y = toY((sp.ty + 0.5) * T);
+        if (!big && Math.hypot(x - sx, y - sy) > 86) continue;
+        ctx.fillStyle = `rgba(215,220,255,${0.18 + 0.2 * pulse2})`; G.circle(ctx, x, y, 3.5 + pulse2 * 2.5);
+        ctx.fillStyle = 'rgba(235,238,255,.95)'; G.circle(ctx, x, y, 1.6);
+      }
+      for (const v of folk.list) {
+        const x = toX(v.x), y = toY(v.y);
+        if (!big && Math.hypot(x - sx, y - sy) > 86) continue;
+        ctx.fillStyle = `hsl(${v.hue},70%,72%)`; G.circle(ctx, x, y, big ? 1.8 : 1.3);
+      }
+    }
     // the player: a soft pulsing light
     const px = toX(player.x), py = toY(player.y), pulse = 0.5 + 0.5 * Math.sin(t * 3);
     ctx.strokeStyle = `rgba(255,250,235,${0.25 + 0.35 * (1 - pulse)})`;
@@ -186,8 +210,9 @@ G.Minimap = class {
     g.addColorStop(0, 'rgba(11,14,38,0)'); g.addColorStop(1, 'rgba(11,14,38,.7)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     const ex = this.state.explored.count, lit = this.state.world.litCount();
+    const fr = this.state.villagers ? this.state.villagers.list.length : 0;
     document.getElementById('bigmap-info').textContent =
-      `${ex.toLocaleString()} tiles explored · ${lit} lantern${lit === 1 ? '' : 's'} lit`;
+      `${ex.toLocaleString()} tiles explored · ${lit} lantern${lit === 1 ? '' : 's'} lit` + (fr ? ` · ${fr} friend${fr === 1 ? '' : 's'} home` : '');
   }
 
   // ---------- big map controls ----------

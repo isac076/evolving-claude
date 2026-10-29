@@ -52,10 +52,10 @@ as the world does.
 - [ ] Storage chest
 
 ## Chapter 4 — The return of the villagers
-- [ ] Lost spirits found wandering the faded world; lead them home
-- [ ] Villagers settle near lanterns and walk around, with simple daily routines
+- [x] Lost spirits found wandering the faded world; lead them home (Night 6 — pale dots on the map, friends hint where others are)
+- [x] Villagers settle near lanterns and walk around, with simple daily routines (Night 6 — they visit things they love, sleep by their light, give a daily gift)
 - [ ] Houses villagers build or you build for them
-- [ ] Dialogue and small requests (bring me 5 petals...) with rewards
+- [ ] Dialogue and small requests (bring me 5 petals...) with rewards (Night 6 added talking + daily gifts; requests still to come)
 - [ ] Villagers unlock new recipes, music, and abilities
 - [ ] A village that visibly grows over time (market, well, festival)
 
@@ -118,3 +118,10 @@ as the world does.
 - A rain barrel or watering can that fills up in the rain, for gardens
 - Sitting on a bench in the rain under a little roof: a "shelter" structure (pergola) that keeps creatures near you in the rain
 - A weather vane decoration that points with G.windDir and spins faster with G.windNow
+- Villager requests: a friend's `wish` could become a real request ("build me a bench") tracked in the goal tracker, with a heart-shaped reward
+- Little houses: when a light has all its friends, a tiny cottage could appear beside it (Chapter 4 "houses")
+- Friends could wave at each other and chat (two bubbles) when they pass; singers could hum together at night
+- A friends page in the journal: name, kind, home, favourite thing, days since they came home
+- Lost spirits could appear in the big map legend; a far-off lost spirit's sigh could be heard in the ambience when it's near
+- Friends in the rain could open tiny leaf umbrellas
+- Villager kinds tied to new biomes (a snowy-peaks kind, a desert kind) once Chapter 5 arrives

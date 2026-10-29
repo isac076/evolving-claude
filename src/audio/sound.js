@@ -260,6 +260,35 @@ G.SFX = {
     [0, 1, 2, 3, 4, 5, 6].forEach((n, k) => S.bell(G.note(n + 2, 4), { gain: 0.05, dur: 2.6, t: k * 0.16, pan: -0.7 + k * 0.23, rev: 0.8 }));
     S.tone(G.note(0, 3), { type: 'sine', attack: 1, dur: 4, gain: 0.05, rev: 0.9 });
   },
+  // ---- lost spirits and villagers (Night 6) ----
+  sigh(S, o) {      // a lost spirit, far away and sad: a soft falling breath
+    S.noise({ filter: 'bandpass', freq: 900, freqTo: 400, q: 1.5, attack: 0.25, dur: 1.1, gain: 0.03, pan: o.pan, rev: 0.7 });
+    S.tone(G.note(4, 4), { glide: G.note(2, 4), glideTime: 0.8, attack: 0.2, dur: 0.9, gain: 0.025, pan: o.pan, rev: 0.8 });
+  },
+  spiritFound(S, o) {  // a pale little light takes hold of yours
+    [0, 2, 4].forEach((n, k) => S.bell(G.note(n + 5, 4), { gain: 0.06, dur: 1.6, t: k * 0.14, pan: o.pan, rev: 0.7 }));
+    S.noise({ filter: 'bandpass', freq: 500, freqTo: 2600, q: 0.8, attack: 0.3, dur: 0.9, gain: 0.035, pan: o.pan, rev: 0.6 });
+  },
+  homecoming(S, o) {   // a friend comes home: a warm, happy rising tune
+    [0, 2, 4, 7, 9, 12, 14].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.075, dur: 2, t: k * 0.09, pan: o.pan, rev: 0.6 }));
+    for (const n of [0, 2, 4]) S.tone(G.note(n, 3), { type: 'triangle', attack: 0.4, dur: 2.6, gain: 0.045, rev: 0.7 });
+    S.bell(G.note(16, 4), { gain: 0.05, dur: 2.4, t: 0.75, rev: 0.8 });
+  },
+  chirp(S, o) {     // a villager's voice: a few quick, happy babbling syllables
+    const base = 300 + ((o.pitch || 0) % 360) / 360 * 260, n = o.n || 3;
+    for (let i = 0; i < n; i++) {
+      const f = base * (1 + Math.random() * 0.35);
+      S.tone(f, { type: 'triangle', glide: f * G.rand(0.8, 1.25), dur: 0.09, attack: 0.012, gain: 0.07, t: i * 0.11, pan: o.pan, rev: 0.2 });
+    }
+  },
+  gift(S, o) {      // a small present: a twinkle and a pop
+    S.tone(G.note(5, 4), { type: 'triangle', glide: G.note(9, 4), dur: 0.12, gain: 0.08, pan: o.pan, rev: 0.2 });
+    [7, 9, 12].forEach((n, k) => S.bell(G.note(n, 5), { gain: 0.045, dur: 1, t: 0.1 + k * 0.07, pan: o.pan, rev: 0.5 }));
+  },
+  hum(S, o) {       // a singer by the lantern hums a little phrase
+    const i = Math.floor(((o.pitch || 0) % 360) / 72);
+    [0, 2, 1, 4].forEach((n, k) => S.tone(G.note(i + n, 4), { type: 'sine', attack: 0.06, dur: 0.4, gain: 0.03, t: k * 0.3, pan: o.pan, rev: 0.6 }));
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

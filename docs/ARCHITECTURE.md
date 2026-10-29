@@ -15,10 +15,12 @@ src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
 src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow
+src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
+src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -26,6 +28,7 @@ src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
 src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
 src/render/weather_fx.js G.WeatherFX — draws cloud shadows, grey skies, rain + splashes, wind-blown leaves, fog, rainbow
+src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bubbles), G.drawFollowThreads
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -97,6 +100,18 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   ends on a bright day (`weather.rainbow` seconds, `rainbowA` visibility). Stats: `stats.rainTime`,
   `stats.rainbows`, `stats.weatherSeen`. The save stores `weather: {kind, left, rainbow}` — optional,
   older saves simply start clear (no version bump). Tests can call `state.weather.set(kind, true)`.
+- **Villagers** (`state.villagers`, G.Villagers): lost spirits live at seeded spots — `spotOf(world, cx, cy)` gives
+  0 or 1 per 16×16 chunk (`G.SPIRITS.chance`), plus `firstSpot()` a short walk from the Heart Stone; who they are
+  (name, kind, hue) comes from their spot id, so it never changes. Lost ones near the camera are kept in `lost`; touching
+  one moves it to `followers` (they float after you in a chain, joined by a thread of light). A follower standing in
+  land restored above `G.SPIRITS.settle` settles by the nearest light with room (`homes` on the structure: heart 3,
+  lantern 2, beacon 4) and joins `list`. A friend's day (`stepHome`): idle → walk (around home) or go → busy at a
+  structure it `likes`; at night tobed → sleep beside its light; it stops and greets you when you're near. If its
+  light is picked up it moves to another. `talk()` gives a once-a-day gift, a hint toward the nearest lost spot,
+  a `wish`, or a line chosen by weather/time. Drawn row by row with the player (`rows()`), glows added to the
+  night lighting (`glows()`), bubbles + threads drawn by main after lighting. Clicks/E near a friend talk.
+  Stats: `spiritsFound`, `talks`, `visits`, `gifts`. Saved as `villagers: {rescued, list, follow}` — optional,
+  older saves load with nobody (no version bump).
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.
