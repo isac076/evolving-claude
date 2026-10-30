@@ -13,6 +13,8 @@ G.Input = class {
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
     });
     window.addEventListener('keyup', e => { this.keys[e.key.toLowerCase()] = false; });
+    // switching windows mid-step would otherwise leave a key "held" and the spirit walking on its own
+    window.addEventListener('blur', () => { this.keys = {}; this.mouse.down = false; });
     const pos = e => {
       const p = e.touches ? e.touches[0] : e;
       if (p) { this.mouse.x = p.clientX; this.mouse.y = p.clientY; }

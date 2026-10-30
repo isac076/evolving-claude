@@ -3,11 +3,21 @@
 window.G = window.G || {};
 
 // Colour that fades toward grey when the land is not yet restored.
+// Solid colours are remembered (the ground asks for the same few thousand
+// every frame), which saves building a new string for each tile.
+const shadeCache = new Map();
 G.shade = function (h, s, l, f, a) {
   const S = s * (0.12 + 0.88 * f), L = l * (0.62 + 0.38 * f);
-  return a === undefined
-    ? `hsl(${h},${S.toFixed(1)}%,${L.toFixed(1)}%)`
-    : `hsla(${h},${S.toFixed(1)}%,${L.toFixed(1)}%,${a})`;
+  if (a !== undefined) return `hsla(${h},${S.toFixed(1)}%,${L.toFixed(1)}%,${a})`;
+  const si = Math.round(S * 10), li = Math.round(L * 10);
+  const k = (Math.round(h * 10) * 1024 + si) * 1024 + li;
+  let c = shadeCache.get(k);
+  if (c === undefined) {
+    if (shadeCache.size > 30000) shadeCache.clear();
+    c = `hsl(${h},${(si / 10).toFixed(1)}%,${(li / 10).toFixed(1)}%)`;
+    shadeCache.set(k, c);
+  }
+  return c;
 };
 
 function circle(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); }
@@ -29,10 +39,41 @@ G.sway = function (t, seed, amp) {
 // fc = optional restoration at the four corners [top-left, top-right,
 // bottom-left, bottom-right]: where they differ (the edge of a lantern's
 // colour) the tile is filled in small blended squares so colour fades softly.
-G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc) {
-  const T = G.TILE, d = G.TILES[tile.type];
+// the lightness of a ground tile (its own variation, and water shimmering)
+function groundL(tile, d, t, tx, ty) {
   let l = d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
   if (d.water) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
+  return l;
+}
+
+// Rounded corners where two grounds meet. nb = neighbour tiles [up, right,
+// down, left]. A corner whose two neighbours are both lower ground is rounded
+// off (painted with the lower ground); a corner tucked between two higher
+// grounds gets a little fillet of the higher one. Together: curving shores.
+const CORNERS = [[0, 3, 0, 0, 1, 1], [0, 1, 1, 0, -1, 1], [2, 3, 0, 1, 1, -1], [2, 1, 1, 1, -1, -1]];  // [n1, n2, ox, oy, sx, sy]
+const NB_OFF = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+function roundCorners(ctx, d, x, y, f, t, tx, ty, fc, nb) {
+  const T = G.TILE, R = 11, r = d.rank;
+  for (let c = 0; c < 4; c++) {
+    const [i1, i2, ox, oy, sx, sy] = CORNERS[c];
+    const a = nb[i1], b = nb[i2], da = G.TILES[a.type], db = G.TILES[b.type];
+    let pick = -1;
+    if (da.rank < r && db.rank < r) pick = da.rank >= db.rank ? i1 : i2;         // sticking out: round it off
+    else if (da.rank > r && db.rank > r) pick = da.rank <= db.rank ? i1 : i2;    // tucked in: fill the nook
+    if (pick < 0) continue;
+    const n = nb[pick], dn = G.TILES[n.type], ntx = tx + NB_OFF[pick][0], nty = ty + NB_OFF[pick][1];
+    const cx = x + ox * T, cy = y + oy * T;
+    ctx.fillStyle = G.shade(dn.h, dn.s, groundL(n, dn, t, ntx, nty), fc ? fc[c] : f);
+    ctx.beginPath();
+    ctx.moveTo(cx + sx * R, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + sy * R);
+    ctx.arcTo(cx, cy, cx + sx * R, cy, R);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
+  const T = G.TILE, d = G.TILES[tile.type];
+  const l = groundL(tile, d, t, tx, ty);
   if (fc && Math.max(fc[0], fc[1], fc[2], fc[3]) - Math.min(fc[0], fc[1], fc[2], fc[3]) > 0.03) {
     const N = 4, S = T / N;
     for (let j = 0; j < N; j++) {
@@ -46,6 +87,7 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc) {
     ctx.fillStyle = G.shade(d.h, d.s, l, f);
     ctx.fillRect(x, y, T, T);
   }
+  if (nb) roundCorners(ctx, d, x, y, f, t, tx, ty, fc, nb);
 
   if (tile.type === 'grass' || tile.type === 'forest') {
     if (tile.v > 0.72) {

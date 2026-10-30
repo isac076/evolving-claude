@@ -115,6 +115,7 @@ body.removing #game { cursor: pointer; }
   border: 1px solid rgba(255, 215, 122, .45); font-size: 16px; letter-spacing: .04em;
 }
 .title-buttons button:hover { background: rgba(255, 215, 122, .25); }
+.title-buttons button.sure { border-color: var(--bad); color: var(--bad); background: rgba(255, 154, 138, .12); }
 
 @media (hover: hover) and (pointer: fine) { #touch-buttons { display: none; } }
 
@@ -179,3 +180,57 @@ body.map-open #minimap, body.craft-open #minimap { opacity: 0; pointer-events: n
 @media (max-width: 960px) and (min-width: 601px) { #toast { top: 190px; } }
 @media (min-width: 761px) { body.craft-open #bottom { right: 350px; } }
 #bottom { transition: right .35s ease; }
+
+/* ---------- resting / settings menu (Esc) ---------- */
+#btn-settings { pointer-events: auto; background: none; border: 0; padding: 0 2px; margin: -4px -4px -4px -8px; display: flex; opacity: .8; }
+#btn-settings:hover { opacity: 1; }
+#btn-settings path { fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linejoin: round; }
+#settings {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(8, 10, 30, .18), rgba(5, 6, 20, .6));
+  opacity: 0; pointer-events: none; transition: opacity .35s;
+}
+#settings.open { opacity: 1; pointer-events: auto; }
+.settings-frame {
+  width: min(440px, 100%); max-height: 100%; overflow: auto; box-sizing: border-box; padding: 16px 20px 18px;
+  transform: translateY(10px) scale(.98); transition: transform .35s ease;
+}
+#settings.open .settings-frame { transform: none; }
+.settings-head { display: flex; justify-content: space-between; align-items: center; }
+.settings-head h2 { margin: 0; font-weight: 400; font-size: 24px; letter-spacing: .08em; color: #fff3d6; text-shadow: 0 0 18px rgba(255, 210, 120, .5); }
+#settings-close { background: none; border: 0; font-size: 22px; line-height: 1; }
+#settings-summary { margin: 4px 0 2px; color: var(--gold); font-size: 14px; }
+.settings-note { margin: 4px 0; color: var(--ink-dim); font-size: 13px; line-height: 1.4; }
+#settings h3 { margin: 16px 0 6px; font-weight: 400; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
+.set-row { display: flex; align-items: center; gap: 12px; padding: 6px 2px; font-size: 15px; }
+.set-row span { flex: 1; }
+.set-row em { font-style: normal; width: 38px; text-align: right; color: var(--ink-dim); font-size: 13px; }
+#settings.muted #set-volume-n { color: var(--bad); }
+.set-row input[type=range] { flex: 1.4; accent-color: var(--gold); cursor: pointer; }
+.switch { position: relative; width: 42px; height: 24px; border-radius: 12px; padding: 0; background: rgba(255, 255, 255, .1); border: 1px solid var(--edge); transition: background .25s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dim); transition: transform .25s, background .25s, box-shadow .25s; }
+.switch.on { background: rgba(255, 215, 122, .28); }
+.switch.on::after { transform: translateX(18px); background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; font-size: 14px; }
+.keys kbd { font: inherit; font-size: 12px; text-align: center; min-width: 36px; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--edge); background: rgba(255, 255, 255, .06); color: var(--gold); }
+.keys span { color: var(--ink); }
+.settings-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.settings-buttons button { flex: 1 1 110px; padding: 9px 12px; border-radius: 999px; background: rgba(255, 255, 255, .05); border: 1px solid var(--edge); font-size: 14px; }
+.settings-buttons button:hover { background: rgba(255, 215, 122, .16); }
+.settings-buttons button.main { background: rgba(255, 215, 122, .16); border-color: rgba(255, 215, 122, .5); }
+.settings-buttons button.sure { border-color: var(--bad); color: var(--bad); background: rgba(255, 154, 138, .12); }
+body.paused #hud { filter: saturate(.6) brightness(.85); transition: filter .35s; }
+
+/* comfort: larger text, hidden key hints */
+body.big-text #hud, body.big-text #craft, body.big-text #bigmap, body.big-text #settings, body.big-text #title { zoom: 1.18; }
+body.no-hints #hint { display: none; }
+.keys.touch { display: none; }
+@media (hover: none), (pointer: coarse) { #hint { display: none; } .keys { display: none; } .keys.touch { display: grid; } #row-hints { display: none; } }
+
+/* small screens: keep the status bar clear of the round minimap */
+@media (max-width: 600px) {
+  #status { max-width: calc(100vw - 160px); flex-wrap: wrap; gap: 2px 12px; font-size: 13px; padding: 7px 12px; }
+  #weather, #friends { margin-left: 0; }
+  #goals { bottom: 160px; }
+  #toast { top: 136px; }
+}

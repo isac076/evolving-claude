@@ -17,7 +17,7 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="panel" id="status"><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button></div>
+  <div class="panel" id="status"><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button><button id="btn-settings" aria-label="Rest and settings (Esc)" title="Rest and settings (Esc)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 1 0 7.6 13.2A7 7 0 0 1 12 3.2z"/></svg></button></div>
   <div class="panel" id="goals"></div>
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
@@ -44,6 +44,47 @@
     <div class="bigmap-foot">
       <span>Drag to look around · scroll to zoom · M to close</span>
       <span class="bigmap-buttons"><button id="bigmap-out" aria-label="Zoom out">−</button><button id="bigmap-home" aria-label="Back to you">◎</button><button id="bigmap-in" aria-label="Zoom in">+</button></span>
+    </div>
+  </div>
+</div>
+
+<div id="settings">
+  <div class="panel settings-frame" role="dialog" aria-labelledby="settings-h">
+    <div class="settings-head"><h2 id="settings-h">Resting</h2><button id="settings-close" aria-label="Close">×</button></div>
+    <p id="settings-summary"></p>
+    <p class="settings-note">The world waits quietly while you rest. Your progress is saved.</p>
+
+    <h3>Sound</h3>
+    <div class="set-row"><span>Sound</span><button class="switch" id="set-sound" role="switch" aria-label="Sound on or off"></button></div>
+    <label class="set-row"><span>Volume</span><input type="range" id="set-volume" min="0" max="100" step="1"><em id="set-volume-n"></em></label>
+    <label class="set-row"><span>World sounds</span><input type="range" id="set-world" min="0" max="100" step="1"><em id="set-world-n"></em></label>
+
+    <h3>Comfort</h3>
+    <div class="set-row"><span>Larger text</span><button class="switch" id="set-bigtext" role="switch" aria-label="Larger text"></button></div>
+    <div class="set-row" id="row-hints"><span>Show key hints</span><button class="switch" id="set-hints" role="switch" aria-label="Show key hints"></button></div>
+
+    <h3>How to play</h3>
+    <div class="keys">
+      <kbd>WASD</kbd><span>move — or click / tap where to go</span>
+      <kbd>E</kbd><span>gather, or talk to a friend</span>
+      <kbd>C</kbd><span>craft lanterns, paths and more</span>
+      <kbd>X</kbd><span>pick a building back up</span>
+      <kbd>M</kbd><span>the map</span>
+      <kbd>N</kbd><span>sound on / off</span>
+      <kbd>Esc</kbd><span>rest here (this menu)</span>
+    </div>
+    <div class="keys touch">
+      <kbd>Tap</kbd><span>walk there — or tap a tree, rock or friend</span>
+      <kbd>Gather</kbd><span>gather what's close, or talk</span>
+      <kbd>Craft</kbd><span>lanterns, paths, and picking things up</span>
+      <kbd>Map</kbd><span>tap the round map</span>
+    </div>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home.</p>
+
+    <div class="settings-buttons">
+      <button id="set-resume" class="main">Keep playing</button>
+      <button id="set-title">Back to title</button>
+      <button id="set-new">New world</button>
     </div>
   </div>
 </div>
@@ -86,6 +127,7 @@
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>
 <script src="src/ui/goals.js"></script>
+<script src="src/ui/settings.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

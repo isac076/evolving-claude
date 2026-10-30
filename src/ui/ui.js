@@ -50,6 +50,8 @@ G.UI = class {
     }
   }
 
+  get craftOpen() { return this.$('craft').classList.contains('open'); }
+
   toggleCraft(force) {
     const el = this.$('craft');
     const was = el.classList.contains('open');
@@ -144,6 +146,6 @@ G.UI = class {
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
       : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
-      : 'WASD / arrows or click to move · E gather / talk · C craft · X pick up · M map · N sound';
+      : 'WASD / arrows or click to move · E gather / talk · C craft · X pick up · M map · Esc rest';
   }
 };

@@ -29,7 +29,7 @@ as the world does.
 - [x] Ambient soundscape that changes with day/night and restoration (Night 1)
 - [x] Minimap (toggle with M) showing explored land and lanterns (Night 2)
 - [x] First-time tutorial goals ("gather 3 wood", "craft a lantern"...) with a small goal tracker (Night 2)
-- [ ] Settings menu (volume, controls help, new world) with Esc
+- [x] Settings menu (volume, controls help, new world) with Esc (Night 7 — the "Resting" menu pauses the world; also world-sound volume, larger text, key hints)
 - [x] Remove/pick up placed buildings (refund materials) (Night 4 — press X)
 
 ## Chapter 2 — A living world
@@ -80,11 +80,22 @@ as the world does.
 - [ ] Photo mode (hide UI, slow time)
 
 ## Chapter 8 — Polish & reach
-- [ ] Performance: cache rendered chunks; keep 60fps on phones
+- [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; chunk caching still to do)
 - [ ] Great touch controls (virtual joystick)
-- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion
+- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option)
 - [ ] Save migration so old saves always keep working
 - [ ] Achievements / milestones
+
+## Review notes (Night 7)
+What a play-through taught us:
+- Shores and biome edges looked like staircases. Ground types now have a `rank` and round their
+  corners over lower ground — curving coasts for free. A soft foam line along shores would be next.
+- On phones the status bar ran under the minimap and the keyboard hints made no sense; fixed with a
+  small-screen layout and touch-only "how to play". A virtual joystick is still the big missing piece.
+- A held key could stick when the window lost focus (the spirit walked on its own) — fixed.
+- The night layer was the single most expensive thing to draw; it is now half-resolution.
+- `tools/smoke_test.py` is near 600 lines: split it into a few files (by chapter) on the next review.
+- Next nights should lean on Chapter 3–5 content (gardens, houses, new biomes) — the systems are solid.
 
 ---
 
@@ -125,3 +136,8 @@ as the world does.
 - Lost spirits could appear in the big map legend; a far-off lost spirit's sigh could be heard in the ambience when it's near
 - Friends in the rain could open tiny leaf umbrellas
 - Villager kinds tied to new biomes (a snowy-peaks kind, a desert kind) once Chapter 5 arrives
+- Shore foam: a soft, slowly breathing light line where water meets land (follow the rounded corners)
+- Smooth grass lightness between tiles the same way restoration is blended (the faint grid would vanish)
+- Reduced-motion option in the Resting menu: calmer rain, no screen-wide leaves, slower water shimmer
+- The Resting menu could show a little "this world so far" page: days, lights, friends, creatures met, rainbows seen
+- Remember the last chosen music/sound mix per device (prefs are already in localStorage 'lumen-sound')

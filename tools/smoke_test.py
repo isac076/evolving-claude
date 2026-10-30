@@ -468,6 +468,37 @@ def main():
         result = page.evaluate("() => G.state.running && G.state.explored.count > 100 ? 'ok' : 'old save did not continue'")
         if result != "ok":
             errors.append(result)
+
+        # the resting menu: Esc pauses the world, the sliders work, Esc lets it go on
+        page.keyboard.press("Escape"); page.wait_for_timeout(600)
+        result = page.evaluate("""() => new Promise(done => {
+            if (!document.getElementById('settings').classList.contains('open')) return done('Esc did not open the resting menu');
+            const t = G.state.time;
+            const v = document.getElementById('set-volume'); v.value = 55; v.dispatchEvent(new Event('input'));
+            if (Math.abs(G.Sound.volume - 0.55) > 0.001) return done('volume slider did nothing');
+            setTimeout(() => done(G.state.time === t ? 'ok' : 'time kept running while resting'), 300);
+        })""")
+        if result != "ok":
+            errors.append("Resting menu check failed: " + str(result))
+        page.screenshot(path=str(SHOTS / "19-resting.png"))
+        page.keyboard.press("Escape"); page.wait_for_timeout(500)
+        result = page.evaluate("() => document.body.classList.contains('paused') ? 'Esc did not close the resting menu' : 'ok'")
+        if result != "ok":
+            errors.append(result)
+
+        # rounded shores: stand on a beach by day
+        page.evaluate("""() => {
+            const s = G.state, w = s.world; let spot = null;
+            for (let r = 6; r < 300 && !spot; r += 3) for (let a = 0; a < 24; a++) {
+                const tx = Math.round(Math.cos(a / 24 * 6.283) * r) + s.player.tx, ty = Math.round(Math.sin(a / 24 * 6.283) * r) + s.player.ty;
+                if (w.tileAt(tx, ty).type === 'sand' && !w.isSolid(tx, ty)) { spot = { tx, ty }; break; }
+            }
+            s.player.x = (spot.tx + 0.5) * 32; s.player.y = (spot.ty + 0.5) * 32; s.cam.x = s.player.x; s.cam.y = s.player.y;
+            if (w.canBuild('beacon', spot.tx + 1, spot.ty + 1)) w.build('beacon', spot.tx + 1, spot.ty + 1);
+            s.time = Math.ceil(s.time / G.DAY_LENGTH) * G.DAY_LENGTH; s.weather.set('clear', true);
+        }""")
+        page.wait_for_timeout(1200)
+        page.screenshot(path=str(SHOTS / "20-shore.png"))
         browser.close()
 
     if errors:

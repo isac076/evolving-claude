@@ -42,6 +42,15 @@ window.G = window.G || {};
   const ui = new G.UI(state);
   const map = new G.Minimap(state);
   const goals = new G.Goals(state, ui);
+  // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
+  const settings = new G.Settings(state, ui, {
+    title() { G.Save.write(state); state.running = false; location.href = location.pathname; },
+    newWorld() {
+      G.Save.clear(); state.running = false;
+      try { sessionStorage.setItem('lumen-new', '1'); } catch (e) {}
+      location.href = location.pathname;
+    },
+  });
 
   // creatures that return to restored land (not saved — they come and go)
   const life = new G.Creatures();
@@ -213,7 +222,6 @@ window.G = window.G || {};
 
   // pick-up mode: click a building near you to take it back
   function updateRemove() {
-    if (input.hit('escape')) { state.setRemoving(false); return; }
     const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
     const p = state.player, st = state.world.structureAt(tx, ty);
     const near = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= BUILD_REACH;
@@ -238,7 +246,6 @@ window.G = window.G || {};
   function updateBuild() {
     const r = state.buildRecipe;
     if (!r) { state.placing = null; return; }
-    if (input.hit('escape')) { state.buildRecipe = null; state.placing = null; return; }
     const { tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
     const p = state.player;
     const near = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= BUILD_REACH;
@@ -272,7 +279,15 @@ window.G = window.G || {};
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
-    if (map.isOpen && input.hit('escape')) map.toggle(false);
+    // Esc closes the nearest thing first; with nothing open it is time to rest
+    if (input.hit('escape')) {
+      if (map.isOpen) map.toggle(false);
+      else if (state.buildRecipe) { state.buildRecipe = null; state.placing = null; }
+      else if (state.removing) state.setRemoving(false);
+      else if (ui.craftOpen) ui.toggleCraft(false);
+      else { settings.toggle(true); return; }
+    }
+    if (map.isOpen) { /* the big map has the mouse */ }
     else if (state.buildRecipe) updateBuild();
     else if (state.removing) updateRemove();
     else if (input.mouse.clicked || input.mouse.down) {
@@ -333,7 +348,7 @@ window.G = window.G || {};
       waterNear = Math.min(1, n / 40);
     }
     const wv = state.weather.v;
-    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running,
+    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running && !settings.isOpen,
       rain: wv.rain, wind: G.windNow || 0, fog: wv.fog });
   }
 
@@ -358,10 +373,13 @@ window.G = window.G || {};
 
   let prev = performance.now();
   function frame(now) {
-    const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    const paused = settings.isOpen;
+    const dt = paused ? 0 : Math.min(0.05, (now - prev) / 1000); prev = now;
+    if (paused && input.hit('escape')) settings.toggle(false);
+    G.Sound.duck(paused);
     if (state.world) state.weather.update(dt, state);
     if (state.running) {
-      update(dt);
+      if (!paused) update(dt);
       renderer.render(state, dt);
       drawFolk();
       drawFloaters();
@@ -382,8 +400,13 @@ window.G = window.G || {};
   const btnContinue = document.getElementById('btn-continue');
   if (!saved) btnContinue.style.display = 'none';
   btnContinue.onclick = () => loadGame(saved);
-  document.getElementById('btn-new').onclick = () => {
-    if (saved && !confirm('Start a new world? Your current world will be replaced.')) return;
+  const btnNew = document.getElementById('btn-new');
+  btnNew.onclick = () => {
+    if (saved && !btnNew.classList.contains('sure')) {   // ask once more, right on the button
+      btnNew.classList.add('sure'); btnNew.textContent = 'Replace your world?';
+      setTimeout(() => { btnNew.classList.remove('sure'); btnNew.textContent = 'New world'; }, 4000);
+      return;
+    }
     G.Save.clear();
     newGame(Math.floor(Math.random() * 1e9));
   };
@@ -400,6 +423,11 @@ window.G = window.G || {};
 
   // allow tests/tools to start instantly: index.html?autostart
   if (location.search.includes('autostart')) newGame(12345);
+  else {   // "New world" from the resting menu reloads the page and lands here
+    let fresh = false;
+    try { fresh = sessionStorage.getItem('lumen-new') === '1'; sessionStorage.removeItem('lumen-new'); } catch (e) {}
+    if (fresh) newGame(Math.floor(Math.random() * 1e9));
+  }
 
   requestAnimationFrame(frame);
 })();

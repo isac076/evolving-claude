@@ -8,13 +8,15 @@ G.DAY_LENGTH = 360;       // seconds for a full day/night cycle
 
 // Ground types. h/s/l = base colour when fully restored.
 // step = footstep sound (see G.STEP_SOUNDS in audio/sound.js).
+// rank = which ground lies "on top" where two meet: the higher one gets
+// rounded corners over the lower, so shores and edges curve instead of stepping.
 G.TILES = {
-  deep:  { name: 'Deep water', h: 215, s: 55, l: 22, water: true },
-  water: { name: 'Water',      h: 205, s: 55, l: 34, water: true },
-  sand:  { name: 'Sand',       h: 42,  s: 48, l: 64, step: 'sand' },
-  grass: { name: 'Grass',      h: 104, s: 42, l: 38, step: 'grass' },
-  forest:{ name: 'Forest',     h: 128, s: 38, l: 27, step: 'leaves' },
-  stone: { name: 'Highland',   h: 220, s: 8,  l: 46, step: 'stone' },
+  deep:  { name: 'Deep water', h: 215, s: 55, l: 22, water: true, rank: 0 },
+  water: { name: 'Water',      h: 205, s: 55, l: 34, water: true, rank: 1 },
+  sand:  { name: 'Sand',       h: 42,  s: 48, l: 64, step: 'sand', rank: 2 },
+  grass: { name: 'Grass',      h: 104, s: 42, l: 38, step: 'grass', rank: 3 },
+  forest:{ name: 'Forest',     h: 128, s: 38, l: 27, step: 'leaves', rank: 4 },
+  stone: { name: 'Highland',   h: 220, s: 8,  l: 46, step: 'stone', rank: 5 },
 };
 
 // Things you can carry.

@@ -9,7 +9,9 @@ window.G = window.G || {};
 G.Sound = {
   ctx: null,
   muted: false,
-  volume: 0.8,
+  volume: 0.8,       // master volume 0..1 (settings menu)
+  world: 1,          // world sounds (ambience) 0..1 (settings menu)
+  ducked: false,     // softer while the game is paused
   PREF_KEY: 'lumen-sound',
 
   init() {
@@ -17,6 +19,7 @@ G.Sound = {
       const p = JSON.parse(localStorage.getItem(this.PREF_KEY) || '{}');
       if (typeof p.muted === 'boolean') this.muted = p.muted;
       if (typeof p.volume === 'number') this.volume = G.clamp(p.volume, 0, 1);
+      if (typeof p.world === 'number') this.world = G.clamp(p.world, 0, 1);
     } catch (e) { /* no saved preference */ }
     const wake = () => this.unlock();
     for (const ev of ['pointerdown', 'keydown', 'touchstart']) window.addEventListener(ev, wake, { capture: true });
@@ -42,7 +45,7 @@ G.Sound = {
   buildGraph() {
     const c = this.ctx;
     this.master = c.createGain();
-    this.master.gain.value = this.muted ? 0 : this.volume;
+    this.master.gain.value = this.level();
     const comp = c.createDynamicsCompressor();
     comp.threshold.value = -18; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.3;
     this.master.connect(comp); comp.connect(c.destination);
@@ -53,7 +56,7 @@ G.Sound = {
     this.reverb.connect(revOut); revOut.connect(this.master);
 
     this.sfxBus = c.createGain(); this.sfxBus.gain.value = 1.8; this.sfxBus.connect(this.master);
-    this.ambBus = c.createGain(); this.ambBus.gain.value = 0.7; this.ambBus.connect(this.master);
+    this.ambBus = c.createGain(); this.ambBus.gain.value = 0.7 * this.world; this.ambBus.connect(this.master);
 
     this.noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
     const d = this.noiseBuf.getChannelData(0);
@@ -74,14 +77,24 @@ G.Sound = {
   get live() { return !!this.ctx && this.ctx.state === 'running' && !this.muted; },
   get now() { return this.ctx ? this.ctx.currentTime : 0; },
 
+  // what the master gain should be right now
+  level() { return this.muted ? 0 : 1.25 * this.volume * this.volume * (this.ducked ? 0.45 : 1); },
+  applyLevel(tc = 0.15) { if (this.master) this.master.gain.setTargetAtTime(this.level(), this.now, tc); },
   setMuted(m) {
     this.muted = m;
-    if (this.master) this.master.gain.setTargetAtTime(m ? 0 : this.volume, this.now, 0.15);
+    this.applyLevel();
     this.savePrefs();
   },
+  setVolume(v) { this.volume = G.clamp(v, 0, 1); this.applyLevel(0.05); this.savePrefs(); },
+  setWorld(v) {
+    this.world = G.clamp(v, 0, 1);
+    if (this.ambBus) this.ambBus.gain.setTargetAtTime(0.7 * this.world, this.now, 0.05);
+    this.savePrefs();
+  },
+  duck(on) { if (this.ducked !== on) { this.ducked = on; this.applyLevel(0.4); } },
   toggleMute() { this.setMuted(!this.muted); return this.muted; },
   savePrefs() {
-    try { localStorage.setItem(this.PREF_KEY, JSON.stringify({ muted: this.muted, volume: this.volume })); } catch (e) {}
+    try { localStorage.setItem(this.PREF_KEY, JSON.stringify({ muted: this.muted, volume: this.volume, world: this.world })); } catch (e) {}
   },
 
   // Route a node out through panning, to a bus, with some reverb.

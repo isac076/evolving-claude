@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 7 — 2026-10-30 — A quiet place to rest
+A review night. Press Esc (or the little moon by the sound button) to open the new Resting menu: the world
+pauses, and you can set the volume and world sounds, turn on larger text, read how to play, go back to the
+title or start a new world. Coastlines and the edges of sand, forest and highlands now curve softly instead of
+stepping in squares, the game runs about twice as smoothly, phones get a tidier screen, and the spirit no
+longer keeps walking by itself if you switch windows mid-step.
+
 ## Night 6 — 2026-10-29 — Friends come home
 Pale, grey spirits now wander the faded land, sad and lost (look for soft dots on your map, or a shimmer in the dark).
 Walk up to one and it takes hold of your light — lead it into the colour around a lantern, beacon or the Heart Stone

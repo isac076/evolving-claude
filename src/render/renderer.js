@@ -23,9 +23,11 @@ G.Renderer = class {
   resize() {
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.W = window.innerWidth; this.H = window.innerHeight;
-    for (const c of [this.canvas, this.light]) {
-      c.width = Math.floor(this.W * this.dpr); c.height = Math.floor(this.H * this.dpr);
-    }
+    this.canvas.width = Math.floor(this.W * this.dpr); this.canvas.height = Math.floor(this.H * this.dpr);
+    // the night layer is all soft gradients, so it is drawn at half size and
+    // stretched: a quarter of the pixels to fill each frame (much kinder to phones)
+    this.ls = this.dpr * 0.5;
+    this.light.width = Math.ceil(this.W * this.ls); this.light.height = Math.ceil(this.H * this.ls);
     this.canvas.style.width = this.W + 'px'; this.canvas.style.height = this.H + 'px';
   }
 
@@ -76,8 +78,14 @@ G.Renderer = class {
     };
 
     // ground, then fish + ripples under the surface, then floor structures (paths, bridges)
+    // the visible tiles plus a one-tile border, so each tile can see its neighbours
+    const gcols = cols + 2, tiles = new Array(gcols * (ty1 - ty0 + 3));
+    for (let ty = ty0 - 1; ty <= ty1 + 1; ty++) for (let tx = tx0 - 1; tx <= tx1 + 1; tx++) tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)] = world.tileAt(tx, ty);
+    const nb = [null, null, null, null];
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
-      G.drawGround(ctx, world.tileAt(tx, ty), tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, cornersAt(tx, ty));
+      const i = (ty - ty0 + 1) * gcols + (tx - tx0 + 1);
+      nb[0] = tiles[i - gcols]; nb[1] = tiles[i + 1]; nb[2] = tiles[i + gcols]; nb[3] = tiles[i - 1];
+      G.drawGround(ctx, tiles[i], tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, cornersAt(tx, ty), nb);
     }
     const life = state.creatures;
     if (life) life.drawWater(ctx, camX, camY, time);
@@ -184,7 +192,7 @@ G.Renderer = class {
     if (dark < 0.02) return;
 
     const l = this.lctx;
-    l.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    l.setTransform(this.ls, 0, 0, this.ls, 0, 0);
     l.globalCompositeOperation = 'source-over';
     l.clearRect(0, 0, W, H);
     l.fillStyle = `rgba(6,8,28,${(dark * 0.84).toFixed(3)})`;
@@ -199,7 +207,7 @@ G.Renderer = class {
     hole(player.x - camX, player.y - camY - 8, pr, 0.95);
     for (const L of lights) if (L.light) hole(L.x - camX, L.y - camY - 14, L.light);
     for (const g of nightGlows) hole(g.x, g.y, g.r, 0.8);
-    ctx.drawImage(this.light, 0, 0, W, H);
+    ctx.drawImage(this.light, 0, 0, this.light.width / this.ls, this.light.height / this.ls);
 
     // warm glow on top (lights bloom wider in the mist)
     ctx.globalCompositeOperation = 'lighter';

@@ -33,6 +33,7 @@ src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles,
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
+src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
@@ -112,6 +113,21 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   night lighting (`glows()`), bubbles + threads drawn by main after lighting. Clicks/E near a friend talk.
   Stats: `spiritsFound`, `talks`, `visits`, `gifts`. Saved as `villagers: {rescued, list, follow}` — optional,
   older saves load with nobody (no version bump).
+- **Rounded ground edges**: each tile type has a `rank` (deep 0 … highland 5). The renderer builds a
+  grid of the visible tiles plus a border and passes each tile's neighbours `[up, right, down, left]` to
+  `G.drawGround`; a corner between two lower neighbours is rounded off, a corner between two higher ones
+  gets a small fillet of the higher ground (`roundCorners` in sprites.js). Only the drawing changes —
+  the tile grid, collisions and the map are untouched.
+- **Drawing speed**: `G.shade` remembers solid colour strings (a Map keyed by rounded h/s/l), and the
+  night layer (`renderer.light`) is drawn at half resolution (`renderer.ls`) and stretched — it is all soft
+  gradients. Headless frame time went from ~24ms to ~12ms.
+- **Resting / pause** (G.Settings): `settings.isOpen` pauses the game — main's `frame()` uses dt = 0, skips
+  `update()`, tells the ambience it is inactive and `G.Sound.duck(true)` softens everything. Esc closes the
+  nearest thing first (big map → building → pick-up → craft panel) and only then opens the menu.
+  "Back to title" saves and reloads the page; "New world" clears the save, sets sessionStorage `lumen-new`
+  and reloads, and main starts a fresh world when it sees that flag. Sound prefs (`muted`, `volume`, `world`)
+  live in localStorage `lumen-sound`; comfort prefs (`bigText`, `hints`) in `lumen-prefs` — neither is in the
+  save. Larger text is CSS `zoom` on the HUD and panels (body class `big-text`).
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.
