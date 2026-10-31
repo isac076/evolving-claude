@@ -22,7 +22,8 @@ G.UI = class {
     const list = this.$('craft-list');
     list.innerHTML = '';
     const groups = [
-      { title: 'Anywhere', recipes: G.RECIPES.filter(r => !r.at) },
+      { title: 'Anywhere', recipes: G.RECIPES.filter(r => !r.at && !r.garden) },
+      { title: 'Garden', recipes: G.RECIPES.filter(r => r.garden && !r.at) },
       { title: 'At a workbench', id: 'bench-head', recipes: G.RECIPES.filter(r => r.at === 'workbench') },
     ];
     for (const g of groups) {
@@ -146,6 +147,6 @@ G.UI = class {
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
       : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
-      : 'WASD / arrows or click to move · E gather / talk · C craft · X pick up · M map · Esc rest';
+      : 'WASD / arrows or click to move · E gather / talk / water · C craft · X pick up · M map · Esc rest';
   }
 };

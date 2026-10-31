@@ -114,6 +114,10 @@ G.Renderer = class {
             nightGlows.push({ x: x + 16, y: y + 13, r: od.light, hue });
           }
         }
+        else if (!st) {   // something gathered here is growing back
+          const rg = world.regrowAt(tx, ty);
+          if (rg && G.REGROW_SPRITES[rg.obj]) G.REGROW_SPRITES[rg.obj](ctx, x, y, f, time, world.tileAt(tx, ty), rg.p);
+        }
       }
       const people = folk && folk.get(ty);
       if (people) for (const v of people) G.drawVillager(ctx, v, v.x - camX, v.y - camY, time);

@@ -9,7 +9,8 @@ G.World = class {
     this.seed = seed;
     this.cache = new Map();       // generated tiles
     this.harvested = new Map();   // key -> game time when it regrows
-    this.structures = new Map();  // key -> { type, tx, ty }
+    this.structures = new Map();  // key -> { type, tx, ty } (planted things also carry g = growth 0..1, wet = seconds)
+    this.grown = new Map();       // key -> object type grown from a seed (a garden bloom, a planted tree)
     this.lights = [];             // derived from structures
     this.lightsVersion = 0;       // bumps when lights change (the map recolours)
     this.time = 0;                // game time in seconds (set by main)
@@ -51,14 +52,25 @@ G.World = class {
   objectAt(tx, ty) {
     const k = G.key(tx, ty);
     if (this.structures.has(k)) return null;
-    const t = this.tileAt(tx, ty);
-    if (!t.obj) return null;
+    const obj = this.tileAt(tx, ty).obj || this.grown.get(k);
+    if (!obj) return null;
     const regrow = this.harvested.get(k);
     if (regrow !== undefined) {
       if (this.time < regrow) return null;
       this.harvested.delete(k);
     }
-    return t.obj;
+    return obj;
+  }
+
+  // A gathered object that is growing back: { obj, p } with p = 0 (just gathered) .. 1 (back), or null.
+  regrowAt(tx, ty) {
+    const t = this.tileAt(tx, ty);
+    if (!t.obj && !this.grown.size) return null;
+    const k = G.key(tx, ty), at = this.harvested.get(k);
+    if (at === undefined || this.time >= at) return null;
+    const obj = t.obj || this.grown.get(k);
+    if (!obj || this.structures.has(k)) return null;
+    return { obj, p: G.clamp(1 - (at - this.time) / G.OBJECTS[obj].regrow, 0, 1) };
   }
 
   structureAt(tx, ty) { return this.structures.get(G.key(tx, ty)) || null; }
@@ -85,14 +97,31 @@ G.World = class {
     const def = G.STRUCTURES[type];
     if (this.structureAt(tx, ty)) return false;
     if (this.objectAt(tx, ty)) return false;
+    if (def.soil) {   // plants need the right ground, and a spot nothing else will grow back on
+      const t = this.tileAt(tx, ty), k = G.key(tx, ty);
+      if (!def.soil.includes(t.type) || t.obj || this.grown.has(k)) return false;
+    }
     const water = this.isWater(tx, ty);
     return def.on === 'water' ? water : !water;
   }
 
   build(type, tx, ty) {
-    this.structures.set(G.key(tx, ty), { type, tx, ty });
+    const st = { type, tx, ty };
+    if (G.STRUCTURES[type].grow) { st.g = 0; st.wet = 0; }
+    this.structures.set(G.key(tx, ty), st);
     const def = G.STRUCTURES[type];
     if (def.restore || def.light) this.rebuildLights();
+  }
+
+  // Saved structures: [type, tx, ty] or, for planted things, [type, tx, ty, growth, wet].
+  loadStructures(list) {
+    for (const [type, tx, ty, g, wet] of list || []) {
+      if (!G.STRUCTURES[type]) continue;
+      const st = { type, tx, ty };
+      if (G.STRUCTURES[type].grow) { st.g = +g || 0; st.wet = +wet || 0; }
+      this.structures.set(G.key(tx, ty), st);
+    }
+    this.rebuildLights();
   }
 
   remove(tx, ty) {

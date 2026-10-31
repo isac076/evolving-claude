@@ -78,4 +78,23 @@ G.GOALS = [
     progress: s => s.villagers ? s.villagers.list.length : 0,
     hint: 'Friends sometimes hear where other lost spirits are. Beacons have room for 4.',
     reward: { crystal: 2, petal: 3 } },
+
+  // ---- Gardens (Night 8) ----
+  { id: 'seed', chapter: 'Gardens', text: 'Find seeds or acorns', target: 2,
+    progress: s => (s.stats.got.seed || 0) + (s.stats.got.acorn || 0),
+    hint: 'Glow blooms often drop flower seeds, and trees drop acorns.' },
+  { id: 'plant', chapter: 'Gardens', text: 'Plant something in coloured grass', target: 1,
+    progress: s => s.stats.planted || 0, hint: 'Open Craft (C) — seeds and acorns are in the Garden group.',
+    reward: { seed: 1 } },
+  { id: 'can', chapter: 'Gardens', text: 'Make a watering can', target: 1,
+    progress: s => s.inv.can ? 1 : 0, hint: 'Made at a workbench from a little wood and stone.' },
+  { id: 'water', chapter: 'Gardens', text: 'Water your plants', target: 3,
+    progress: s => s.stats.watered || 0, hint: 'Stand beside a dry sprout and press E. Rain waters them too.',
+    reward: { acorn: 1, seed: 2 } },
+  { id: 'flowers', chapter: 'Gardens', text: 'Grow flowers from seed', target: 3,
+    progress: s => ((s.stats.grown || {}).bloom || 0) + ((s.stats.grown || {}).moonflower || 0),
+    hint: 'Damp soil in bright land grows fastest. Some seeds become rare moonflowers…', reward: { petal: 3 } },
+  { id: 'grove', chapter: 'Gardens', text: 'Grow a tree from an acorn', target: 1,
+    progress: s => (s.stats.grown || {}).tree || 0,
+    hint: 'Saplings take a while. Water them, and let the rain help.', reward: { wood: 5, fibre: 2 } },
 ];

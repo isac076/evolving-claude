@@ -35,11 +35,13 @@ G.Crafting = {
     return null;
   },
 
-  // Everything an object gives, including the bonus from a tool you own.
-  dropsFor(state, obj) {
+  // Everything an object gives, including the bonus from a tool you own,
+  // and the lucky extras (seeds, acorns) that only drop sometimes.
+  dropsFor(state, obj, luck = Math.random) {
     const def = G.OBJECTS[obj], out = { ...def.drops };
     if (def.tool && def.bonus && this.owns(state, def.tool))
       for (const [k, n] of Object.entries(def.bonus)) out[k] = (out[k] || 0) + n;
+    for (const [k, c] of Object.entries(def.chance || {})) if (luck() < c) out[k] = (out[k] || 0) + 1;
     return out;
   },
 

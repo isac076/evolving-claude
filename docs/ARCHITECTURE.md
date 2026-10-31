@@ -15,17 +15,20 @@ src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
 src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow
+src/data/garden.js    G.GARDEN growth settings, G.GROW_KINDS (what sprouts/saplings become and how fast)
 src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
+src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
+src/render/garden_sprites.js sprout + sapling stages, moonflower, G.REGROW_SPRITES (stumps, things growing back)
 src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
 src/render/weather_fx.js G.WeatherFX — draws cloud shadows, grey skies, rain + splashes, wind-blown leaves, fog, rainbow
 src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bubbles), G.drawFollowThreads
@@ -128,6 +131,20 @@ tools/smoke_test.py   plays the game in a headless browser, saves screenshots
   and reloads, and main starts a fresh world when it sees that flag. Sound prefs (`muted`, `volume`, `world`)
   live in localStorage `lumen-sound`; comfort prefs (`bigText`, `hints`) in `lumen-prefs` — neither is in the
   save. Larger text is CSS `zoom` on the HUD and panels (body class `big-text`).
+- **Gardens** (`state.garden`, G.Garden): a structure with `grow: '<kind>'` (sprout, sapling) is a planting. It
+  carries `g` (growth 0..1) and `wet` (seconds of damp soil). Every 0.25s `update` grows each one by
+  `rate()` = colour factor (`G.GARDEN.greySpeed` in the grey → 1 at `colourNeeded`) × `wetSpeed` if damp ÷ the kind's
+  `time`; rain keeps every planting damp. At 1 it is removed and its spot goes in `world.grown` (key → object type);
+  `objectAt` treats grown objects exactly like generated ones (gathering, regrowing). The rare outcome (moonflower) is
+  chosen by a hash of the spot, so the bud already shows it. Structures with `soil` can only go on those tile types
+  and not where a natural object lives. Objects can drop lucky extras: `chance: { seed: 0.55 }` (`G.Crafting.dropsFor`).
+  E waters the nearest dry planting if you own the can (before gathering); clicking one waters it or describes it.
+  Stats: `planted`, `watered`, `grown{type}`. Save: plantings are `[type, tx, ty, g, wet]` and `grown` is a list of
+  `[key, type]` — both optional, older saves load unchanged (no version bump). `world.loadStructures()` reads them.
+- **Growing back**: `world.regrowAt(tx, ty)` gives `{obj, p}` for a gathered object that is regrowing; the renderer
+  draws `G.REGROW_SPRITES[obj]` there (stump + young tree, short reeds, pebbles, tiny shards).
+- **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that
+  smoke_test.py calls at the end. New features should add their own file the same way.
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
   `G.Save.upgrade()` converts older saves when they are read.
 - **Debugging**: `G.state` in the browser console is the whole game state.

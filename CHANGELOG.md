@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 8 — 2026-10-31 — Seeds and gardens
+Glow blooms now often drop flower seeds and trees drop acorns. Plant them from the new Garden group in the
+craft menu and watch them grow, stage by stage, into real blooms and tall trees — fastest in coloured land and
+damp soil. Make a Watering Can at the workbench (press E beside a dry sprout), or let the rain water every garden
+at once. Some seeds become rare moonflowers that open and shine at night, and anything you gather now visibly
+grows back: chopped trees leave a stump that sprouts a new little tree.
+
 ## Night 7 — 2026-10-30 — A quiet place to rest
 A review night. Press Esc (or the little moon by the sound button) to open the new Resting menu: the world
 pauses, and you can set the volume and world sounds, turn on larger text, read how to play, go back to the

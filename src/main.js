@@ -86,6 +86,20 @@ window.G = window.G || {};
     ui.refresh();
   };
 
+  // gardens: sprouts and saplings grow into blooms, moonflowers and trees (not a separate save — they are structures)
+  const garden = new G.Garden();
+  state.garden = garden;
+  garden.fx = {
+    burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    sound: (name, x) => { if (state.running) G.Sound.play(name, { pan: panAt(x) }); },
+    touch: (tx, ty) => map.touch(tx, ty),
+  };
+  garden.onGrown = (st, into, first) => {
+    const k = G.GROW_KINDS[G.STRUCTURES[st.type].grow];
+    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE - 10, `${G.OBJECTS[into].name}!`, into === 'tree' ? '#a8e090' : into === 'moonflower' ? '#bfe2ff' : '#ffc8e6');
+    if (first) ui.toast(into === k.rare ? k.firstRare : k.first, 6);
+  };
+
   // the sky: weather drifts on its own; tell the player when it changes
   function makeWeather() {
     const wx = new G.Weather();
@@ -126,8 +140,8 @@ window.G = window.G || {};
 
   function loadGame(d) {
     state.world = new G.World(d.seed);
-    for (const [type, tx, ty] of d.structures || []) if (G.STRUCTURES[type]) state.world.structures.set(G.key(tx, ty), { type, tx, ty });
-    state.world.rebuildLights();
+    state.world.loadStructures(d.structures);
+    for (const [k, o] of d.grown || []) if (G.OBJECTS[o]) state.world.grown.set(k, o);   // older saves grew nothing yet
     for (const [k, t] of d.harvested || []) state.world.harvested.set(k, t);
     state.player = new G.Player(d.player.x, d.player.y);
     state.inv = d.inv || {}; state.time = d.time || 0; state.stats = d.stats;
@@ -185,6 +199,21 @@ window.G = window.G || {};
     return true;
   }
 
+  function waterPlant(st) {
+    garden.water(state, st);
+    const first = state.stats.watered === 1;
+    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE, 'Watered', '#9fd4ff');
+    if (first) ui.toast('Splish! Damp soil makes plants grow three times as fast. Rain waters them too.', 5);
+    ui.refresh();
+  }
+
+  // clicking a planting: water it if you can, otherwise say how it is doing
+  function tendPlant(st) {
+    if (st.wet <= 0 && G.Crafting.owns(state, 'can')) { waterPlant(st); return; }
+    G.Sound.play('select');
+    ui.toast(garden.describe(state, st), 4);
+  }
+
   function talkTo(v) {
     folk.talk(v, state);
     ui.refresh();
@@ -194,6 +223,10 @@ window.G = window.G || {};
     const p = state.player; let best = null, bd = Infinity, locked = null;
     const friend = folk.nearest(p.x, p.y, 46);
     if (friend) { talkTo(friend); return; }
+    if (G.Crafting.owns(state, 'can')) {   // water a dry planting before gathering
+      const dry = garden.dryNear(state.world, p.x, p.y, REACH);
+      if (dry) { waterPlant(dry); return; }
+    }
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
       if (!o) continue;
@@ -203,7 +236,12 @@ window.G = window.G || {};
       if (d < bd) { bd = d; best = { tx, ty }; }
     }
     if (best || locked) gatherAt((best || locked).tx, (best || locked).ty);
-    else { G.Sound.play('deny'); ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5); }
+    else {
+      let plant = null;
+      for (const st of garden.plants(state.world)) if (Math.hypot((st.tx + 0.5) * G.TILE - p.x, (st.ty + 0.5) * G.TILE - p.y) <= REACH) plant = st;
+      if (plant) { tendPlant(plant); return; }
+      G.Sound.play('deny'); ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5);
+    }
   }
 
   // make an item (a tool) straight into your pockets
@@ -262,10 +300,18 @@ window.G = window.G || {};
       renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
       if (r.builds === 'lantern') ui.toast('The land around the lantern remembers its colour.');
       if (r.builds === 'beacon') ui.toast('The crystal sings, and the land far around it remembers its colour.', 5);
+      if (G.STRUCTURES[r.builds].grow) planted(tx, ty);
       if (r.builds === 'workbench') ui.toast('A workbench! Stand near it and open Craft (C) for tools and more.', 5);
       ui.refresh();
       if (!state.canAfford(r)) { state.buildRecipe = null; state.placing = null; }
     }
+  }
+
+  function planted(tx, ty) {
+    state.stats.planted = (state.stats.planted || 0) + 1;
+    const f = state.world.restoreAt((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, state.world.lights);
+    if (f < G.GARDEN.colourNeeded * 0.5) ui.toast('Seeds grow only slowly in the grey. Plant them where the colour has come back.', 5);
+    else if (state.stats.planted === 1) ui.toast('Planted! Watch it grow — rain or a watering can (made at a workbench) speeds it up.', 6);
   }
 
   // ---------- loop ----------
@@ -300,6 +346,7 @@ window.G = window.G || {};
         else p.moveTarget = { x: friend.x, y: friend.y + 14 };
       }
       else if (input.mouse.clicked && close && state.world.objectAt(tx, ty)) gatherAt(tx, ty);
+      else if (input.mouse.clicked && close && state.world.structureAt(tx, ty) && G.STRUCTURES[state.world.structureAt(tx, ty).type].grow) tendPlant(state.world.structureAt(tx, ty));
       else p.moveTarget = { x: wx, y: wy };
     }
 
@@ -321,6 +368,7 @@ window.G = window.G || {};
     ui.update(dt);
     map.update(dt, state.time);
     goals.update(dt);
+    garden.update(dt, state);
   }
 
   // ---------- sound ----------
@@ -414,7 +462,7 @@ window.G = window.G || {};
 
   // a peaceful world drifts behind the title screen
   state.world = new G.World(saved ? saved.seed : 12345);
-  if (saved) { for (const [t, x, y] of saved.structures || []) if (G.STRUCTURES[t]) state.world.structures.set(G.key(x, y), { type: t, tx: x, ty: y }); state.world.rebuildLights(); state.weather.load(saved.weather); folk.load(saved.villagers, state.world, null); }
+  if (saved) { state.world.loadStructures(saved.structures); for (const [k, o] of saved.grown || []) if (G.OBJECTS[o]) state.world.grown.set(k, o); state.weather.load(saved.weather); folk.load(saved.villagers, state.world, null); }
   else { const sp = state.world.findSpawn(); state.world.build('heart', sp.tx, sp.ty); }
   state.player = new G.Player(-9999, -9999);
   const l0 = state.world.lights[0] || { x: 0, y: 0 };

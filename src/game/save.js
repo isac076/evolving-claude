@@ -16,7 +16,9 @@ G.Save = {
         player: { x: state.player.x, y: state.player.y },
         inv: state.inv,
         stats: state.stats,
-        structures: [...w.structures.values()].map(s => [s.type, s.tx, s.ty]),
+        structures: [...w.structures.values()].map(s => s.g === undefined ? [s.type, s.tx, s.ty]
+          : [s.type, s.tx, s.ty, Math.round(s.g * 1000) / 1000, Math.round(s.wet || 0)]),   // planted things keep their growth (Night 8)
+        grown: [...w.grown.entries()],   // optional (Night 8): things grown from seed
         harvested: [...w.harvested.entries()].filter(([, t]) => t > state.time),
         explored: state.explored.serialize(),
         goalsDone: state.goalsDone,

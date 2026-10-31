@@ -31,10 +31,12 @@ G.VILLAGER_NAMES = [
 
 G.VILLAGER_KINDS = {
   gardener: {
-    likes: 'flowerbed', doing: 'tend', hat: 'leaf', gift: { petal: 2 }, hues: [330, 350, 300, 20],
+    likes: 'flowerbed', doing: 'tend', hat: 'leaf', gift: { petal: 1, seed: 2 }, hues: [330, 350, 300, 20],
     wish: 'If only there were a flower bed nearby. I could tend it every morning!',
     lines: ['The flowers hum when you walk past. Did you notice?', 'Petals remember the sun, you know.',
-      'I planted a wish under that bloom. Don\'t tell anyone.', 'Everything grows back, if someone is patient with it.'],
+      'I planted a wish under that bloom. Don\'t tell anyone.', 'Everything grows back, if someone is patient with it.',
+      'Seeds sleep in the grey. Plant them where the colour is, and water them — they wake right up!',
+      'Have you found a moonflower yet? They only open for the night.'],
     visit: 'is tending the flowers',
   },
   tinkerer: {
@@ -75,7 +77,8 @@ G.VILLAGER_SAYS = {
   full: ['This light already has a full home… could we find another?'],
   settle: ['Home! It\'s… it\'s so bright!', 'I remember now. This is what colour feels like.', 'I think I\'ll stay right here, forever.'],
   sleep: ['Zzz…', 'Zzz… mm… lanterns…', 'Zzz… zz…'],
-  rain: ['Rain on the roof of the world! Listen!', 'The frogs are having a party.', 'Wet feet, happy heart.'],
+  rain: ['Rain on the roof of the world! Listen!', 'The frogs are having a party.', 'Wet feet, happy heart.',
+    'The rain is watering every garden at once. Clever rain.'],
   fog: ['Mind your step — the fog hides everything but your glow.', 'Fog is just a cloud that came to visit.'],
   night: ['Goodnight, little light.', 'Shouldn\'t you be sleeping too?'],
   morning: ['Good morning! The colours look new every day.', 'Morning! Did you sleep? Do spirits sleep?'],

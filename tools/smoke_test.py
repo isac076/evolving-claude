@@ -7,6 +7,9 @@ Needs: pip install playwright && python3 -m playwright install chromium
 """
 import pathlib, sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import smoke_garden
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
 
@@ -499,6 +502,8 @@ def main():
         }""")
         page.wait_for_timeout(1200)
         page.screenshot(path=str(SHOTS / "20-shore.png"))
+
+        smoke_garden.run(page, SHOTS, errors)   # Night 8: planting, watering, growing
         browser.close()
 
     if errors:

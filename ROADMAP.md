@@ -38,14 +38,15 @@ as the world does.
 - [x] Wildlife that reacts to the player (rabbits, deer that flee and return) (Night 3: rabbits, startled birds — deer still to come)
 - [x] Weather: rain, wind, fog — with visuals and sound (Night 5 — plus overcast skies, drifting cloud shadows, rainbows, and frogs that only come out in the rain)
 - [ ] Seasons that slowly change colours, plants and weather
-- [ ] Regrowth looks alive: saplings grow into trees over time
+- [x] Regrowth looks alive: saplings grow into trees over time (Night 8 — plant acorns; chopped trees leave stumps that sprout again, reeds/flowers/pebbles/crystals visibly grow back)
 
 ## Chapter 3 — Deeper crafting & building
 - [x] Tools: an axe and pick that gather faster / more (Night 4 — the pick also unlocks crystal)
 - [x] Workbench: more recipes unlock when standing near it (Night 4)
 - [x] New materials: fibre (reeds) and crystal (highlands) (Night 4)
-- [ ] More materials: clay (riverbanks), seeds (from grown plants)
-- [ ] Gardens: plant seeds, water them, watch them grow
+- [x] Seeds (from blooms) and acorns (from trees) (Night 8)
+- [ ] More materials: clay (riverbanks)
+- [x] Gardens: plant seeds, water them, watch them grow (Night 8 — sprouts, saplings, watering can, rain waters gardens, rare moonflowers)
 - [x] Decorations: fences that join up, flower beds, benches (Night 4)
 - [ ] More decorations: banners, signposts (with a name you type), stepping stones
 - [x] Bigger lanterns / beacons with larger restore radius (Night 4 — Crystal Beacon)
@@ -141,3 +142,8 @@ What a play-through taught us:
 - Reduced-motion option in the Resting menu: calmer rain, no screen-wide leaves, slower water shimmer
 - The Resting menu could show a little "this world so far" page: days, lights, friends, creatures met, rainbows seen
 - Remember the last chosen music/sound mix per device (prefs are already in localStorage 'lumen-sound')
+- More garden crops: berry bushes (berries as gifts friends love), sunflowers that turn to follow the sun, pumpkins for a harvest festival
+- Gardeners could water your sprouts for you when they pass by; a friend's request "plant 3 flowers by my home"
+- Bees that visit grown flowers and a beehive structure; butterflies prefer garden blooms
+- A garden plot / tilled-soil floor structure where plants grow faster, and fences that keep rabbits out (they nibble sprouts — gently)
+- Seasons (Chapter 2) can drive gardens: spring growth spurt, autumn seeds, winter rest

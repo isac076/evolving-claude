@@ -302,6 +302,18 @@ G.SFX = {
     const i = Math.floor(((o.pitch || 0) % 360) / 72);
     [0, 2, 1, 4].forEach((n, k) => S.tone(G.note(i + n, 4), { type: 'sine', attack: 0.06, dur: 0.4, gain: 0.03, t: k * 0.3, pan: o.pan, rev: 0.6 }));
   },
+  plant(S, o) {     // pressing a seed into soft earth: a soft pat and a tiny rising note
+    S.noise({ filter: 'lowpass', freq: 500, dur: 0.12, attack: 0.01, gain: 0.22, pan: o.pan, rev: 0.05 });
+    S.tone(G.note(1, 5), { type: 'triangle', glide: G.note(3, 5), dur: 0.25, gain: 0.06, t: 0.08, pan: o.pan, rev: 0.3 });
+  },
+  water(S, o) {     // a little pour of water and a few drips
+    S.noise({ filter: 'bandpass', freq: 1800, freqTo: 1100, q: 1.5, dur: 0.5, attack: 0.06, gain: 0.08, pan: o.pan });
+    for (let i = 0; i < 3; i++) S.tone(G.rand(1400, 1900), { glide: 2400, dur: 0.06, gain: 0.04, t: 0.25 + i * 0.13, pan: o.pan, rev: 0.4 });
+  },
+  grow(S, o) {      // something you planted has grown: an unfolding little phrase
+    [0, 2, 4, 7].forEach((n, i) => S.bell(G.note(n, 5), { gain: 0.06, dur: 1.2, t: i * 0.09, pan: o.pan, rev: 0.5 }));
+    S.noise({ filter: 'highpass', freq: 3000, dur: 0.5, attack: 0.1, gain: 0.03, pan: o.pan });
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },
