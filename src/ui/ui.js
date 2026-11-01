@@ -133,7 +133,15 @@ G.UI = class {
     this.toastTimer = secs;
   }
 
+  // the name of the piece of music that just began, softly in the corner
+  musicCaption(title, grey) {
+    const el = this.$('music-caption');
+    el.textContent = title; el.classList.toggle('grey', !!grey); el.classList.add('show');
+    this.captionTimer = 6;
+  }
+
   update(dt) {
+    if (this.captionTimer > 0 && (this.captionTimer -= dt) <= 0) this.$('music-caption').classList.remove('show');
     if (this.toastTimer > 0) {
       this.toastTimer -= dt;
       if (this.toastTimer <= 0) this.$('toast').classList.remove('show');

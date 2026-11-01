@@ -121,6 +121,14 @@ window.G = window.G || {};
   }
   state.weather = makeWeather();
 
+  // music: the world writes its own tunes; friends nearby join in
+  G.Music.onCaption = (title, grey) => { if (state.running) ui.musicCaption(title, grey); };
+  G.Music.onJoin = (v, def) => {
+    if (!state.running) return;
+    addFloater(v.x, v.y - 34, `♪ ${v.name} ${def.joins}`, `hsl(${v.hue},85%,80%)`);
+    if ((state.stats.music || {}).joined === 1) ui.toast('Your friends play along when you are near them — every kind of friend has its own part in the song.', 6);
+  };
+
   // ---------- starting / loading ----------
   function newGame(seed) {
     state.world = new G.World(seed);
@@ -384,6 +392,18 @@ window.G = window.G || {};
 
   // how much water is near a point, 0..1 (sampled a few times a second)
   let waterNear = 0, waterTimer = 0;
+  function updateMusic(realDt) {
+    if (!state.world) return;
+    const w = state.world, x = state.cam.x, y = state.cam.y, p = state.running ? state.player : null;
+    const tx = Math.floor((p ? p.x : x) / G.TILE), ty = Math.floor((p ? p.y : y) / G.TILE);
+    const st = w.structureAt(tx, ty), wv = state.weather.v;
+    G.Music.update(realDt, {
+      restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), phase: (state.time % G.DAY_LENGTH) / G.DAY_LENGTH,
+      rain: wv.rain, fog: wv.fog, ground: st && st.type === 'bridge' ? 'water' : w.tileAt(tx, ty).type,
+      player: p, friends: folk.list, active: state.running && !settings.isOpen, stats: state.stats,
+    });
+  }
+
   function updateAmbience(dt) {
     if (!G.Sound.ctx || !state.world) return;
     const x = state.cam.x, y = state.cam.y, w = state.world;
@@ -404,6 +424,7 @@ window.G = window.G || {};
   function drawFolk() {
     const ctx = renderer.ctx, camX = Math.round(state.cam.x - renderer.W / 2), camY = Math.round(state.cam.y - renderer.H / 2);
     G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
+    G.MusicFX.draw(ctx, G.Music.notes, camX, camY, renderer.W, renderer.H);
     for (const v of folk.all()) if (v.say) G.drawSpeech(ctx, v, v.x - camX, v.y - camY, renderer.W, renderer.H);
   }
 
@@ -422,7 +443,7 @@ window.G = window.G || {};
   let prev = performance.now();
   function frame(now) {
     const paused = settings.isOpen;
-    const dt = paused ? 0 : Math.min(0.05, (now - prev) / 1000); prev = now;
+    const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
     if (paused && input.hit('escape')) settings.toggle(false);
     G.Sound.duck(paused);
     if (state.world) state.weather.update(dt, state);
@@ -439,6 +460,7 @@ window.G = window.G || {};
     life.update(dt, state, renderer.W, renderer.H);
     folk.update(dt, state, renderer.W, renderer.H);
     updateAmbience(dt);
+    updateMusic(realDt);
     input.endFrame();
     requestAnimationFrame(frame);
   }

@@ -11,6 +11,7 @@ G.Sound = {
   muted: false,
   volume: 0.8,       // master volume 0..1 (settings menu)
   world: 1,          // world sounds (ambience) 0..1 (settings menu)
+  music: 0.7,        // music 0..1 (settings menu)
   ducked: false,     // softer while the game is paused
   PREF_KEY: 'lumen-sound',
 
@@ -20,6 +21,7 @@ G.Sound = {
       if (typeof p.muted === 'boolean') this.muted = p.muted;
       if (typeof p.volume === 'number') this.volume = G.clamp(p.volume, 0, 1);
       if (typeof p.world === 'number') this.world = G.clamp(p.world, 0, 1);
+      if (typeof p.music === 'number') this.music = G.clamp(p.music, 0, 1);
     } catch (e) { /* no saved preference */ }
     const wake = () => this.unlock();
     for (const ev of ['pointerdown', 'keydown', 'touchstart']) window.addEventListener(ev, wake, { capture: true });
@@ -57,6 +59,7 @@ G.Sound = {
 
     this.sfxBus = c.createGain(); this.sfxBus.gain.value = 1.8; this.sfxBus.connect(this.master);
     this.ambBus = c.createGain(); this.ambBus.gain.value = 0.7 * this.world; this.ambBus.connect(this.master);
+    this.musicBus = c.createGain(); this.musicBus.gain.value = this.musicLevel(); this.musicBus.connect(this.master);
 
     this.noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
     const d = this.noiseBuf.getChannelData(0);
@@ -91,10 +94,16 @@ G.Sound = {
     if (this.ambBus) this.ambBus.gain.setTargetAtTime(0.7 * this.world, this.now, 0.05);
     this.savePrefs();
   },
+  musicLevel() { return 1.5 * this.music * this.music; },
+  setMusic(v) {
+    this.music = G.clamp(v, 0, 1);
+    if (this.musicBus) this.musicBus.gain.setTargetAtTime(this.musicLevel(), this.now, 0.05);
+    this.savePrefs();
+  },
   duck(on) { if (this.ducked !== on) { this.ducked = on; this.applyLevel(0.4); } },
   toggleMute() { this.setMuted(!this.muted); return this.muted; },
   savePrefs() {
-    try { localStorage.setItem(this.PREF_KEY, JSON.stringify({ muted: this.muted, volume: this.volume, world: this.world })); } catch (e) {}
+    try { localStorage.setItem(this.PREF_KEY, JSON.stringify({ muted: this.muted, volume: this.volume, world: this.world, music: this.music })); } catch (e) {}
   },
 
   // Route a node out through panning, to a bus, with some reverb.

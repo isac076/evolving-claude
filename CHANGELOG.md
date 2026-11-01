@@ -2,6 +2,15 @@
 
 What changed each night, newest first.
 
+## Night 9 — 2026-11-01 — The world sings
+Lumen now has music that writes itself as you play — a new little tune every minute or so. In grey land you hear
+only a few lonely notes; walk into colour and a soft bass, a melody and a high sparkle bloom in. Mornings, sunny days,
+dusk, rain and fog each have their own mood, nights bring a slow music-box lullaby, and the ground picks the
+instrument (a flute in meadows, marimba in the woods, kalimba on the shore, glassy bells in the highlands).
+Friends who are awake nearby join in — singers sing, gardeners pluck a harp, tinkerers tap the beat, dreamers ring
+chimes, wanderers play a pipe — with little glowing notes floating up. The name of each piece appears softly in the
+corner, there's a Music slider in the Resting menu, and a new "Song of the world" chapter of goals.
+
 ## Night 8 — 2026-10-31 — Seeds and gardens
 Glow blooms now often drop flower seeds and trees drop acorns. Plant them from the new Garden group in the
 craft menu and watch them grow, stage by stage, into real blooms and tall trees — fastest in coloured land and

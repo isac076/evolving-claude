@@ -57,7 +57,7 @@ as the world does.
 - [x] Villagers settle near lanterns and walk around, with simple daily routines (Night 6 — they visit things they love, sleep by their light, give a daily gift)
 - [ ] Houses villagers build or you build for them
 - [ ] Dialogue and small requests (bring me 5 petals...) with rewards (Night 6 added talking + daily gifts; requests still to come)
-- [ ] Villagers unlock new recipes, music, and abilities
+- [ ] Villagers unlock new recipes, music, and abilities (Night 9: music done — awake friends nearby join the song, each kind with its own part and instrument)
 - [ ] A village that visibly grows over time (market, well, festival)
 
 ## Chapter 5 — Exploration
@@ -75,7 +75,7 @@ as the world does.
 - [ ] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing)
 
 ## Chapter 7 — Music & presentation
-- [ ] Generative music that changes with time of day, biome and restoration
+- [x] Generative music that changes with time of day, biome and restoration (Night 9 — a new tune every piece; grey land gets lonely notes, colour adds bass, melody and sparkle; morning/day/dusk/night/rain/fog moods; the ground picks the instrument; a Music slider)
 - [ ] Richer lighting: light shafts, reflections in water, soft shadows
 - [ ] Animated title screen; smooth transitions
 - [ ] Photo mode (hide UI, slow time)
@@ -147,3 +147,9 @@ What a play-through taught us:
 - Bees that visit grown flowers and a beehive structure; butterflies prefer garden blooms
 - A garden plot / tilled-soil floor structure where plants grow faster, and fences that keep rabbits out (they nibble sprouts — gently)
 - Seasons (Chapter 2) can drive gardens: spring growth spurt, autumn seeds, winter rest
+- Music: a festival night where every friend in the world gathers at the Heart Stone and the whole band plays
+- Music: a "music box" decoration you build that plays the current tune's melody when you stand near it, even in grey land
+- Music: each new biome (Chapter 5) gets its own entry in G.MUSIC_PLACES (snow = celesta, desert = oud-like pluck)
+- Music: the discoveries journal could list every piece title you've heard ("songbook")
+- Music: lost spirits hum a tiny broken fragment of the tune; it becomes whole when they come home
+- Music: Ember Shrines (Chapter 6) could each restore one "voice" of a great final song

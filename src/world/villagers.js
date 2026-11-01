@@ -306,7 +306,7 @@ window.G = window.G || {};
       } else if (v.state === 'busy') {
         const sits = v.def.doing === 'sit' && v.goal && v.goal.side && v.goal.side[1] === 1;
         v.sit += ((sits ? 1 : 0) - v.sit) * Math.min(1, dt * 5);
-        if (v.def.doing === 'hum' && dp < 260 && Math.random() < dt * 0.6) this.sound('hum', v.x, { pitch: v.hue });
+        if (v.def.doing === 'hum' && dp < 260 && !(G.Music && G.Music.band.has(v.kind)) && Math.random() < dt * 0.6) this.sound('hum', v.x, { pitch: v.hue });
         if ((v.t -= dt) <= 0) { v.state = 'idle'; v.t = G.rand(2, 4); v.goal = null; }
       }
     }

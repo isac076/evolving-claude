@@ -21,6 +21,7 @@
   <div class="panel" id="goals"></div>
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
+  <div id="music-caption"></div>
   <div id="bottom">
     <div class="panel" id="inventory"></div>
     <div id="hint"></div>
@@ -58,6 +59,7 @@
     <div class="set-row"><span>Sound</span><button class="switch" id="set-sound" role="switch" aria-label="Sound on or off"></button></div>
     <label class="set-row"><span>Volume</span><input type="range" id="set-volume" min="0" max="100" step="1"><em id="set-volume-n"></em></label>
     <label class="set-row"><span>World sounds</span><input type="range" id="set-world" min="0" max="100" step="1"><em id="set-world-n"></em></label>
+    <label class="set-row"><span>Music</span><input type="range" id="set-music" min="0" max="100" step="1"><em id="set-music-n"></em></label>
 
     <h3>Comfort</h3>
     <div class="set-row"><span>Larger text</span><button class="switch" id="set-bigtext" role="switch" aria-label="Larger text"></button></div>
@@ -105,12 +107,15 @@
 <script src="src/core/input.js"></script>
 <script src="src/audio/sound.js"></script>
 <script src="src/audio/ambience.js"></script>
+<script src="src/audio/instruments.js"></script>
+<script src="src/audio/music.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
 <script src="src/data/weather.js"></script>
 <script src="src/data/villagers.js"></script>
 <script src="src/data/garden.js"></script>
+<script src="src/data/music.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/explore.js"></script>
 <script src="src/world/creatures.js"></script>
@@ -126,6 +131,7 @@
 <script src="src/render/creature_sprites.js"></script>
 <script src="src/render/weather_fx.js"></script>
 <script src="src/render/villager_sprites.js"></script>
+<script src="src/render/music_fx.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>

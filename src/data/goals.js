@@ -97,4 +97,19 @@ G.GOALS = [
   { id: 'grove', chapter: 'Gardens', text: 'Grow a tree from an acorn', target: 1,
     progress: s => (s.stats.grown || {}).tree || 0,
     hint: 'Saplings take a while. Water them, and let the rain help.', reward: { wood: 5, fibre: 2 } },
+
+  // ---- The song of the world (Night 9) ----
+  { id: 'tune', chapter: 'The song of the world', text: 'Listen to the land sing', target: 30,
+    progress: s => Math.floor((s.stats.music || {}).heard || 0),
+    hint: 'Music blooms where the colour is bright. Stand still in a lantern\'s glow and listen.' },
+  { id: 'bandmate', chapter: 'The song of the world', text: 'Hear a friend join the song', target: 1,
+    progress: s => (s.stats.music || {}).joined || 0,
+    hint: 'Friends who are awake play along when you stand near them.', reward: { petal: 2 } },
+  { id: 'songs', chapter: 'The song of the world', text: 'Hear the morning, day, dusk and night songs', target: 4,
+    progress: s => ['morning', 'day', 'dusk', 'night'].filter(k => ((s.stats.music || {}).moods || {})[k]).length,
+    hint: 'Each time of day has its own tunes. Night brings a slow lullaby.', reward: { seed: 2, fibre: 2 } },
+  { id: 'band', chapter: 'The song of the world', text: 'Gather a band of 3 friends', target: 3,
+    progress: s => (s.stats.music || {}).band || 0,
+    hint: 'Singers sing, gardeners pluck a harp, tinkerers keep the beat, dreamers ring chimes, wanderers play a pipe.',
+    reward: { crystal: 2, petal: 3 } },
 ];

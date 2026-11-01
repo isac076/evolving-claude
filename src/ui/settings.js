@@ -20,9 +20,10 @@ G.Settings = class {
     this.el.addEventListener('pointerdown', e => { if (e.target === this.el) this.toggle(false); });   // click outside
 
     // sound
-    const vol = this.$('set-volume'), world = this.$('set-world');
+    const vol = this.$('set-volume'), world = this.$('set-world'), music = this.$('set-music');
     vol.oninput = () => { G.Sound.setVolume(vol.value / 100); if (G.Sound.muted) { G.Sound.setMuted(false); this.ui.showSound(); } this.showSound(); };
     world.oninput = () => { G.Sound.setWorld(world.value / 100); this.showSound(); };
+    music.oninput = () => { G.Sound.setMusic(music.value / 100); this.showSound(); };
     vol.onchange = () => G.Sound.play('select');
     this.$('set-sound').onclick = () => { this.ui.toggleSound(); this.showSound(); };
 
@@ -63,7 +64,9 @@ G.Settings = class {
   }
 
   showSound() {
-    const vol = this.$('set-volume'), world = this.$('set-world');
+    const vol = this.$('set-volume'), world = this.$('set-world'), music = this.$('set-music');
+    music.value = Math.round(G.Sound.music * 100);
+    this.$('set-music-n').textContent = music.value + '%';
     vol.value = Math.round(G.Sound.volume * 100);
     world.value = Math.round(G.Sound.world * 100);
     this.$('set-volume-n').textContent = G.Sound.muted ? 'off' : vol.value + '%';

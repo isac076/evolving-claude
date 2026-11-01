@@ -234,3 +234,18 @@ body.no-hints #hint { display: none; }
   #goals { bottom: 160px; }
   #toast { top: 136px; }
 }
+
+/* ---------- music: the name of the piece that just began ---------- */
+#music-caption {
+  position: absolute; left: 18px; bottom: 20px; max-width: min(260px, 40vw);
+  font-style: italic; font-size: 14px; letter-spacing: .03em; color: #fff0c8;
+  text-shadow: 0 0 12px rgba(255, 210, 120, .55), 0 1px 3px rgba(0, 0, 0, .8);
+  opacity: 0; transform: translateY(6px); transition: opacity 1.4s ease, transform 1.4s ease;
+}
+#music-caption::before { content: '♪'; display: inline-block; margin-right: 7px; font-style: normal; color: var(--gold); animation: note-bob 2.4s ease-in-out infinite; }
+#music-caption.show { opacity: .92; transform: none; }
+#music-caption.grey { color: #c9ccd8; text-shadow: 0 0 10px rgba(180, 190, 220, .35), 0 1px 3px rgba(0, 0, 0, .8); }
+#music-caption.grey::before { color: #c9ccd8; }
+@keyframes note-bob { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-3px) rotate(6deg); } }
+@media (max-width: 760px) { #music-caption { bottom: 108px; left: 16px; max-width: 52vw; font-size: 13px; } }
+@media (prefers-reduced-motion: reduce) { #music-caption::before { animation: none; } }

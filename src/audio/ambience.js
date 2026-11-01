@@ -86,11 +86,13 @@ G.Ambience = {
     set(n.waterF.frequency, 380 + 260 * lap, 0.5);
 
     // warm chord: appears as colour returns; a brighter chord by day, softer at night
-    const chord = day > 0.45 ? [0, 4, 7] : [-3, 0, 4];   // D major by day, B minor by night
+    // (when the music is playing, the pad holds the music's chord instead)
+    const tune = G.Music && G.Music.padChord();
+    const chord = tune || (day > 0.45 ? [0, 4, 7] : [-3, 0, 4]);   // D major by day, B minor by night
     const key = chord.join();
     if (key !== this.chord) {
       this.chord = key;
-      chord.forEach((semi, i) => set(n.voices[i].frequency, 146.83 * Math.pow(2, (semi + (i === 2 ? 12 : 0)) / 12), 2.5));
+      chord.forEach((semi, i) => set(n.voices[i].frequency, 146.83 * Math.pow(2, (semi + (i === 2 ? 12 : 0)) / 12), tune ? 0.25 : 2.5));
     }
     set(n.padG.gain, 0.05 * Math.pow(r, 1.5) * (0.6 + 0.4 * day) + 0.006, 2);
     set(n.padF.frequency, 450 + 700 * r * (0.5 + 0.5 * day), 2);
