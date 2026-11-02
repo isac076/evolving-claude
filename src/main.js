@@ -20,7 +20,8 @@ window.G = window.G || {};
       const name = r.builds ? G.STRUCTURES[r.builds].name : G.ITEMS[r.makes].name;
       if (why) {
         G.Sound.play('deny');
-        ui.toast(why === 'owned' ? `You already have a ${name}.`
+        ui.toast(why === 'locked' ? `Nobody has shown you how to make a ${name} yet.`
+          : why === 'owned' ? `You already have a ${name}.`
           : why === 'far' ? `Stand near a Workbench to make a ${name}.`
           : `Not enough materials for a ${name}.`);
         return;
@@ -84,6 +85,33 @@ window.G = window.G || {};
     map.touch(Math.floor(L.x / G.TILE), Math.floor(L.y / G.TILE));
     ui.toast(`${v.name} has made a home by your ${G.STRUCTURES[L.type].name}. Click them to say hello!`, 6);
     ui.refresh();
+  };
+
+  // friends' wishes and the cottages they move into (saved inside each villager)
+  const wishes = new G.Wishes(folk);
+  folk.wishes = wishes; state.wishes = wishes;
+  wishes.fx = folk.fx;
+  const wishPanel = new G.WishPanel(state, wishes);
+  wishes.onHeard = () => {
+    if (state.stats.wishesHeard === 1) ui.toast('A wish! Friends with a heart bubble are wishing for something. Their wishes are listed on the left.', 7);
+  };
+  wishes.onReady = (v, w) => {
+    addFloater(v.x, v.y - 40, `${v.name}'s wish came true!`, '#ffd77a');
+    ui.toast(`${v.name}'s wish came true — go and say hello!`, 4.5);
+    G.Sound.play('meet', { pan: panAt(v.x) });
+  };
+  wishes.onGrant = (v, w, before) => {
+    if (v.hearts > before) addFloater(v.x - 30, v.y - 30, `${v.name} ${'♥'.repeat(v.hearts)}`, '#ffa8c8');
+    ui.refresh();
+  };
+  wishes.onUnlock = (id, v) => {
+    const r = G.RECIPES.find(r => r.unlock === id), name = r ? G.STRUCTURES[r.builds].name : id;
+    setTimeout(() => ui.toast(`${v.name} shows you how to build a ${name}! Find it in Craft (C) — friends move into cottages near their light.`, 8), 1800);
+    ui.refresh();
+  };
+  wishes.onMoveIn = (v, st) => {
+    map.touch(st.tx, st.ty);
+    ui.toast(`${v.name} has moved into the cottage! At night you'll see the window glow.`, 6);
   };
 
   // gardens: sprouts and saplings grow into blooms, moonflowers and trees (not a separate save — they are structures)
@@ -309,6 +337,7 @@ window.G = window.G || {};
       if (r.builds === 'lantern') ui.toast('The land around the lantern remembers its colour.');
       if (r.builds === 'beacon') ui.toast('The crystal sings, and the land far around it remembers its colour.', 5);
       if (G.STRUCTURES[r.builds].grow) planted(tx, ty);
+      if (r.builds === 'cottage') ui.toast('A cottage! A friend whose light is close by will move in.', 4.5);
       if (r.builds === 'workbench') ui.toast('A workbench! Stand near it and open Craft (C) for tools and more.', 5);
       ui.refresh();
       if (!state.canAfford(r)) { state.buildRecipe = null; state.placing = null; }
@@ -377,6 +406,8 @@ window.G = window.G || {};
     map.update(dt, state.time);
     goals.update(dt);
     garden.update(dt, state);
+    wishes.update(dt, state);
+    wishPanel.update(dt);
   }
 
   // ---------- sound ----------
@@ -425,6 +456,11 @@ window.G = window.G || {};
     const ctx = renderer.ctx, camX = Math.round(state.cam.x - renderer.W / 2), camY = Math.round(state.cam.y - renderer.H / 2);
     G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
     G.MusicFX.draw(ctx, G.Music.notes, camX, camY, renderer.W, renderer.H);
+    for (const v of folk.list) {
+      if (folk.indoors(v)) continue;
+      G.drawHeartFx(ctx, v, v.x - camX, v.y - camY, frameDt);
+      G.drawWishMark(ctx, v, v.x - camX, v.y - camY, state.time, wishes.canGrant(v, state));
+    }
     for (const v of folk.all()) if (v.say) G.drawSpeech(ctx, v, v.x - camX, v.y - camY, renderer.W, renderer.H);
   }
 
@@ -440,10 +476,11 @@ window.G = window.G || {};
     ctx.globalAlpha = 1;
   }
 
-  let prev = performance.now();
+  let prev = performance.now(), frameDt = 0;
   function frame(now) {
     const paused = settings.isOpen;
     const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
+    frameDt = dt;
     if (paused && input.hit('escape')) settings.toggle(false);
     G.Sound.duck(paused);
     if (state.world) state.weather.update(dt, state);

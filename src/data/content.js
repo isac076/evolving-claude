@@ -58,6 +58,7 @@ G.OBJECTS = {
 // map = [h, s, l] colour on the map (lights with restore show as glowing dots).
 // fixed = can never be picked up.  workbench = recipes marked `at: 'workbench'` work near it.
 // homes = how many rescued spirits can make their home by this light (see data/villagers.js).
+// house = a cottage a friend can move into (see data/wishes.js).
 // grow = a planted thing that grows into a natural object (see data/garden.js); soil = ground types it can go in.
 G.STRUCTURES = {
   heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern', fixed: true, homes: 3 },
@@ -69,6 +70,7 @@ G.STRUCTURES = {
   fence:   { name: 'Fence',       solid: true,  on: 'land', sound: 'placeWood', map: [30, 35, 52] },
   flowerbed:{ name: 'Flower bed', solid: false, on: 'land', sound: 'petal', light: 70, map: [330, 60, 66] },
   bench:   { name: 'Bench',       solid: true,  on: 'land', sound: 'placeWood', map: [30, 40, 48] },
+  cottage: { name: 'Cottage',     solid: true,  on: 'land', sound: 'placeWood', house: true, map: [20, 55, 58] },
   sprout:  { name: 'Flower sprout', solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'flower', map: [110, 40, 34] },
   sapling: { name: 'Sapling',     solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'tree', map: [120, 40, 28] },
 };
@@ -76,6 +78,7 @@ G.STRUCTURES = {
 // Crafting recipes. Each either builds a structure (placed in the world) or
 // makes an item (a tool). at: 'workbench' = only while standing near a workbench.
 // garden: true = listed in the Garden group of the craft panel.
+// unlock = hidden until a friend teaches it to you (state.stats.unlocked, see data/wishes.js).
 G.RECIPES = [
   { id: 'lantern', cost: { wood: 3, stone: 2, petal: 2 }, builds: 'lantern',
     desc: 'Brings colour and light back to the land around it.' },
@@ -85,6 +88,8 @@ G.RECIPES = [
     desc: 'Stand near it to craft tools, beacons and more.' },
   { id: 'fence', cost: { wood: 1 }, builds: 'fence', desc: 'Joins up with fences beside it.' },
   { id: 'flowerbed', cost: { petal: 1, fibre: 1 }, builds: 'flowerbed', desc: 'A little bed of glowing flowers.' },
+  { id: 'cottage', cost: { wood: 6, stone: 4, fibre: 3 }, builds: 'cottage', unlock: 'cottage', home: true,
+    desc: 'A little home with a round door. Build it near a friend\'s light and they\'ll move in.' },
   { id: 'sprout', cost: { seed: 1 }, builds: 'sprout', garden: true,
     desc: 'Plant flower seeds in grass. They grow into a glowing bloom — or, now and then, a rare moonflower.' },
   { id: 'sapling', cost: { acorn: 1 }, builds: 'sapling', garden: true,

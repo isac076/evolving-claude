@@ -214,7 +214,8 @@ window.G = window.G || {};
     ctx.font = (lost ? 'italic ' : '') + '12px Georgia, serif';
     const lines = wrap(ctx, v.say, 170);
     const lh = 15, name = lost ? '' : v.name;
-    const w = Math.max(...lines.map(l => ctx.measureText(l).width), name ? 40 : 0) + 18;
+    const hearts = lost ? 0 : v.hearts || 0;   // friendship hearts beside the name (Night 10)
+    const w = Math.max(...lines.map(l => ctx.measureText(l).width), name ? Math.max(40, name.length * 7.6 + hearts * 9 + 4) : 0) + 18;
     const h = lines.length * lh + (name ? 14 : 0) + 10;
     let bx = sx - w / 2, byy = sy - 46 - (v.sit || 0) * 24 - h;
     bx = G.clamp(bx, 8, W - w - 8); byy = Math.max(8, byy);
@@ -233,7 +234,10 @@ window.G = window.G || {};
     let y = byy + 6;
     if (name) {
       ctx.font = '600 10px Georgia, serif'; ctx.fillStyle = `hsl(${v.hue},45%,38%)`;
-      ctx.fillText(name.toUpperCase(), bx + 9, y); y += 14;
+      ctx.fillText(name.toUpperCase(), bx + 9, y);
+      const nw = ctx.measureText(name.toUpperCase()).width;
+      for (let i = 0; i < hearts; i++) { G.heartPath(ctx, bx + 9 + nw + 9 + i * 9, y + 5, 3.4); ctx.fillStyle = '#ff7fa8'; ctx.fill(); }
+      y += 14;
       ctx.font = '12px Georgia, serif';
     }
     ctx.fillStyle = lost ? '#4a4d66' : '#3b2c4a';

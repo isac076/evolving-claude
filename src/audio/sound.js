@@ -307,6 +307,20 @@ G.SFX = {
     S.tone(G.note(5, 4), { type: 'triangle', glide: G.note(9, 4), dur: 0.12, gain: 0.08, pan: o.pan, rev: 0.2 });
     [7, 9, 12].forEach((n, k) => S.bell(G.note(n, 5), { gain: 0.045, dur: 1, t: 0.1 + k * 0.07, pan: o.pan, rev: 0.5 }));
   },
+  // ---- wishes and cottages (Night 10) ----
+  wish(S, o) {      // a wish comes true: a sparkling rise and a warm, glad chord
+    [0, 4, 7, 11, 14, 16].forEach((n, k) => S.bell(G.note(n, 5), { gain: 0.055, dur: 1.6, t: k * 0.07, pan: o.pan, rev: 0.6 }));
+    for (const n of [0, 4, 7]) S.tone(G.note(n, 3), { type: 'triangle', attack: 0.25, dur: 2.2, gain: 0.05, t: 0.1, rev: 0.7 });
+    S.noise({ filter: 'highpass', freq: 4200, attack: 0.2, dur: 0.9, gain: 0.025, t: 0.15, pan: o.pan, rev: 0.6 });
+  },
+  movein(S, o) {    // moving in: knock knock, the door creaks open, a homely little tune
+    [0, 0.16].forEach(t => {
+      S.tone(150, { type: 'triangle', glide: 95, dur: 0.07, gain: 0.2, t, pan: o.pan, rev: 0.15 });
+      S.noise({ filter: 'bandpass', freq: 900, q: 2, dur: 0.04, gain: 0.12, t, pan: o.pan });
+    });
+    S.tone(420, { type: 'sawtooth', glide: 560, glideTime: 0.3, dur: 0.32, attack: 0.05, gain: 0.012, t: 0.42, pan: o.pan, rev: 0.3 });
+    [4, 2, 0, 2, 4, 4, 4].forEach((n, k) => S.bell(G.note(n, 5), { gain: 0.05, dur: 0.9, t: 0.8 + k * 0.16, pan: o.pan, rev: 0.5 }));
+  },
   hum(S, o) {       // a singer by the lantern hums a little phrase
     const i = Math.floor(((o.pitch || 0) % 360) / 72);
     [0, 2, 1, 4].forEach((n, k) => S.tone(G.note(i + n, 4), { type: 'sine', attack: 0.06, dur: 0.4, gain: 0.03, t: k * 0.3, pan: o.pan, rev: 0.6 }));

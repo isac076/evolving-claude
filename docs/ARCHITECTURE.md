@@ -19,6 +19,7 @@ src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, ho
 src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow
 src/data/garden.js    G.GARDEN growth settings, G.GROW_KINDS (what sprouts/saplings become and how fast)
 src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
+src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / build / stat / house, words, rewards), G.WISH_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
@@ -26,6 +27,7 @@ src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the 
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
 src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
+src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -36,15 +38,17 @@ src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
 src/render/weather_fx.js G.WeatherFX — draws cloud shadows, grey skies, rain + splashes, wind-blown leaves, fog, rainbow
 src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bubbles), G.drawFollowThreads
 src/render/music_fx.js G.MusicFX — the little glowing ♪ that float up from friends playing (drawn after lighting)
+src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbles), G.drawHeartFx (rising hearts)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
 src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
+src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_garden.py, tools/smoke_music.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -162,6 +166,18 @@ tools/smoke_garden.py, tools/smoke_music.py  chapter tests, called at the end of
   `#music-caption`), `onJoin(v, def)`. Stats in `stats.music = {heard, joined, band, moods, pieces}` (saved inside stats,
   no version bump). Music volume is `G.Sound.music` (own `musicBus`), stored in localStorage `lumen-sound`.
   To add an instrument: a function in `G.INSTRUMENTS`; to add a mood or place: a data entry.
+- **Wishes & cottages** (`state.wishes`, G.Wishes; data in src/data/wishes.js): `folk.wishes` points at it, and G.Villagers
+  calls into it from `talk()` (wishes first), `bedFor()` (a house's doorstep), `serialize()/load()`. Each friend has `wishT`
+  (seconds until the next wish), `wish = {id, base, known, ready}`, `hearts`, `wishes` (granted count), `house = {tx, ty}`.
+  `base` is the counter when they asked (structures of that type within `G.WISH.near` tiles of home, or a stat), so build/stat
+  wishes need *more*. Bring wishes are grantable while you carry the items; others set `ready` once true (toast). `grant()`
+  takes items, gives `reward`, +1 heart, `stats.wishes`, and the first one pushes `G.WISH.unlockFirst` into `stats.unlocked`.
+  Recipes with `unlock` stay hidden ('locked' blocker, CSS `.locked`) until known (`G.Crafting.known`); recipes with `home` go in
+  the "Homes for friends" craft group. Structures with `house` (cottage) are claimed by the nearest friend without one within
+  `near` tiles of their light (`houses()` every 0.5s, also sets `st.owner` for the sprite: owner's colour on the door/roof). At
+  night that friend walks to the door and is `indoors()` while asleep: not drawn, not clickable, a warm window glow instead.
+  Picking a cottage up frees its owner. Main draws heart bubbles (`G.drawWishMark`) after the lighting. Stats: `wishesHeard`,
+  `wishes`, `housed`, `unlocked`. Save: optional fields in each saved villager — older saves load with no wishes (no version bump).
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that
   smoke_test.py calls at the end. New features should add their own file the same way.
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.

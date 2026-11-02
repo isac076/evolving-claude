@@ -19,6 +19,7 @@
 <div id="hud">
   <div class="panel" id="status"><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button><button id="btn-settings" aria-label="Rest and settings (Esc)" title="Rest and settings (Esc)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 1 0 7.6 13.2A7 7 0 0 1 12 3.2z"/></svg></button></div>
   <div class="panel" id="goals"></div>
+  <div class="panel" id="wishes"></div>
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
   <div id="music-caption"></div>
@@ -81,7 +82,7 @@
       <kbd>Craft</kbd><span>lanterns, paths, and picking things up</span>
       <kbd>Map</kbd><span>tap the round map</span>
     </div>
-    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home.</p>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it.</p>
 
     <div class="settings-buttons">
       <button id="set-resume" class="main">Keep playing</button>
@@ -116,12 +117,14 @@
 <script src="src/data/villagers.js"></script>
 <script src="src/data/garden.js"></script>
 <script src="src/data/music.js"></script>
+<script src="src/data/wishes.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/explore.js"></script>
 <script src="src/world/creatures.js"></script>
 <script src="src/world/weather.js"></script>
 <script src="src/world/villagers.js"></script>
 <script src="src/world/garden.js"></script>
+<script src="src/world/wishes.js"></script>
 <script src="src/game/player.js"></script>
 <script src="src/game/save.js"></script>
 <script src="src/game/crafting.js"></script>
@@ -132,11 +135,13 @@
 <script src="src/render/weather_fx.js"></script>
 <script src="src/render/villager_sprites.js"></script>
 <script src="src/render/music_fx.js"></script>
+<script src="src/render/home_sprites.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>
 <script src="src/ui/goals.js"></script>
 <script src="src/ui/settings.js"></script>
+<script src="src/ui/wishes_panel.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

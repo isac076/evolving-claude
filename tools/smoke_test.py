@@ -10,6 +10,7 @@ import pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import smoke_garden
 import smoke_music
+import smoke_wishes
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -506,6 +507,7 @@ def main():
 
         smoke_garden.run(page, SHOTS, errors)   # Night 8: planting, watering, growing
         smoke_music.run(page, SHOTS, errors)    # Night 9: the composer and the band
+        smoke_wishes.run(page, SHOTS, errors)   # Night 10: wishes, hearts and cottages
         browser.close()
 
     if errors:

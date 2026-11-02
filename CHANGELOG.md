@@ -2,6 +2,14 @@
 
 What changed each night, newest first.
 
+## Night 10 — 2026-11-02 — Wishes and cottages
+Your friends now make wishes! A little heart bubble over a friend means they're wishing for something — talk to them to
+hear it: a few glow petals, a flower bed or a path near their home, a new lantern, another lost spirit brought home…
+Wishes appear in a new list on the left, and the heart turns gold when a wish can come true. Each one earns a gift and a
+friendship heart (close friends give bigger daily gifts), and your first granted wish teaches you to build a Cottage:
+a friend whose light is close by moves in, goes inside to sleep at night with the window glowing warm, and has smoke
+curling from the chimney at dusk. A new "Friends' wishes" chapter of goals guides the way.
+
 ## Night 9 — 2026-11-01 — The world sings
 Lumen now has music that writes itself as you play — a new little tune every minute or so. In grey land you hear
 only a few lonely notes; walk into colour and a soft bass, a melody and a high sparkle bloom in. Mornings, sunny days,

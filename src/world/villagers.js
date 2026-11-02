@@ -232,6 +232,7 @@ window.G = window.G || {};
     // where a villager sleeps: a free spot beside its home light
     bedFor(world, v) {
       if (v.bed) return v.bed;
+      if (v.house && this.wishes) return (v.bed = this.wishes.door(v));   // a cottage of their own (Night 10)
       const mates = this.list.filter(o => o.home && o.home.key === v.home.key), idx = Math.max(0, mates.indexOf(v));
       const free = BED.filter(([dx, dy]) => !world.isSolid(v.home.tx + dx, v.home.ty + dy));
       const [dx, dy] = free.length ? free[idx % free.length] : [0, 1];
@@ -270,7 +271,13 @@ window.G = window.G || {};
       }
       const night = v.state === 'sleep' || v.state === 'tobed' ? day < 0.36 : day < 0.24;
       if (night && v.state !== 'sleep' && v.state !== 'tobed') { v.state = 'tobed'; const b = this.bedFor(world, v); v.tx2 = b.x; v.ty2 = b.y; v.sit = 0; }
-      if (!night && (v.state === 'sleep' || v.state === 'tobed')) { v.state = 'idle'; v.t = G.rand(0.5, 2); }
+      if (!night && (v.state === 'sleep' || v.state === 'tobed')) {
+        if (v.state === 'sleep' && v.house) {   // out of the cottage door, into the morning
+          if (this.fx && state.running) this.fx.burst(v.x, v.y - 14, 'rgba(255,230,180,A)', 8);
+          if (Math.random() < 0.5) this.say(v, pick(G.WISH_SAYS.morning), 3.5);
+        }
+        v.state = 'idle'; v.t = G.rand(0.5, 2);
+      }
 
       const dp = Math.hypot(v.x - p.x, v.y - p.y);
       const near = state.running && dp < G.SPIRITS.greet && v.state !== 'sleep' && v.state !== 'tobed';
@@ -327,8 +334,12 @@ window.G = window.G || {};
     }
 
     // ---------- talking ----------
-    hello(v) {
-      const n = v.name;
+    hello(v, state) {
+      const n = v.name, W = this.wishes;
+      if (W && v.wish && state) {   // a friend with a wish says so (Night 10)
+        if (W.canGrant(v, state)) return pick(W.def(v).type === 'bring' ? G.WISH_SAYS.carry : G.WISH_SAYS.ready);
+        if (!v.wish.known) return pick(['Psst! Can I tell you a wish?', 'Oh! I was hoping you\'d come. I have a wish…', 'Come here — I have a little wish!']);
+      }
       return pick([`Hello, little light!`, `Oh, it's you! Hello!`, `${n} says hi!`, `Hi! Come and talk to me.`, `There you are!`]);
     }
 
@@ -340,12 +351,15 @@ window.G = window.G || {};
       v.greetCd = Math.max(v.greetCd, 20);
       if (v.state === 'sleep') { this.say(v, pick(S.sleep), 2.5); return; }
       if (v.state === 'walk' || v.state === 'go') { v.state = 'idle'; v.t = 3; }
+      if (this.wishes && this.wishes.talk(v, state)) return;   // wishes come first (Night 10)
       this.voice(v);
       if (v.giftDay !== day) {
         v.giftDay = day;
         this.say(v, pick(S.gift), 4.5);
         let k = 0;
-        for (const [item, n] of Object.entries(v.def.gift)) {
+        const extra = (v.hearts || 0) >= G.WISH.giftHearts ? 1 : 0;   // close friends give a little more
+        for (const [item, n0] of Object.entries(v.def.gift)) {
+          const n = n0 + extra;
           state.inv[item] = (state.inv[item] || 0) + n;
           state.stats.got[item] = (state.stats.got[item] || 0) + n;
           if (this.fx) this.fx.floater(v.x + 34, v.y - 8 - k * 14, `+${n} ${G.ITEMS[item].name}`, G.ITEMS[item].color);
@@ -384,15 +398,16 @@ window.G = window.G || {};
     // the villager under a world point (for clicks)
     at(x, y) {
       let best = null, bd = 20;
-      for (const v of this.list) { const d = Math.hypot(v.x - x, v.y - 12 - y); if (d < bd) { bd = d; best = v; } }
+      for (const v of this.list) { if (this.indoors(v)) continue; const d = Math.hypot(v.x - x, v.y - 12 - y); if (d < bd) { bd = d; best = v; } }
       return best;
     }
     nearest(x, y, r) {
       let best = null, bd = r;
-      for (const v of this.list) { const d = Math.hypot(v.x - x, v.y - y); if (d < bd) { bd = d; best = v; } }
+      for (const v of this.list) { if (this.indoors(v)) continue; const d = Math.hypot(v.x - x, v.y - y); if (d < bd) { bd = d; best = v; } }
       return best;
     }
 
+    indoors(v) { return !!v.house && v.state === 'sleep'; }   // asleep inside their cottage: not drawn, can't be clicked
     voice(v) { this.sound('chirp', v.x, { pitch: v.hue, n: 2 + Math.floor(Math.random() * 3) }); }
     sound(name, x, opts) {
       if (!this.fx) return;
@@ -408,6 +423,7 @@ window.G = window.G || {};
     rows() {
       const m = new Map(), vw = this.view;
       for (const v of this.all()) {
+        if (this.indoors(v)) continue;
         if (vw && (v.x < vw.x0 || v.x > vw.x1 || v.y < vw.y0 || v.y > vw.y1)) continue;
         const r = Math.floor(v.y / T);
         if (!m.has(r)) m.set(r, []);
@@ -421,6 +437,10 @@ window.G = window.G || {};
     glows(out, camX, camY) {
       for (const v of this.lost.values()) out.push({ x: v.x - camX, y: v.y - camY - 14, r: 30 * v.a, hue: 235 });   // a pale shimmer in the dark
       for (const v of [...this.followers, ...this.list]) {
+        if (this.indoors(v)) {   // a warm window instead of their little lantern
+          out.push({ x: (v.house.tx + 0.5) * T - camX + 12, y: (v.house.ty + 1) * T - camY - 20, r: 70, hue: 38, warm: true });
+          continue;
+        }
         const a = v.mode === 'home' ? 1 : v.f;
         if (a > 0.2) out.push({ x: v.x - camX + v.face * 9, y: v.y - camY - 12, r: 46 * a, hue: v.hue });
       }
@@ -430,7 +450,8 @@ window.G = window.G || {};
     serialize() {
       return {
         rescued: [...this.rescued],
-        list: this.list.map(v => ({ id: v.id, name: v.name, kind: v.kind, hue: v.hue, home: [v.home.tx, v.home.ty], gift: v.giftDay })),
+        list: this.list.map(v => ({ id: v.id, name: v.name, kind: v.kind, hue: v.hue, home: [v.home.tx, v.home.ty], gift: v.giftDay,
+          ...(this.wishes ? this.wishes.save(v) : {}) })),   // wishes, hearts, cottage: optional (Night 10)
         follow: this.followers.map(v => v.id),
       };
     }
@@ -446,6 +467,7 @@ window.G = window.G || {};
         const L = world.lights.find(L => this.lightKey(L) === G.key(s.home[0], s.home[1])) || world.lights.find(L => L.type === 'heart');
         if (!L) continue;
         this.setHome(v, L);
+        if (this.wishes) this.wishes.load(v, s);
         this.list.push(v);
         const b = this.bedFor(world, v);
         v.x = b.x; v.y = b.y; v.t = Math.random() * 3;

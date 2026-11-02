@@ -22,7 +22,8 @@ G.UI = class {
     const list = this.$('craft-list');
     list.innerHTML = '';
     const groups = [
-      { title: 'Anywhere', recipes: G.RECIPES.filter(r => !r.at && !r.garden) },
+      { title: 'Anywhere', recipes: G.RECIPES.filter(r => !r.at && !r.garden && !r.home) },
+      { title: 'Homes for friends', id: 'home-head', recipes: G.RECIPES.filter(r => r.home && !r.at) },
       { title: 'Garden', recipes: G.RECIPES.filter(r => r.garden && !r.at) },
       { title: 'At a workbench', id: 'bench-head', recipes: G.RECIPES.filter(r => r.at === 'workbench') },
     ];
@@ -101,9 +102,12 @@ G.UI = class {
       head.querySelector('em').textContent = near ? 'workbench nearby ✓' : this.state.world && this.state.world.count('workbench')
         ? 'walk to your workbench' : 'build a workbench first';
     }
+    const homeHead = this.$('home-head');   // the homes group appears once a friend teaches you
+    if (homeHead) homeHead.classList.toggle('locked', !G.RECIPES.some(r => r.home && G.Crafting.known(this.state, r)));
     for (const b of document.querySelectorAll('.recipe')) {
       const r = G.RECIPES.find(x => x.id === b.dataset.id);
       const why = G.Crafting.blocker(this.state, r);
+      b.classList.toggle('locked', why === 'locked');
       b.classList.toggle('cant', !!why);
       b.classList.toggle('far', why === 'far');
       b.classList.toggle('is-owned', why === 'owned');

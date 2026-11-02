@@ -18,10 +18,14 @@ G.Crafting = {
     return false;
   },
 
+  // recipes with `unlock` are taught by friends (their first granted wish)
+  known(state, r) { return !r.unlock || ((state.stats && state.stats.unlocked) || []).includes(r.unlock); },
+
   owns(state, item) { return (state.inv[item] || 0) > 0; },
 
   // Why can't this recipe be used right now? null = it can.
   blocker(state, r) {
+    if (!this.known(state, r)) return 'locked';
     if (r.makes && G.ITEMS[r.makes].tool && this.owns(state, r.makes)) return 'owned';
     if (r.at === 'workbench' && !this.nearWorkbench(state)) return 'far';
     if (!state.canAfford(r)) return 'cost';

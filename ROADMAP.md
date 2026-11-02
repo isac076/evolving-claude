@@ -55,9 +55,9 @@ as the world does.
 ## Chapter 4 — The return of the villagers
 - [x] Lost spirits found wandering the faded world; lead them home (Night 6 — pale dots on the map, friends hint where others are)
 - [x] Villagers settle near lanterns and walk around, with simple daily routines (Night 6 — they visit things they love, sleep by their light, give a daily gift)
-- [ ] Houses villagers build or you build for them
-- [ ] Dialogue and small requests (bring me 5 petals...) with rewards (Night 6 added talking + daily gifts; requests still to come)
-- [ ] Villagers unlock new recipes, music, and abilities (Night 9: music done — awake friends nearby join the song, each kind with its own part and instrument)
+- [x] Houses villagers build or you build for them (Night 10 — cottages: a friend near your light moves in, sleeps inside with a glowing window, smoke from the chimney)
+- [x] Dialogue and small requests (bring me 5 petals...) with rewards (Night 10 — friends' wishes: bring, build, plant, light, rescue; heart bubbles, a wishes list, friendship hearts, bigger gifts from close friends)
+- [ ] Villagers unlock new recipes, music, and abilities (Night 9: music done — awake friends nearby join the song; Night 10: the first wish teaches the Cottage via `unlock` on recipes — more recipes/abilities to come)
 - [ ] A village that visibly grows over time (market, well, festival)
 
 ## Chapter 5 — Exploration
@@ -153,3 +153,9 @@ What a play-through taught us:
 - Music: the discoveries journal could list every piece title you've heard ("songbook")
 - Music: lost spirits hum a tiny broken fragment of the tune; it becomes whole when they come home
 - Music: Ember Shrines (Chapter 6) could each restore one "voice" of a great final song
+- Wishes: more friend-taught recipes via `unlock` (tinkerer → storage chest, singer → wind chime, gardener → garden arch) at 2–3 hearts
+- Wishes: knock on a cottage door at night (click it) and the friend peeks out sleepily; a "visit" counts as talking
+- Cottages: let the player pick the roof style or name plate; friends decorate their cottage more as hearts grow (flowers, a lantern by the door)
+- Wishes: a friend's wish could point at a far place ("bring me a crystal from the highlands") and mark it on the map
+- A village square: once 3 cottages stand near each other, a well appears and friends gather there in the evening
+- Friendship hearts could be shown on a friends page in the journal (with favourite things and how many wishes came true)
