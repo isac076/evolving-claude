@@ -39,6 +39,8 @@ G.Player = class {
   moveAxis(dx, dy, world) {
     const nx = this.x + dx, ny = this.y + dy, r = this.r, T = G.TILE;
     const pts = [[nx - r, ny], [nx + r, ny], [nx, ny - r * 0.6], [nx, ny + r * 0.6]];
+    // something grew (or stood) where the spirit already is: let it walk out
+    if (world.isSolid(Math.floor(this.x / T), Math.floor(this.y / T))) { this.x = nx; this.y = ny; return; }
     for (const [px, py] of pts) {
       if (world.isSolid(Math.floor(px / T), Math.floor(py / T))) {
         if (dx) this.vx *= 0.2; if (dy) this.vy *= 0.2;

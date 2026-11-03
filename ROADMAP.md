@@ -57,19 +57,19 @@ as the world does.
 - [x] Villagers settle near lanterns and walk around, with simple daily routines (Night 6 — they visit things they love, sleep by their light, give a daily gift)
 - [x] Houses villagers build or you build for them (Night 10 — cottages: a friend near your light moves in, sleeps inside with a glowing window, smoke from the chimney)
 - [x] Dialogue and small requests (bring me 5 petals...) with rewards (Night 10 — friends' wishes: bring, build, plant, light, rescue; heart bubbles, a wishes list, friendship hearts, bigger gifts from close friends)
-- [ ] Villagers unlock new recipes, music, and abilities (Night 9: music done — awake friends nearby join the song; Night 10: the first wish teaches the Cottage via `unlock` on recipes — more recipes/abilities to come)
+- [ ] Villagers unlock new recipes, music, and abilities (Night 11: friends now also remember where ruins are; Night 9: music done — awake friends nearby join the song; Night 10: the first wish teaches the Cottage via `unlock` on recipes — more recipes/abilities to come)
 - [ ] A village that visibly grows over time (market, well, festival)
 
 ## Chapter 5 — Exploration
 - [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
 - [ ] Each biome has its own materials, plants, creatures and restoration look
-- [ ] Ruins and points of interest scattered through the world
-- [ ] Discoveries journal / collection book
+- [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
+- [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
 - [ ] Lantern network fast travel
 - [ ] Boats to cross wide seas
 
 ## Chapter 6 — The mystery of the Fading
-- [ ] Lore fragments found in ruins tell what happened
+- [x] Lore fragments found in ruins tell what happened (Night 11 — 12 memories in `G.LORE`, told in order; they set up the Great Sun, the Heart and the Ember Shrines)
 - [ ] Ember Shrines: big goals spread across the world that each restore a huge area
 - [ ] Gentle shadow creatures at night that dim your light — repelled by light, never fought
 - [ ] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing)
@@ -101,6 +101,14 @@ What a play-through taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Ruins: more kinds (a sunken stair, a broken bridge over a stream, an old well, an overgrown greenhouse) — each is a stamp in G.RUIN_SITES
+- Ruins: biome-specific ruins once Chapter 5 biomes arrive (an ice temple in the snowy peaks, a buried sun-dial in the desert)
+- Ruins: a rare "keeper's chest" in some ruins with an old tool or a recipe (e.g. a lantern design) inside
+- Ruins: friends who visit a woken ruin and sit by the stone; a dreamer could "hear" the next memory before you find it
+- Memory stones could each hum one phrase of an old song; wake them all and the whole melody plays (ties into Chapter 6 music)
+- The journal could get a "Songbook" page (piece titles heard) and a "Garden" page (everything grown, rare moonflowers)
+- After all 12 memories, point the way to the first Ember Shrine (Chapter 6) — the story already promises them
+- Map: the big map could show a faint "?" where friends said a ruin might be
 - Fireflies can be caught in jars and used as small lights
 - Constellations in the night sky that light up as you restore the world
 - A cat that follows you around after you find it

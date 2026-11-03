@@ -379,6 +379,13 @@ window.G = window.G || {};
           this.say(v, pick(S.heard).replace('{dir}', dir), 5); return;
         }
       }
+      if (r >= 0.3 && r < 0.42) {   // friends remember the old ruins (Night 11)
+        const ruin = G.Ruins.nearestUnfound(world, state.stats, Math.floor(v.x / T), Math.floor(v.y / T));
+        if (ruin) {
+          const dir = G.Ruins.direction(v.x / T, v.y / T, ruin.tx, ruin.ty);
+          this.say(v, pick(S.ruins).replace('{dir}', dir), 5); return;
+        }
+      }
       if (r < 0.45 && !this.findLiked(world, v)) { this.say(v, v.def.wish, 5); return; }
       const wx = state.weather, dl = G.daylight(state.time), phase = (state.time % G.DAY_LENGTH) / G.DAY_LENGTH;
       let pool = [...v.def.lines, ...v.def.lines];

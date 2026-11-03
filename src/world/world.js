@@ -17,20 +17,24 @@ G.World = class {
   }
 
   // ---------- generation ----------
+  // The ground type at a tile, straight from the seed (no cache, no objects).
+  groundType(tx, ty) {
+    const s = this.seed;
+    const e = G.fbm(tx * 0.018, ty * 0.018, s, 5);            // elevation
+    if (e < 0.36) return 'deep';
+    if (e < 0.42) return 'water';
+    if (e < 0.445) return 'sand';
+    if (e > 0.68) return 'stone';
+    const m = G.fbm(tx * 0.03 + 100, ty * 0.03, s + 777, 3);  // moisture
+    return m > 0.55 ? 'forest' : 'grass';
+  }
+
   tileAt(tx, ty) {
     const k = G.key(tx, ty);
     let t = this.cache.get(k);
     if (t) return t;
     const s = this.seed;
-    const e = G.fbm(tx * 0.018, ty * 0.018, s, 5);            // elevation
-    const m = G.fbm(tx * 0.03 + 100, ty * 0.03, s + 777, 3);  // moisture
-    let type;
-    if (e < 0.36) type = 'deep';
-    else if (e < 0.42) type = 'water';
-    else if (e < 0.445) type = 'sand';
-    else if (e > 0.68) type = 'stone';
-    else if (m > 0.55) type = 'forest';
-    else type = 'grass';
+    const type = this.groundType(tx, ty);
 
     const v = G.hash2(tx, ty, s + 7);      // colour variation
     const o = G.hash2(tx, ty, s + 31);     // object placement
@@ -43,6 +47,13 @@ G.World = class {
 
     const soft = G.valueNoise(tx * 0.15, ty * 0.15, s + 55);  // gentle colour patches
     t = { type, v, soft, obj, hue: Math.floor(G.hash2(tx, ty, s + 99) * 360) };
+    // ruins of the old world (world/ruins.js) clear the ground they stand on
+    const ruin = G.Ruins.pieceAt(this, tx, ty);
+    if (ruin) {
+      t.obj = G.RUIN_PIECES[ruin.ch] || null;
+      t.ruin = ruin.site;
+      if (ruin.ch === '.') t.pave = true;
+    }
     if (this.cache.size > 150000) this.cache.clear();
     this.cache.set(k, t);
     return t;
@@ -165,7 +176,10 @@ G.World = class {
   }
 
   // Find a good spawn point near the origin: open grass with land around it.
-  findSpawn() {
+  // Uses only the ground (not objects or ruins), so ruins can stay away from it.
+  spawnSpot() {
+    if (this.spawn) return this.spawn;
+    const water = (x, y) => !!G.TILES[this.groundType(x, y)].water;
     for (let r = 0; r < 400; r += 2) {
       for (let a = 0; a < 16; a++) {
         const tx = Math.round(Math.cos(a / 16 * 6.283) * r);
@@ -173,10 +187,12 @@ G.World = class {
         let ok = true;
         for (let dx = -3; dx <= 3 && ok; dx++)
           for (let dy = -3; dy <= 3 && ok; dy++)
-            if (this.isWater(tx + dx, ty + dy)) ok = false;
-        if (ok && this.tileAt(tx, ty).type === 'grass') return { tx, ty };
+            if (water(tx + dx, ty + dy)) ok = false;
+        if (ok && this.groundType(tx, ty) === 'grass') return (this.spawn = { tx, ty });
       }
     }
-    return { tx: 0, ty: 0 };
+    return (this.spawn = { tx: 0, ty: 0 });
   }
+
+  findSpawn() { return { ...this.spawnSpot() }; }
 };

@@ -11,6 +11,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import smoke_garden
 import smoke_music
 import smoke_wishes
+import smoke_ruins
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -29,6 +30,21 @@ def main():
         page = browser.new_page(viewport={"width": 1100, "height": 680})
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+        try:
+            play(page, errors)
+        except Exception:
+            if errors: print("ERRORS before the crash:\n" + "\n".join(errors))
+            raise
+        browser.close()
+    if errors:
+        print("ERRORS:\n" + "\n".join(errors))
+        return 1
+    print("Smoke test passed. Screenshots in tools/screenshots/")
+    return 0
+
+
+def play(page, errors):
+    if True:
 
         page.goto((ROOT / "index.html").as_uri())
         page.wait_for_timeout(800)
@@ -257,10 +273,10 @@ def main():
             // an open patch of grass near the heart stone
             const h = w.lights.find(L => L.type === 'heart'), htx = Math.floor(h.x / T), hty = Math.floor(h.y / T);
             let spot = null;
-            for (let r = 3; r < 80 && !spot; r++) for (let dx = -r; dx <= r && !spot; dx++) for (const dy of [-r, r]) {
-                const tx = htx + dx, ty = hty + dy; let ok = true;
+            for (let r = 3; r < 200 && !spot; r++) for (let dx = -r; dx <= r && !spot; dx++) for (const [ox, oy] of [[dx, -r], [dx, r], [-r, dx], [r, dx]]) {
+                const tx = htx + ox, ty = hty + oy; let ok = true;
                 for (let x = -4; x <= 4 && ok; x++) for (let y = -3; y <= 3 && ok; y++)
-                    if (w.isWater(tx + x, ty + y) || w.objectAt(tx + x, ty + y) || w.structureAt(tx + x, ty + y)) ok = false;
+                    if (w.isWater(tx + x, ty + y) || w.objectAt(tx + x, ty + y) || w.structureAt(tx + x, ty + y) || w.tileAt(tx + x, ty + y).ruin) ok = false;
                 if (ok) { spot = { tx, ty }; break; }
             }
             if (!spot) return 'no open spot for the workshop';
@@ -508,13 +524,7 @@ def main():
         smoke_garden.run(page, SHOTS, errors)   # Night 8: planting, watering, growing
         smoke_music.run(page, SHOTS, errors)    # Night 9: the composer and the band
         smoke_wishes.run(page, SHOTS, errors)   # Night 10: wishes, hearts and cottages
-        browser.close()
-
-    if errors:
-        print("ERRORS:\n" + "\n".join(errors))
-        return 1
-    print("Smoke test passed. Screenshots in tools/screenshots/")
-    return 0
+        smoke_ruins.run(page, SHOTS, errors)    # Night 11: ruins, memory stones, the journal
 
 
 if __name__ == "__main__":

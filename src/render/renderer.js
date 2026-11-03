@@ -90,6 +90,8 @@ G.Renderer = class {
     const life = state.creatures;
     if (life) life.drawWater(ctx, camX, camY, time);
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+      const tile = tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)];
+      if (tile.pave) G.drawPave(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // a ruin's old flagstones
       const st = world.structureAt(tx, ty);
       if (st && G.STRUCTURES[st.type].floor) G.STRUCTURE_SPRITES[st.type](ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), time, st);
     }
@@ -101,6 +103,8 @@ G.Renderer = class {
     for (let ty = ty0; ty <= ty1; ty++) {
       const critters = groundLife && groundLife.get(ty);
       if (critters) for (const c of critters) life.drawOne(ctx, c, camX, camY, time);
+      for (let tx = tx0 - 2; tx < tx0; tx++)   // a wide ruin arch whose left foot is just off screen
+        if (world.objectAt(tx, ty) === 'arch') G.OBJECT_SPRITES.arch(ctx, tx * T - camX, ty * T - camY, fAt(tx0, ty), time, world.tileAt(tx, ty));
       for (let tx = tx0; tx <= tx1; tx++) {
         const x = tx * T - camX, y = ty * T - camY, f = fAt(tx, ty);
         const st = world.structureAt(tx, ty);
@@ -108,10 +112,12 @@ G.Renderer = class {
         const o = world.objectAt(tx, ty);
         if (o) {
           G.OBJECT_SPRITES[o](ctx, x, y, f, time, world.tileAt(tx, ty));
-          const od = G.OBJECTS[o];
+          const od = G.OBJECTS[o], tile = world.tileAt(tx, ty);
           if (od.light) {
-            const hue = od.glowHue !== undefined ? od.glowHue + (world.tileAt(tx, ty).hue % 50) : world.tileAt(tx, ty).hue;
+            const hue = od.glowHue !== undefined ? od.glowHue + (tile.hue % 50) : tile.hue;
             nightGlows.push({ x: x + 16, y: y + 13, r: od.light, hue });
+          } else if (od.awakeLight && tile.ruin && tile.ruin.awake) {   // a ruin's keeper lantern, once its stone is woken
+            nightGlows.push({ x: x + 16 + (od.glowAt || [0, 0])[0], y: y + 13 + (od.glowAt || [0, 0])[1], r: od.awakeLight, hue: od.glowHue });
           }
         }
         else if (!st) {   // something gathered here is growing back

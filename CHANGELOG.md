@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 11 — 2026-11-03 — Ruins of the old world
+The faded land is now dotted with ruins: stone circles, fallen gates you can walk through, dry fountains, a hooded keeper
+statue and broken halls of lanterns. At the heart of each sleeps a carved memory stone — stand beside it and press E to wake
+it: it glows gold, colour returns around the ruin (the fountain runs again, the keeper's lantern lights up at night) and you
+read one memory of the story of why the world faded. A new Journal (J, or the little book at the top) keeps every memory,
+the ruins you've found, the wildlife you've met and your friends, and friends sometimes remember which way the old stones lie.
+
 ## Night 10 — 2026-11-02 — Wishes and cottages
 Your friends now make wishes! A little heart bubble over a friend means they're wishing for something — talk to them to
 hear it: a few glow petals, a flower bed or a path near their home, a new lantern, another lost spirit brought home…

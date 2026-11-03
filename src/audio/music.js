@@ -115,7 +115,7 @@ G.Music = {
         const n = Math.abs(len);
         if (len > 0) {
           deg += G.pick([-2, -1, -1, -1, 0, 1, 1, 1, 2]);
-          if (deg > 8) deg -= 3; if (deg < -1) deg += 3;
+          while (deg > 8) deg -= 3; while (deg < -1) deg += 3;   // keep it singable (snap can add 2 more)
           const strong = p === 0 || (beats === 4 && p === 4) || n >= 3;
           if (strong) deg = this.snap(deg, chord);
           out.push({ p, len: n, d: deg, strong });

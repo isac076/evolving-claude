@@ -86,5 +86,7 @@ G.VILLAGER_SAYS = {
   friends: ['It\'s nice not being the only one any more.', 'We should have a festival one day. With music!'],
   heard: ['I heard someone crying, far to the {dir}.', 'Someone is lost out in the grey, {dir} of here. Will you find them?',
     'I dreamt of a pale little light to the {dir}. Someone is waiting there.'],
+  ruins: ['I remember old stones standing to the {dir}. They used to hum at night.', 'There are ruins to the {dir}. My grandmother said the stones keep memories.',
+    'Have you been {dir}? Someone built something there, long, long ago.'],
   gift: ['Here — I saved these for you.', 'A little something, for all your kindness.', 'Take these! I have plenty.'],
 };

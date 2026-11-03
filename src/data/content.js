@@ -49,6 +49,17 @@ G.OBJECTS = {
   reeds: { name: 'Reeds', solid: false, drops: { fibre: 2 }, regrow: 240, sound: 'fibre' },
   crystal:{ name: 'Crystal cluster', solid: false, drops: { crystal: 1 }, regrow: 900, light: 60, glowHue: 195,
             sound: 'crystal', needs: 'pick', tool: 'pick', bonus: { crystal: 1 } },
+  // ruins of the old world (see data/ruins.js): placed by world/ruins.js, never gathered —
+  // except rubble. ruin = part of a ruin.  read = a memory stone you can wake (E).
+  rubble:  { name: 'Rubble', solid: false, drops: { stone: 2 }, regrow: 700, sound: 'stone', tool: 'pick', bonus: { stone: 1 }, ruin: true },
+  pillar:  { name: 'Old pillar', solid: true, ruin: true },
+  stump:   { name: 'Broken pillar', solid: true, ruin: true },
+  ruinwall:{ name: 'Old wall', solid: true, ruin: true },
+  arch:    { name: 'Old arch', solid: true, ruin: true },
+  archfoot:{ name: 'Old arch', solid: true, ruin: true },
+  statue:  { name: 'Keeper statue', solid: true, ruin: true, awakeLight: 110, glowHue: 40, glowAt: [13, -35] },
+  fountain:{ name: 'Old fountain', solid: true, ruin: true, awakeLight: 70, glowHue: 195, glowAt: [0, -8] },
+  memory:  { name: 'Memory stone', solid: true, ruin: true, read: true, light: 34, glowHue: 215 },
 };
 
 // Things the player can build.
@@ -56,7 +67,7 @@ G.OBJECTS = {
 // light = glow radius (px) at night.  floor = drawn under everything.
 // sound = played when built.  step = footstep sound when walking on it.
 // map = [h, s, l] colour on the map (lights with restore show as glowing dots).
-// fixed = can never be picked up.  workbench = recipes marked `at: 'workbench'` work near it.
+// fixed = can never be picked up (fixedSay = what to say when you try).  workbench = recipes marked `at: 'workbench'` work near it.
 // homes = how many rescued spirits can make their home by this light (see data/villagers.js).
 // house = a cottage a friend can move into (see data/wishes.js).
 // grow = a planted thing that grows into a natural object (see data/garden.js); soil = ground types it can go in.
@@ -71,6 +82,9 @@ G.STRUCTURES = {
   flowerbed:{ name: 'Flower bed', solid: false, on: 'land', sound: 'petal', light: 70, map: [330, 60, 66] },
   bench:   { name: 'Bench',       solid: true,  on: 'land', sound: 'placeWood', map: [30, 40, 48] },
   cottage: { name: 'Cottage',     solid: true,  on: 'land', sound: 'placeWood', house: true, map: [20, 55, 58] },
+  // a memory stone you have woken (it replaces the sleeping stone; see data/ruins.js)
+  memorystone: { name: 'Memory stone', solid: true, on: 'land', restore: 4, light: 170, sound: 'memory', fixed: true, homes: 1,
+                 fixedSay: 'The memory stone has stood here since long before the Fading — it stays where it is.', map: [45, 70, 72] },
   sprout:  { name: 'Flower sprout', solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'flower', map: [110, 40, 34] },
   sapling: { name: 'Sapling',     solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'tree', map: [120, 40, 28] },
 };

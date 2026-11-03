@@ -43,6 +43,12 @@ window.G = window.G || {};
   const ui = new G.UI(state);
   const map = new G.Minimap(state);
   const goals = new G.Goals(state, ui);
+  const journal = new G.Journal(state, ui);   // discoveries journal (J) + the memory card (Night 11)
+  // ruins of the old world: finding them, and waking their memory stones (Night 11)
+  const ruins = new G.RuinPlay(state, {
+    ui, map, journal, burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    floater: (x, y, text, color) => addFloater(x, y, text, color), pan: x => panAt(x),
+  });
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -217,6 +223,8 @@ window.G = window.G || {};
   function gatherAt(tx, ty) {
     const w = state.world, obj = w.objectAt(tx, ty);
     if (!obj) return false;
+    if (G.OBJECTS[obj].read) { ruins.wake(tx, ty); return true; }
+    if (!G.OBJECTS[obj].drops) { ruins.about(tx, ty, obj); return true; }
     const why = G.Crafting.gatherBlocker(state, obj);
     if (why) { G.Sound.play('deny'); ui.toast(why, 3); return true; }
     const drops = G.Crafting.dropsFor(state, obj);
@@ -263,15 +271,20 @@ window.G = window.G || {};
       const dry = garden.dryNear(state.world, p.x, p.y, REACH);
       if (dry) { waterPlant(dry); return; }
     }
+    let stone = null, oldStone = null;
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
       if (!o) continue;
       const d = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y);
       if (d > REACH) continue;
+      if (G.OBJECTS[o].read) { stone = { tx, ty }; continue; }    // a sleeping memory stone comes first
+      if (!G.OBJECTS[o].drops) { oldStone = { tx, ty, o }; continue; }   // ruins can't be gathered
       if (G.Crafting.gatherBlocker(state, o)) { locked = { tx, ty }; continue; }   // skip what you can't gather yet
       if (d < bd) { bd = d; best = { tx, ty }; }
     }
-    if (best || locked) gatherAt((best || locked).tx, (best || locked).ty);
+    if (stone) ruins.wake(stone.tx, stone.ty);
+    else if (best || locked) gatherAt((best || locked).tx, (best || locked).ty);
+    else if (oldStone) ruins.about(oldStone.tx, oldStone.ty, oldStone.o);
     else {
       let plant = null;
       for (const st of garden.plants(state.world)) if (Math.hypot((st.tx + 0.5) * G.TILE - p.x, (st.ty + 0.5) * G.TILE - p.y) <= REACH) plant = st;
@@ -362,6 +375,7 @@ window.G = window.G || {};
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
+    if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return; }
     // Esc closes the nearest thing first; with nothing open it is time to rest
     if (input.hit('escape')) {
       if (map.isOpen) map.toggle(false);
@@ -408,6 +422,7 @@ window.G = window.G || {};
     garden.update(dt, state);
     wishes.update(dt, state);
     wishPanel.update(dt);
+    ruins.update(dt);
   }
 
   // ---------- sound ----------
@@ -478,10 +493,11 @@ window.G = window.G || {};
 
   let prev = performance.now(), frameDt = 0;
   function frame(now) {
-    const paused = settings.isOpen;
+    const paused = settings.isOpen || journal.paused;
     const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
     frameDt = dt;
-    if (paused && input.hit('escape')) settings.toggle(false);
+    if (settings.isOpen) { if (input.hit('escape')) settings.toggle(false); }
+    else if (journal.paused) journal.keys(input);
     G.Sound.duck(paused);
     if (state.world) state.weather.update(dt, state);
     if (state.running) {

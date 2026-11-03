@@ -62,6 +62,8 @@ G.Minimap = class {
       else if (t.obj === 'tree') { h += 6; l -= 9; }
       else if (t.obj === 'rock') { s = 6; l = 58; }
       else if (t.obj === 'bloom' && f > 0.3) { h = t.hue; s = 80; l = 68; }
+      else if (t.obj && G.OBJECTS[t.obj].ruin) { h = 36; s = 16; l = 74; }   // old stones (Night 11)
+      else if (t.pave) { h = 36; s = 12; l = 60; }
       const S = s * (0.1 + 0.9 * f), L = l * (0.66 + 0.4 * f);
       const [r, g, b] = G.hslToRgb(h, S, Math.min(92, L));
       d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255;
@@ -133,6 +135,20 @@ G.Minimap = class {
       ctx.fillStyle = L.type === 'heart' ? '#fff6dc' : L.type === 'beacon' ? '#dff8ff' : '#ffd77a';
       if (big9) { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3, y); ctx.fill(); }
       else G.circle(ctx, x, y, 1.6);
+    }
+    // ruins you have found: a pale stone mark, gold once its memory stone is awake
+    const found = (this.state.stats.ruins && this.state.stats.ruins.found) || {};
+    for (const id in found) {
+      const [cx, cy] = id.split(',').map(Number), site = G.Ruins.siteOf(world, cx, cy);
+      if (!site) continue;
+      const x = toX((site.tx + 0.5) * T), y = toY((site.ty + 0.5) * T);
+      if (!big && Math.hypot(x - sx, y - sy) > 84) continue;
+      const read = G.Ruins.isRead(world, site), r = big ? 4.5 : 3.5;
+      ctx.fillStyle = 'rgba(10,12,30,.55)'; ctx.fillRect(x - r - 1, y - r - 1, r * 2 + 2, r * 2 + 2);
+      ctx.strokeStyle = read ? '#ffd77a' : 'rgba(225,228,240,.9)'; ctx.lineWidth = 1.3;
+      ctx.strokeRect(x - r, y - r, r * 2, r * 2);
+      ctx.fillStyle = read ? '#ffd77a' : 'rgba(225,228,240,.7)';
+      ctx.fillRect(x - r + 2, y - 0.6, r * 2 - 4, 1.2); ctx.fillRect(x - 0.6, y - r + 2, 1.2, r * 2 - 4);
     }
     // lost spirits you have seen (pale, pulsing) and friends at home (their own colour)
     const folk = this.state.villagers;

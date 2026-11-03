@@ -337,6 +337,20 @@ G.SFX = {
     [0, 2, 4, 7].forEach((n, i) => S.bell(G.note(n, 5), { gain: 0.06, dur: 1.2, t: i * 0.09, pan: o.pan, rev: 0.5 }));
     S.noise({ filter: 'highpass', freq: 3000, dur: 0.5, attack: 0.1, gain: 0.03, pan: o.pan });
   },
+  ruin(S) {          // you come upon an old ruin: a low, hollow hum and a far-off bell
+    S.tone(G.note(0, 2), { type: 'sine', attack: 0.6, dur: 2.6, gain: 0.07, rev: 0.8 });
+    S.tone(G.note(3, 2), { type: 'sine', attack: 0.8, dur: 2.4, gain: 0.04, t: 0.2, rev: 0.8 });
+    [3, 2, 4].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.05, dur: 2.4, t: 0.5 + k * 0.38, rev: 0.8 }));
+  },
+  memory(S, o) {     // a memory stone wakes: glassy notes climbing slowly, then a warm, wide chord
+    [0, 2, 3, 4, 5, 7].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.07, dur: 2.6, t: k * 0.16, pan: o.pan, rev: 0.75 }));
+    for (const n of [0, 2, 3]) S.tone(G.note(n, 3), { type: 'triangle', attack: 0.7, dur: 3.4, gain: 0.045, t: 0.6, rev: 0.8 });
+    S.noise({ filter: 'bandpass', freq: 800, freqTo: 5000, q: 0.7, attack: 0.6, dur: 1.6, gain: 0.03, rev: 0.7 });
+  },
+  page(S) {          // a journal page turning
+    S.noise({ filter: 'bandpass', freq: 1800, freqTo: 3600, q: 0.8, attack: 0.02, dur: 0.16, gain: 0.06 });
+    S.noise({ filter: 'bandpass', freq: 3000, freqTo: 1500, q: 0.8, attack: 0.02, dur: 0.12, gain: 0.04, t: 0.1 });
+  },
   welcome(S) {  // the Heart Stone glows as a new world begins
     [0, 4, 7, 9, 12].forEach((n, k) => S.bell(G.note(n, 3), { gain: 0.08, dur: 3, t: k * 0.22, rev: 0.7 }));
   },

@@ -133,4 +133,23 @@ G.GOALS = [
   { id: 'wishes6', chapter: 'Friends\' wishes', text: 'Make 6 wishes come true', target: 6,
     progress: s => s.stats.wishes || 0, hint: 'Every friend has many wishes, one after another.',
     reward: { petal: 4, acorn: 2 } },
+
+  // ---- Echoes of the old world (Night 11) ----
+  { id: 'ruinfind', chapter: 'Echoes of the old world', text: 'Find the ruins of the old world', target: 1,
+    progress: s => s.stats.ruinsFound || 0,
+    hint: 'Old stones stand out in the grey, away from the Heart Stone. Friends sometimes remember where.' },
+  { id: 'wake', chapter: 'Echoes of the old world', text: 'Wake a memory stone', target: 1,
+    progress: s => (s.stats.memories || []).length,
+    hint: 'Every ruin has one carved stone at its heart. Stand beside it and press E (or click it).', reward: { crystal: 1 } },
+  { id: 'journal', chapter: 'Echoes of the old world', text: 'Open your journal', target: 1,
+    progress: s => s.stats.journal || 0, hint: 'Press J, or tap the little book beside the moon.' },
+  { id: 'ruins3', chapter: 'Echoes of the old world', text: 'Find 3 different ruins', target: 3,
+    progress: s => s.stats.ruinsFound || 0,
+    hint: 'Stone circles, fallen gates, dry fountains, sleeping keepers… found ruins show on your map.', reward: { wood: 4, stone: 4 } },
+  { id: 'memories5', chapter: 'Echoes of the old world', text: 'Remember 5 memories', target: 5,
+    progress: s => (s.stats.memories || []).length,
+    hint: 'Each stone you wake tells the next part of the story, and brings colour back around it.', reward: { crystal: 2, petal: 3 } },
+  { id: 'story', chapter: 'Echoes of the old world', text: 'Learn the whole story of the Fading', target: 12,
+    progress: s => (s.stats.memories || []).length,
+    hint: 'Twelve memories, scattered far and wide. Your journal keeps them in order.', reward: { crystal: 3, seed: 3 } },
 ];

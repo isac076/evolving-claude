@@ -52,7 +52,7 @@ G.Crafting = {
   // Can this building be picked up? null = yes, else a message why not.
   pickupBlocker(state, st) {
     const def = G.STRUCTURES[st.type];
-    if (def.fixed) return `The ${def.name} can't be moved — it holds the world together.`;
+    if (def.fixed) return def.fixedSay || `The ${def.name} can't be moved — it holds the world together.`;
     const p = state.player;
     if (def.bridge && p.tx === st.tx && p.ty === st.ty) return 'Step off the bridge first.';
     return null;

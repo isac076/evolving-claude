@@ -95,6 +95,8 @@ G.Settings = class {
     const lit = w.litCount(), friends = s.villagers ? s.villagers.list.length : 0;
     const bits = [`Day ${day}`, `${lit} light${lit === 1 ? '' : 's'} lit`];
     if (friends) bits.push(`${friends} friend${friends === 1 ? '' : 's'} at home`);
+    const mem = (s.stats.memories || []).length;
+    if (mem) bits.push(`${mem} memor${mem === 1 ? 'y' : 'ies'} remembered`);
     bits.push(`${s.explored.count.toLocaleString()} places seen`);
     this.$('settings-summary').textContent = bits.join(' · ');
   }

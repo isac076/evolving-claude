@@ -269,3 +269,74 @@ body.no-hints #hint { display: none; }
 .wish.unknown span { font-style: italic; color: var(--ink-dim); }
 .wish-more { font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
 @media (max-width: 600px) { #wishes { top: auto; width: min(240px, calc(100vw - 120px)); font-size: 12px; } }
+
+/* ---------- journal + memory stones (Night 11) ---------- */
+#btn-journal { pointer-events: auto; background: none; border: 0; padding: 0 2px; margin: -4px -2px -4px -6px; display: flex; opacity: .8; }
+#btn-journal:hover { opacity: 1; }
+#btn-journal path { fill: none; stroke: var(--gold); stroke-width: 1.7; stroke-linejoin: round; }
+#journal {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(8, 10, 30, .2), rgba(5, 6, 20, .62));
+  opacity: 0; pointer-events: none; transition: opacity .35s;
+}
+#journal.open { opacity: 1; pointer-events: auto; }
+.journal-frame {
+  width: min(560px, 100%); height: min(560px, 100%); display: flex; flex-direction: column; box-sizing: border-box; padding: 16px 20px 14px;
+  background: rgba(16, 18, 40, .9);
+  transform: translateY(10px) scale(.98); transition: transform .35s ease;
+}
+#journal.open .journal-frame { transform: none; }
+.journal-head { display: flex; justify-content: space-between; align-items: center; }
+.journal-head h2 { margin: 0; font-weight: 400; font-size: 24px; letter-spacing: .08em; color: #fff3d6; text-shadow: 0 0 18px rgba(255, 210, 120, .5); }
+#journal-close { background: none; border: 0; font-size: 22px; line-height: 1; }
+.journal-tabs { display: flex; gap: 4px; margin: 10px 0 8px; border-bottom: 1px solid var(--edge); }
+.journal-tabs button { flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 4px 7px; font-size: 13px; letter-spacing: .06em; color: var(--ink-dim); margin-bottom: -1px; }
+.journal-tabs button:hover { color: var(--ink); }
+.journal-tabs button.on { color: var(--gold); border-bottom-color: var(--gold); text-shadow: 0 0 10px rgba(255, 210, 120, .45); }
+#journal-page { flex: 1; min-height: 0; overflow: auto; padding-right: 4px; user-select: text; -webkit-user-select: text; }
+.j-note { margin: 4px 0 10px; color: var(--ink-dim); font-size: 13px; line-height: 1.45; }
+.j-memory { margin: 0 0 12px; padding: 0 0 0 12px; border-left: 2px solid rgba(255, 215, 122, .45); }
+.j-memory b { font-weight: 400; color: var(--gold); font-size: 15px; letter-spacing: .03em; }
+.j-memory p { margin: 3px 0 0; font-style: italic; line-height: 1.5; font-size: 14.5px; }
+.j-memory.sleeping { border-left-color: rgba(200, 210, 240, .25); }
+.j-memory.sleeping b, .j-memory.sleeping p { color: var(--ink-dim); }
+.j-place { margin: 0 0 10px; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .06); }
+.j-place b { font-weight: 400; color: var(--ink); font-size: 15px; }
+.j-place.read b { color: var(--gold); }
+.j-place em { float: right; font-size: 12px; color: var(--ink-dim); }
+.j-place p { margin: 3px 0; font-size: 13px; color: var(--ink-dim); font-style: italic; }
+.j-place small { font-size: 12px; color: #c8d2f0; }
+.j-place.read small { color: var(--gold); }
+.j-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.j-card { padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .06); font-size: 13px; }
+.j-card i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 6px currentColor; vertical-align: 0; }
+.j-card b { font-weight: 400; color: var(--gold); }
+.j-card p { margin: 4px 0 0; color: var(--ink-dim); font-size: 12px; line-height: 1.4; }
+.j-card.unknown b { color: var(--ink-dim); letter-spacing: .2em; }
+.j-card.unknown i { background: rgba(255, 255, 255, .15); }
+.j-card .hearts { float: right; color: #ff8fb5; font-size: 11px; letter-spacing: 1px; }
+.j-card .hearts s { text-decoration: none; color: rgba(255, 255, 255, .15); }
+
+#memory {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px;
+  background: radial-gradient(ellipse at center, rgba(40, 30, 10, .25), rgba(5, 6, 20, .7));
+  opacity: 0; pointer-events: none; transition: opacity .8s ease;
+}
+#memory.open { opacity: 1; pointer-events: auto; cursor: pointer; }
+.memory-card {
+  width: min(470px, 100%); box-sizing: border-box; padding: 26px 30px 18px; text-align: center; border-radius: 16px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(70, 58, 50, .97), rgba(20, 20, 44, .96) 70%);
+  border: 1px solid rgba(255, 215, 122, .35);
+  box-shadow: 0 0 60px rgba(255, 200, 110, .18), 0 10px 40px rgba(0, 0, 0, .5);
+  transform: translateY(14px) scale(.97); transition: transform 1s ease;
+}
+#memory.open .memory-card { transform: none; }
+#memory-where { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
+#memory-title { margin: 8px 0 10px; font-weight: 400; font-size: 23px; letter-spacing: .05em; color: #fff0c8; text-shadow: 0 0 20px rgba(255, 210, 120, .6); }
+#memory-title::before, #memory-title::after { content: '✦'; font-size: 12px; color: var(--gold); margin: 0 12px; vertical-align: 4px; }
+#memory-text { margin: 0 0 18px; font-style: italic; font-size: 17px; line-height: 1.6; color: var(--ink); }
+.memory-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-dim); border-top: 1px solid var(--edge); padding-top: 10px; }
+#memory-journal { background: none; border: 0; color: var(--gold); font-size: 12px; padding: 0; }
+#memory-journal:hover { text-decoration: underline; }
+body.big-text #journal, body.big-text #memory { zoom: 1.18; }
+@media (max-width: 600px) { #memory-text { font-size: 15.5px; } .memory-card { padding: 20px 18px 14px; } }

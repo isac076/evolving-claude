@@ -20,8 +20,10 @@ src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/clou
 src/data/garden.js    G.GARDEN growth settings, G.GROW_KINDS (what sprouts/saplings become and how fast)
 src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
 src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / build / stat / house, words, rewards), G.WISH_SAYS
+src/data/ruins.js     G.RUIN settings, G.RUIN_SITES (ruin kinds as little stamps), G.RUIN_PIECES, G.LORE (the 12 memories), G.RUIN_ECHOES
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
+src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
@@ -30,6 +32,7 @@ src/world/garden.js   G.Garden — grows planted structures, watering, turns the
 src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
+src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
@@ -39,16 +42,18 @@ src/render/weather_fx.js G.WeatherFX — draws cloud shadows, grey skies, rain +
 src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bubbles), G.drawFollowThreads
 src/render/music_fx.js G.MusicFX — the little glowing ♪ that float up from friends playing (drawn after lighting)
 src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbles), G.drawHeartFx (rising hearts)
+src/render/ruin_sprites.js pillars, stumps, walls, the arch (spans 3 tiles), keeper statue, fountain, rubble, memory stones, G.drawPave
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
 src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
+src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -178,6 +183,20 @@ tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py  chapter test
   night that friend walks to the door and is `indoors()` while asleep: not drawn, not clickable, a warm window glow instead.
   Picking a cottage up frees its owner. Main draws heart bubbles (`G.drawWishMark`) after the lighting. Stats: `wishesHeard`,
   `wishes`, `housed`, `unlocked`. Save: optional fields in each saved villager — older saves load with no wishes (no version bump).
+- **Ruins & memories** (Night 11; data in src/data/ruins.js): the world is cut into `G.RUIN.cell`-tile cells and each
+  may hold one site (`G.Ruins.siteOf`, memoised in `world.ruinCells`), chosen from the seed using only `world.groundType()`
+  (the raw ground, no cache) so it never recurses into `tileAt`. A site never sits on water and keeps `awayFromStart` tiles
+  from `world.spawnSpot()` (also ground-only; `findSpawn()` returns a copy). `tileAt` asks `G.Ruins.pieceAt` and the stamp
+  letter replaces the natural object (`tile.obj` = a piece from `G.RUIN_PIECES`, `tile.ruin` = the site, `tile.pave` = old
+  flagstones drawn with the floors). Pieces are `G.OBJECTS` with `ruin: true`: no `drops` = can't be gathered (E/click
+  describes them; rubble can be gathered), `read: true` = the memory stone. Waking it (G.RuinPlay.wake) builds a
+  `memorystone` structure on top (fixed, restore 4, light, homes 1) — so "read" is saved as a structure, no version bump.
+  `stats.memories` lists woken sites in order; memory *n* tells `G.LORE[n]`, after that `G.RUIN_ECHOES`. `stats.ruins.found`
+  and `stats.ruinsFound` track found sites (within `G.RUIN.findAt` tiles). Objects with `awakeLight` (keeper, fountain) glow
+  at night once their site is awake (the sprite caches `site.awake` per lights version). The minimap marks found ruins.
+  Friends' talk can point toward the nearest unfound ruin (`G.VILLAGER_SAYS.ruins`).
+- **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
+  `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that
   smoke_test.py calls at the end. New features should add their own file the same way.
 - **Save versions**: v2 (Night 2) added `explored`, `goalsDone`, `goalsHidden`.
