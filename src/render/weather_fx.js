@@ -30,6 +30,8 @@ G.WeatherFX = class {
     const v = wx.v, wind = G.windNow || 0, dir = wx.dir;
     this.view = { camX, camY, W, H };
     this.drawShadows(ctx, v.shadows, wind, dir, dt);
+    const tn = G.SEASON_NOW.tint;   // each season washes the world in its own light (Night 12)
+    if (tn[3] > 0.004) { ctx.fillStyle = `rgba(${tn[0] | 0},${tn[1] | 0},${tn[2] | 0},${tn[3].toFixed(3)})`; ctx.fillRect(0, 0, W, H); }
     if (v.cloud > 0.01) {    // a grey, cool sky dims and cools the colours
       ctx.globalCompositeOperation = 'multiply';
       ctx.fillStyle = `rgba(118,130,165,${(v.cloud * 0.68).toFixed(3)})`;
@@ -39,7 +41,9 @@ G.WeatherFX = class {
     this.drawSplashes(ctx, dt);
     this.drawLeaves(ctx, state, wind, dir, dt);
     this.drawRainbow(ctx, state, wx.rainbowA, W, H, dpr);
-    this.drawRain(ctx, state, v.rain, wind, dir, dt);
+    const snow = G.Seasons.snowing();   // in winter the rain falls as snow
+    this.drawRain(ctx, state, v.rain * (1 - snow), wind, dir, dt);
+    this.drawSnow(ctx, v.rain * snow, wind, dir, dt);
     this.drawFog(ctx, state, v.fog, wind, dir, dt);
   }
 
@@ -101,6 +105,28 @@ G.WeatherFX = class {
     ctx.lineCap = 'butt';
   }
 
+  // ---------- snow: slow flakes that sway as they fall and ride the wind ----------
+  drawSnow(ctx, amount, wind, dir, dt) {
+    const { camX, camY, W, H } = this.view, list = this.flakes || (this.flakes = []);
+    const want = Math.floor(amount * W * H / 2200);
+    while (list.length < want) list.push({ x: camX + G.rand(-40, W + 40), y: camY + G.rand(-40, H), z: G.rand(0.5, 1.35), ph: Math.random() * 6.28, a: 0 });
+    if (list.length > want) list.length = Math.max(want, list.length - Math.ceil(dt * 120));
+    if (!list.length) return;
+    const near = new Path2D(), far = new Path2D();
+    for (const f of list) {
+      f.ph += dt * (0.8 + f.z); f.a = Math.min(1, f.a + dt * 0.8);
+      f.y += (22 + 34 * f.z) * dt;
+      f.x += (Math.sin(f.ph) * 16 * f.z + dir * (8 + wind * 130) * f.z) * dt;
+      if (f.y > camY + H + 12) { f.y = camY - 12; f.x = camX + G.rand(-40, W + 40); }
+      else if (f.y < camY - 60) f.y = camY + H;
+      if (f.x > camX + W + 50) f.x -= W + 90; else if (f.x < camX - 50) f.x += W + 90;
+      const sx = f.x - camX, sy = f.y - camY, r = (0.8 + f.z * 1.3) * (0.4 + 0.6 * f.a), p = f.z > 0.95 ? near : far;
+      p.moveTo(sx + r, sy); p.arc(sx, sy, r, 0, 6.2832);
+    }
+    ctx.fillStyle = `rgba(232,240,255,${(0.45 + 0.3 * amount).toFixed(2)})`; ctx.fill(far);
+    ctx.fillStyle = `rgba(250,252,255,${(0.7 + 0.3 * amount).toFixed(2)})`; ctx.fill(near);
+  }
+
   land(world, state, x, y, z) {
     const { camX, camY, W, H } = this.view;
     if (x < camX || x > camX + W || y < camY || y > camY + H) return;
@@ -131,32 +157,46 @@ G.WeatherFX = class {
 
   // ---------- leaves, petals (and grey fluff in faded land) on the wind ----------
   drawLeaves(ctx, state, wind, dir, dt) {
-    const { camX, camY, W, H } = this.view, list = this.leaves, world = state.world;
+    const { camX, camY, W, H } = this.view, list = this.leaves, world = state.world, S = G.SEASON_NOW;
     const want = Math.max(0, Math.floor((wind - 0.3) * 80));
-    if (list.length < want && Math.random() < dt * 20) {
+    // the season's own: autumn leaves and spring blossom drifting down where the land has its colour
+    const drift = S.drift, dwant = drift ? Math.floor(drift.n * (0.7 + wind)) : 0;
+    if (dwant && Math.random() < dt * 8 && list.filter(l => l.drift).length < dwant) {
+      const x = camX + G.rand(-20, W + 20), y = camY + G.rand(-30, H * 0.85);
+      if (world.restoreAt(x, y + 60, world.lights) > 0.45)
+        list.push({ x, y, z: G.rand(0.6, 1.2), a: Math.random() * 6.28, spin: G.rand(-3, 3), ph: Math.random() * 6.28, kind: drift.kind,
+          hue: G.pick(drift.hues), life: 1, age: 0, drift: true, fall: G.rand(12, 24) });
+    }
+    if (list.filter(l => !l.drift).length < want && Math.random() < dt * 20) {
       // most blow in from the upwind edge; some appear mid-air so a new breeze fills the view quickly
       const edge = Math.random() < 0.6;
       const x = edge ? (dir > 0 ? camX - 20 : camX + W + 20) : camX + G.rand(0, W), y = camY + G.rand(-40, H);
       const f = world.restoreAt(x + dir * 200, y, world.lights);
-      const kind = f > 0.5 ? (Math.random() < 0.3 ? 'petal' : 'leaf') : 'fluff';
-      const hue = kind === 'petal' ? G.pick([330, 45, 285, 10]) : kind === 'leaf' ? G.pick([95, 110, 35, 25, 70]) : 0;
+      const kind = f > 0.5 && S.snow < 0.5 ? (Math.random() < 0.3 ? 'petal' : 'leaf') : 'fluff';   // powder snow in winter
+      const hue = kind === 'petal' ? G.pick([330, 45, 285, 10]) : kind === 'leaf' ? G.pick(S.autumn > 0.5 ? G.AUTUMN_HUES : [95, 110, 35, 25, 70]) : 0;
       list.push({ x, y, z: G.rand(0.6, 1.2), a: Math.random() * 6.28, spin: G.rand(-5, 5), ph: Math.random() * 6.28, kind, hue, life: 1, age: edge ? 1 : 0 });
     }
     for (const l of list) {
       l.ph += dt; l.age += dt;
-      l.x += dir * (70 + wind * 150) * l.z * dt;
-      l.y += (Math.sin(l.ph * 2.1) * 26 + 8) * l.z * dt;
+      if (l.drift) {   // tumbling slowly down, a little sideways
+        l.x += (dir * (10 + wind * 140) + Math.sin(l.ph * 1.3) * 18) * l.z * dt;
+        l.y += (l.fall + Math.sin(l.ph * 2.1) * 10) * l.z * dt;
+        l.life -= dt * 0.1;
+      } else {
+        l.x += dir * (70 + wind * 150) * l.z * dt;
+        l.y += (Math.sin(l.ph * 2.1) * 26 + 8) * l.z * dt;
+        if (wind < 0.25) l.life -= dt * 0.6;
+      }
       l.a += l.spin * dt;
-      if (wind < 0.25) l.life -= dt * 0.6;
       if (l.x < camX - 60 || l.x > camX + W + 60) l.life = 0;
     }
     this.leaves = list.filter(l => l.life > 0);
     for (const l of this.leaves) {
       const x = l.x - camX, y = l.y - camY;
       ctx.save(); ctx.translate(x, y); ctx.rotate(l.a); ctx.globalAlpha = Math.min(1, l.life * 1.5, l.age * 1.5);
-      if (l.kind === 'fluff') { ctx.fillStyle = 'rgba(225,228,235,.6)'; G.circle(ctx, 0, 0, 1.8 * l.z); }
+      if (l.kind === 'fluff') { ctx.fillStyle = S.snow > 0.5 ? 'rgba(245,249,255,.8)' : 'rgba(225,228,235,.6)'; G.circle(ctx, 0, 0, 1.8 * l.z); }
       else {
-        ctx.fillStyle = l.kind === 'petal' ? `hsl(${l.hue},80%,76%)` : `hsl(${l.hue},55%,${l.hue < 60 ? 52 : 42}%)`;
+        ctx.fillStyle = l.kind === 'petal' ? `hsl(${l.hue},80%,${l.drift ? 86 : 76}%)` : `hsl(${l.hue},${l.hue < 60 ? 68 : 55}%,${l.hue < 60 ? 52 : 42}%)`;
         ctx.beginPath(); ctx.ellipse(0, 0, 4.4 * l.z, 2.2 * l.z * Math.abs(Math.cos(l.ph * 3)) + 0.5, 0, 0, 6.2832); ctx.fill();
       }
       ctx.restore();

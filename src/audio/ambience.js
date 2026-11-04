@@ -62,13 +62,15 @@ G.Ambience = {
   },
 
   // info: { restore 0..1, day 0..1, water 0..1, active: is the game being played,
-  //         rain 0..1, wind 0..1, fog 0..1 (optional, from the weather) }
+  //         rain 0..1, wind 0..1, fog 0..1 (optional, from the weather),
+  //         snow 0..1 (falling snow hushes the wind), birds / crickets (how lively this season is, 1 = normal) }
   update(dt, info) {
     const S = this.S;
     if (!S || !this.nodes || !S.ctx || S.ctx.state !== 'running') return;
     const n = this.nodes, t = S.now, r = info.restore, day = info.day, night = 1 - day;
     const set = (param, v, tc = 1.2) => param.setTargetAtTime(v, t, tc);
-    const rain = info.rain || 0, wwind = info.wind || 0, fog = info.fog || 0;
+    const rain = info.rain || 0, wwind = info.wind || 0, fog = Math.max(info.fog || 0, (info.snow || 0) * 0.6);
+    const birds = info.birds === undefined ? 1 : info.birds, crickets = info.crickets === undefined ? 1 : info.crickets;
 
     // wind: strongest in faded land, gusting slowly
     this.gustPhase += dt;
@@ -102,14 +104,14 @@ G.Ambience = {
     // birdsong in restored land by day
     this.birdTimer -= dt;
     if (this.birdTimer <= 0) {
-      this.birdTimer = G.rand(1.8, 5.5);
-      if (day > 0.55 && r > 0.4 && rain < 0.25 && Math.random() > fog * 0.8) this.bird(r);
+      this.birdTimer = G.rand(1.8, 5.5) / Math.max(0.5, birds);
+      if (day > 0.55 && r > 0.4 && rain < 0.25 && Math.random() > fog * 0.8 && Math.random() < birds) this.bird(r);
     }
     // crickets in restored land at night
     this.cricketTimer -= dt;
     if (this.cricketTimer <= 0) {
-      this.cricketTimer = G.rand(0.35, 1.1);
-      if (night > 0.5 && r > 0.3 && rain < 0.3) this.cricket(r * night);
+      this.cricketTimer = G.rand(0.35, 1.1) / Math.max(0.5, crickets);
+      if (night > 0.5 && r > 0.3 && rain < 0.3 && Math.random() < crickets) this.cricket(r * night);
     }
     // an owl, now and then
     this.owlTimer -= dt;

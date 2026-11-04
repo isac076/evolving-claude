@@ -28,7 +28,7 @@ G.Garden = class {
     const w = state.world, k = G.GROW_KINDS[G.STRUCTURES[st.type].grow], S = G.GARDEN;
     const f = w.restoreAt((st.tx + 0.5) * G.TILE, (st.ty + 0.5) * G.TILE, w.lights);
     const colour = S.greySpeed + (1 - S.greySpeed) * G.clamp(f / S.colourNeeded, 0, 1);
-    return colour * (st.wet > 0 ? S.wetSpeed : 1) / k.time;
+    return colour * (st.wet > 0 ? S.wetSpeed : 1) * G.SEASON_NOW.grow / k.time;   // fast in spring, slow in winter
   }
 
   update(dt, state) {

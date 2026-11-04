@@ -10,6 +10,7 @@
 // after   = weights for what may follow this one (otherwise `weight` is used)
 // rainbow = a rainbow can appear when it clears on a bright day
 // say     = the message when it begins (first = the longer one, the first time ever)
+// snow    = { name, say, first } used instead in winter, when the rain falls as snow (see data/seasons.js)
 window.G = window.G || {};
 
 G.WEATHER = {
@@ -29,11 +30,13 @@ G.WEATHER = {
     name: 'Light rain', weight: 1, dur: [50, 110], rain: 0.38, wind: 0.25, fog: 0.1, cloud: 0.5, shadows: 0, rainbow: true,
     after: { clear: 3, rain: 1, fog: 1, breezy: 1 },
     say: 'A soft rain begins.', first: 'A soft rain begins. Plants grow back faster while it falls, and some creatures shelter.',
+    snow: { name: 'Light snow', say: 'Snowflakes drift down.', first: 'Snow! Soft flakes drift down and settle on the trees. Listen how quiet it gets.' },
   },
   rain: {
     name: 'Rain', weight: 0.6, dur: [60, 120], rain: 1, wind: 0.55, fog: 0.15, cloud: 0.8, shadows: 0, rainbow: true,
     after: { clear: 3, drizzle: 2, breezy: 1 },
     say: 'Rain pours down.', first: 'Rain pours down! Plants grow back faster in the rain — and when it clears on a sunny day, look up.',
+    snow: { name: 'Snowfall', say: 'Thick snow is falling.', first: 'A real snowfall! Big flakes swirl on the wind and the whole world hushes.' },
   },
   fog: {
     name: 'Fog', weight: 1, dur: [60, 120], rain: 0, wind: 0.04, fog: 1, cloud: 0.25, shadows: 0,

@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 12 — 2026-11-04 — The turning seasons
+The year now turns every few days. Spring brings pink blossom and fresh green grass; summer is lush and golden with
+fireflies at night; in autumn the trees go gold, orange and red and leaves drift down through the mist; and in winter
+snow covers the land, leafy trees stand bare, rain falls as soft snowflakes, you leave footprints, rabbits wear white
+coats and your friends put on scarves. The season shows at the top of the screen, gardens grow fastest in spring, and
+friends have something to say about each season.
+
 ## Night 11 — 2026-11-03 — Ruins of the old world
 The faded land is now dotted with ruins: stone circles, fallen gates you can walk through, dry fountains, a hooded keeper
 statue and broken halls of lanterns. At the heart of each sleeps a carved memory stone — stand beside it and press E to wake

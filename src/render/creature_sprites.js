@@ -101,7 +101,7 @@ window.G = window.G || {};
       const f = c.face, h = c.hue;
       groundShadow(ctx, sx, sy, 8, c.z, 0.24);
       const y = sy - c.z - 5, stretch = c.state === 'hop' ? 1.5 : 0;
-      const fur = `hsl(${h},28%,58%)`, dark = `hsl(${h},24%,44%)`;
+      const fur = c.coat ? 'hsl(215,30%,94%)' : `hsl(${h},28%,58%)`, dark = c.coat ? 'hsl(215,22%,82%)' : `hsl(${h},24%,44%)`;   // white in winter
       // tail puff
       ctx.fillStyle = '#f4efe6'; circle(ctx, sx - f * (7 + stretch), y - 1, 2.6);
       // body

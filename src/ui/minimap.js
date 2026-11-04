@@ -53,7 +53,7 @@ G.Minimap = class {
       const n = j * C + i, o = n * 4;
       if (!mask || !mask[n]) { d[o + 3] = 0; continue; }
       const tx = cx * C + i, ty = cy * C + j;
-      const t = world.tileAt(tx, ty), def = G.TILES[t.type];
+      const t = world.tileAt(tx, ty), def = G.SEASON_NOW.tiles[t.type];   // this season's colours
       const f = world.restoreAt((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, world.lights);
       let h = def.h, s = def.s, l = def.l + (t.soft - 0.5) * 6;
       const st = world.structures.get(G.key(tx, ty));
@@ -69,13 +69,16 @@ G.Minimap = class {
       d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255;
     }
     img.ctx.putImageData(img.data, 0, 0);
-    img.lv = world.lightsVersion;
+    img.lv = this.version();
     return img;
   }
 
+  // the images need redrawing when the lights change — or the season turns the land another colour
+  version() { return this.state.world.lightsVersion + ':' + G.Seasons.version; }
+
   // Redraw a few stale chunk images per frame so nothing ever stutters.
   refreshImages(budget) {
-    const ex = this.state.explored, lv = this.state.world.lightsVersion;
+    const ex = this.state.explored, lv = this.version();
     for (const k of ex.dirty) {
       if (budget-- <= 0) return;
       ex.dirty.delete(k);

@@ -89,6 +89,7 @@ G.Renderer = class {
     }
     const life = state.creatures;
     if (life) life.drawWater(ctx, camX, camY, time);
+    G.Seasons.drawPrints(ctx, camX, camY, dt);   // footprints in the snow
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const tile = tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)];
       if (tile.pave) G.drawPave(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // a ruin's old flagstones
@@ -177,7 +178,7 @@ G.Renderer = class {
 
   updateParticles(dt, dark, camX, camY, lights, world) {
     // fireflies drift around restored places at dusk and night
-    if (dark > 0.3 && this.particles.length < 140 && Math.random() < dark * 0.5) {
+    if (dark > 0.3 && this.particles.length < 140 && Math.random() < dark * 0.5 * G.SEASON_NOW.fireflies) {   // most in summer, none in winter
       const x = camX + Math.random() * this.W, y = camY + Math.random() * this.H;
       if (world.restoreAt(x, y, lights) > 0.5) {
         this.particles.push({ x, y, vx: G.rand(-8, 8), vy: G.rand(-8, 8), life: 1, decay: G.rand(0.08, 0.2),

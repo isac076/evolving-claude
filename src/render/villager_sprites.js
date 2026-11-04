@@ -94,6 +94,15 @@ window.G = window.G || {};
       ctx.fillStyle = 'rgba(0,0,20,.12)';
       ctx.beginPath(); ctx.ellipse(sx - fc * 4, by - 8 * squash, 2.5, 6 * squash, 0, 0, 6.2832); ctx.fill();
     }
+    // a warm scarf when the snow lies (Night 12), in the friend's own opposite colour
+    if (!lost && G.SEASON_NOW.snow > 0.5) {
+      const sh = (v.hue + 180) % 360, wave = Math.sin(v.ph * 3) * (v.walking ? 1.2 : 0.4);
+      ctx.fillStyle = G.shade(sh, 60, 52, f);
+      ctx.beginPath(); ctx.ellipse(sx, top + 3.5, 6.6, 2.6, 0, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(sx - fc * 3.4, top + 4); ctx.lineTo(sx - fc * (5.2 + wave), top + 11); ctx.lineTo(sx - fc * (2.6 + wave), top + 11.5); ctx.lineTo(sx - fc * 1.4, top + 4.5); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = G.shade(sh, 50, 70, f);
+      ctx.fillRect(sx - 6, top + 3, 12, 0.9);
+    }
     // face
     const hx = sx + fc * 1.2, hy = top - 2 * squash;
     ctx.fillStyle = lost ? 'hsl(225,10%,84%)' : G.shade(32, 55, 86, Math.max(f, 0.6));

@@ -37,7 +37,7 @@ as the world does.
 - [x] Fish visible in restored water; ripples when walking near water (Night 3 — fish leap too)
 - [x] Wildlife that reacts to the player (rabbits, deer that flee and return) (Night 3: rabbits, startled birds — deer still to come)
 - [x] Weather: rain, wind, fog — with visuals and sound (Night 5 — plus overcast skies, drifting cloud shadows, rainbows, and frogs that only come out in the rain)
-- [ ] Seasons that slowly change colours, plants and weather
+- [x] Seasons that slowly change colours, plants and weather (Night 12 — a year of 4 × 3 days: spring blossom, lush summer with fireflies, autumn gold with falling leaves and mist, winter snow with bare trees, snowfall, footprints, white rabbits and scarves; gardens grow by season)
 - [x] Regrowth looks alive: saplings grow into trees over time (Night 8 — plant acorns; chopped trees leave stumps that sprout again, reeds/flowers/pebbles/crystals visibly grow back)
 
 ## Chapter 3 — Deeper crafting & building
@@ -101,6 +101,13 @@ What a play-through taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Seasons: a harvest festival in autumn and a lantern festival on the longest winter night (friends gather at the Heart Stone)
+- Seasons: frozen ponds you can walk across in deep winter (only shallow water; fish asleep under the ice), and icicles on cottages
+- Seasons: build a snow-spirit (snowman) in winter; collect fallen leaves in autumn for a leaf-pile decoration that rabbits hide in
+- Seasons: seasonal crops (pumpkins in autumn, snowdrops that only bloom in winter, cherry trees that are pink all spring)
+- Seasons: a season wheel on the Resting menu or journal showing where in the year you are; a "seasons seen" journal page
+- Seasons: longer days in summer, shorter in winter (G.daylight would read G.SEASON_NOW) — check every test that relies on night times
+- Seasons: the music could pick seasonal moods (a winter waltz, spring birdsong motifs) via G.MUSIC_MOODS
 - Ruins: more kinds (a sunken stair, a broken bridge over a stream, an old well, an overgrown greenhouse) — each is a stamp in G.RUIN_SITES
 - Ruins: biome-specific ruins once Chapter 5 biomes arrive (an ice temple in the snowy peaks, a buried sun-dial in the desert)
 - Ruins: a rare "keeper's chest" in some ruins with an old tool or a recipe (e.g. a lantern design) inside
@@ -133,8 +140,7 @@ What a play-through taught us:
 - Crystals could hum softly when you're near them at night (Ambience reading nearby crystal objects)
 - Puddles that form on paths in heavy rain and slowly dry up afterwards (reflecting lantern light at night)
 - A gentle thunderstorm far away: distant rumbles and a soft flash on the horizon (never scary)
-- Snow in the coming snowy peaks biome / in winter, using the same G.WeatherFX drop system with slow, swaying flakes
-- Seasons could change the weather weights (more rain in spring, fog in autumn) — G.WEATHER weights are plain data
+- Snow in the coming snowy peaks biome (winter snowfall is done — G.WeatherFX.drawSnow can be reused there)
 - A rain barrel or watering can that fills up in the rain, for gardens
 - Sitting on a bench in the rain under a little roof: a "shelter" structure (pergola) that keeps creatures near you in the rain
 - A weather vane decoration that points with G.windDir and spins faster with G.windNow
@@ -154,7 +160,6 @@ What a play-through taught us:
 - Gardeners could water your sprouts for you when they pass by; a friend's request "plant 3 flowers by my home"
 - Bees that visit grown flowers and a beehive structure; butterflies prefer garden blooms
 - A garden plot / tilled-soil floor structure where plants grow faster, and fences that keep rabbits out (they nibble sprouts — gently)
-- Seasons (Chapter 2) can drive gardens: spring growth spurt, autumn seeds, winter rest
 - Music: a festival night where every friend in the world gathers at the Heart Stone and the whole band plays
 - Music: a "music box" decoration you build that plays the current tune's melody when you stand near it, even in grey land
 - Music: each new biome (Chapter 5) gets its own entry in G.MUSIC_PLACES (snow = celesta, desert = oud-like pluck)

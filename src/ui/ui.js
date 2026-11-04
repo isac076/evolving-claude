@@ -121,7 +121,15 @@ G.UI = class {
     const names = ['Noon', 'Afternoon', 'Dusk', 'Night', 'Night', 'Night', 'Dawn', 'Morning'];
     const name = names[Math.floor(((phase + 0.0625) % 1) * 8)];
     this.$('clock').textContent = `Day ${day} · ${name}`;
-    const wname = weather ? weather.def.name : '';
+    const sn = G.SEASON_NOW;
+    if (sn && sn.id !== this.sname) {   // the season, with its little sign (and a glow when it turns)
+      const el = this.$('season'), turned = !!this.sname;
+      this.sname = sn.id;
+      el.innerHTML = `<i>${sn.def.icon}</i><span>${sn.def.name}</span>`; el.dataset.kind = sn.id;
+      el.title = `${sn.def.name} — the seasons turn every ${G.SEASON.days} days`;
+      if (turned) { el.classList.remove('turning'); void el.offsetWidth; el.classList.add('turning'); }
+    }
+    const wname = weather ? weather.name() : '';
     if (wname !== this.wname) {
       this.wname = wname;
       const el = this.$('weather');

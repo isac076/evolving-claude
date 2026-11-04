@@ -389,8 +389,9 @@ window.G = window.G || {};
       if (r < 0.45 && !this.findLiked(world, v)) { this.say(v, v.def.wish, 5); return; }
       const wx = state.weather, dl = G.daylight(state.time), phase = (state.time % G.DAY_LENGTH) / G.DAY_LENGTH;
       let pool = [...v.def.lines, ...v.def.lines];
-      if (wx && wx.rain > 0.4) pool = pool.concat(S.rain, S.rain);
+      if (wx && wx.rain > 0.4 && G.Seasons.snowing() < 0.5) pool = pool.concat(S.rain, S.rain);
       if (wx && wx.v.fog > 0.4) pool = pool.concat(S.fog);
+      if (G.SEASON_NOW && S[G.SEASON_NOW.id]) pool = pool.concat(S[G.SEASON_NOW.id]);   // what the season brings to mind
       if (wx && wx.rainbow > 0) pool = pool.concat(S.rainbow, S.rainbow, S.rainbow);
       if (dl < 0.35) pool = pool.concat(S.night);
       if (phase > 0.72 && phase < 0.95 && dl > 0.3) pool = pool.concat(S.morning);

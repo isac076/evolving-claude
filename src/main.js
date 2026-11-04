@@ -139,9 +139,10 @@ window.G = window.G || {};
     const wx = new G.Weather();
     wx.onChange = kind => {
       if (!state.running) return;
-      const def = G.WEATHER[kind], seen = state.stats.weatherSeen || (state.stats.weatherSeen = {});
-      const firstTime = !seen[kind];
-      seen[kind] = 1;
+      const snowy = G.WEATHER[kind].snow && G.Seasons.snowing() > 0.5, def = snowy ? G.WEATHER[kind].snow : G.WEATHER[kind];
+      const seen = state.stats.weatherSeen || (state.stats.weatherSeen = {}), id = snowy ? kind + '-snow' : kind;
+      const firstTime = !seen[id];
+      seen[id] = 1;
       const msg = firstTime ? def.first : def.say;
       if (msg) ui.toast(msg, firstTime ? 6 : 3.5);
     };
@@ -161,6 +162,13 @@ window.G = window.G || {};
     if (!state.running) return;
     addFloater(v.x, v.y - 34, `♪ ${v.name} ${def.joins}`, `hsl(${v.hue},85%,80%)`);
     if ((state.stats.music || {}).joined === 1) ui.toast('Your friends play along when you are near them — every kind of friend has its own part in the song.', 6);
+  };
+
+  // the seasons turn with the days (nothing to save: the clock says which one it is)
+  G.Seasons.onChange = (def, firstTime) => {
+    if (!state.running) return;
+    G.Sound.play('season', { season: def.id });
+    ui.toast(firstTime ? def.first : def.say, firstTime ? 7 : 4.5);
   };
 
   // ---------- starting / loading ----------
@@ -202,6 +210,7 @@ window.G = window.G || {};
 
   function afterLoad() {
     life.clear();
+    G.Seasons.reset(); G.Seasons.update(state, true);
     state.stats.met = state.stats.met || {};
     state.world.time = state.time;
     state.cam.x = state.player.x; state.cam.y = state.player.y;
@@ -433,7 +442,8 @@ window.G = window.G || {};
     stepDist = 0; stepAlt = !stepAlt;
     const p = state.player, st = state.world.structureAt(p.tx, p.ty);
     const kind = (st && G.STRUCTURES[st.type].step) || G.TILES[state.world.tileAt(p.tx, p.ty).type].step;
-    if (kind) G.Sound.step(kind, { alt: stepAlt });
+    if (kind) G.Sound.step(G.SEASON_NOW.tiles[state.world.tileAt(p.tx, p.ty).type].snow > 0.5 && !st ? 'snow' : kind, { alt: stepAlt });
+    G.Seasons.step(state.world, p.x, p.y, stepAlt);
   }
 
   // how much water is near a point, 0..1 (sampled a few times a second)
@@ -445,9 +455,14 @@ window.G = window.G || {};
     const st = w.structureAt(tx, ty), wv = state.weather.v;
     G.Music.update(realDt, {
       restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), phase: (state.time % G.DAY_LENGTH) / G.DAY_LENGTH,
-      rain: wv.rain, fog: wv.fog, ground: st && st.type === 'bridge' ? 'water' : w.tileAt(tx, ty).type,
+      rain: wv.rain * (1 - G.Seasons.snowing()), fog: wv.fog, ground: musicGround(st, w.tileAt(tx, ty).type),
       player: p, friends: folk.list, active: state.running && !settings.isOpen, stats: state.stats,
     });
+  }
+
+  function musicGround(st, type) {
+    if (st && st.type === 'bridge') return 'water';
+    return G.SEASON_NOW.tiles[type].snow > 0.5 ? 'snow' : type;   // snowy land rings like glass
   }
 
   function updateAmbience(dt) {
@@ -462,8 +477,9 @@ window.G = window.G || {};
       waterNear = Math.min(1, n / 40);
     }
     const wv = state.weather.v;
+    const sn = G.SEASON_NOW, snow = G.Seasons.snowing();   // snow falls silently; the seasons change who sings
     G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running && !settings.isOpen,
-      rain: wv.rain, wind: G.windNow || 0, fog: wv.fog });
+      rain: wv.rain * (1 - snow), snow: wv.rain * snow, wind: G.windNow || 0, fog: wv.fog, birds: sn.birds, crickets: sn.crickets });
   }
 
   // followers' threads of light and everyone's speech bubbles, above the night
@@ -499,7 +515,7 @@ window.G = window.G || {};
     if (settings.isOpen) { if (input.hit('escape')) settings.toggle(false); }
     else if (journal.paused) journal.keys(input);
     G.Sound.duck(paused);
-    if (state.world) state.weather.update(dt, state);
+    if (state.world) { G.Seasons.update(state, !state.running); state.weather.update(dt, state); }
     if (state.running) {
       if (!paused) update(dt);
       renderer.render(state, dt);

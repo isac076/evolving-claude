@@ -24,6 +24,15 @@ body:not(.playing) #hud { display: none; }
 #friends { color: #f6c6d8; margin-left: -6px; }
 #friends::before { content: '♥ '; font-size: 12px; }
 #friends:empty { display: none; }
+#season { margin-right: -8px; }
+#season:empty { display: none; }
+#season i { font-style: normal; display: inline-block; margin-right: 5px; }
+#season[data-kind="spring"] { color: #ffc8dc; }
+#season[data-kind="summer"] { color: #ffe08a; }
+#season[data-kind="autumn"] { color: #ffb070; }
+#season[data-kind="winter"] { color: #cfe4ff; }
+#season.turning { animation: season-turn 2.4s ease; }
+@keyframes season-turn { 0% { text-shadow: 0 0 0 transparent; } 30% { text-shadow: 0 0 12px currentColor; transform: scale(1.08); } 100% { text-shadow: 0 0 0 transparent; } }
 #weather { color: var(--ink-dim); font-style: italic; margin-left: -8px; }
 #weather::before { content: '· '; font-style: normal; }
 #weather:empty { display: none; }
@@ -231,6 +240,9 @@ body.no-hints #hint { display: none; }
 @media (max-width: 600px) {
   #status { max-width: calc(100vw - 160px); flex-wrap: wrap; gap: 2px 12px; font-size: 13px; padding: 7px 12px; }
   #weather, #friends { margin-left: 0; }
+  #season { margin-right: -6px; }
+  #season span { display: none; }   /* just the little sign on phones */
+  #weather[data-kind="clear"] { display: none; }   /* and only weather worth mentioning */
   #goals { bottom: 160px; }
   #toast { top: 136px; }
 }

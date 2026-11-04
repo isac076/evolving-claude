@@ -282,6 +282,12 @@ G.SFX = {
     [0, 1, 2, 3, 4, 5, 6].forEach((n, k) => S.bell(G.note(n + 2, 4), { gain: 0.05, dur: 2.6, t: k * 0.16, pan: -0.7 + k * 0.23, rev: 0.8 }));
     S.tone(G.note(0, 3), { type: 'sine', attack: 1, dur: 4, gain: 0.05, rev: 0.9 });
   },
+  season(S, o) {  // a new season: a slow, open chord, coloured by the season that arrives (Night 12)
+    const k = { spring: [0, 4, 7, 11, 14], summer: [0, 4, 7, 9, 12], autumn: [-3, 0, 4, 7, 9], winter: [2, 7, 9, 14, 19] }[o.season] || [0, 4, 7, 12];
+    k.forEach((n, i) => S.bell(G.note(n, 4), { gain: 0.055, dur: 3, t: i * 0.22, pan: -0.6 + i * 0.3, rev: 0.85 }));
+    S.tone(G.note(k[0], 3), { type: 'sine', attack: 1.2, dur: 4.5, gain: 0.05, rev: 0.9 });
+    if (o.season === 'winter') S.bell(G.note(26, 4), { gain: 0.03, dur: 3, t: 1.3, rev: 0.9 });
+  },
   // ---- lost spirits and villagers (Night 6) ----
   sigh(S, o) {      // a lost spirit, far away and sad: a soft falling breath
     S.noise({ filter: 'bandpass', freq: 900, freqTo: 400, q: 1.5, attack: 0.25, dur: 1.1, gain: 0.03, pan: o.pan, rev: 0.7 });
@@ -364,6 +370,7 @@ G.STEP_SOUNDS = {
     S.noise({ filter: 'lowpass', freq: 800, dur: 0.08, attack: 0.01, gain: 0.132, rev: 0.05 });
     S.noise({ filter: 'highpass', freq: o.alt ? 3800 : 4400, dur: 0.12, attack: 0.02, gain: 0.055, rev: 0.05 });
   },
+  snow(S, o)   { S.noise({ filter: 'lowpass', freq: o.alt ? 700 : 820, dur: 0.16, attack: 0.04, gain: 0.13, rev: 0.03 }); },   // a soft crunch
   sand(S, o)   { S.noise({ filter: 'bandpass', freq: o.alt ? 2200 : 2600, q: 0.7, dur: 0.13, attack: 0.03, gain: 0.11, rev: 0.05 }); },
   stone(S, o)  {
     S.noise({ filter: 'bandpass', freq: o.alt ? 1600 : 1900, q: 3, dur: 0.035, gain: 0.176, rev: 0.12 });

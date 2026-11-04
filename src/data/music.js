@@ -57,6 +57,7 @@ G.MUSIC_PLACES = {
   stone:  { place: 'highlands', inst: 'glass' },
   water:  { place: 'water',     inst: 'harp' },
   deep:   { place: 'deep water', inst: 'harp' },
+  snow:   { place: 'snow',      inst: 'glass' },      // any snowy land in winter (data/seasons.js)
 };
 
 // Rhythms for one bar, in eighth notes; negative numbers are rests.

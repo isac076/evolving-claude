@@ -31,6 +31,7 @@ G.Creatures = class {
     return world.isWater(tx, ty) && !world.structureAt(tx, ty);
   }
   timeOk(def, day, leaving) {
+    if (!G.Seasons.allows(def)) return false;                               // not this season
     if (def.shelter && this.rain > (leaving ? 0.45 : 0.25)) return false;   // hiding from the rain
     if (def.rainy && this.rain < (leaving ? 0.15 : 0.3)) return false;      // only out in the rain
     if (def.when === 'day') return day > (leaving ? 0.38 : 0.5);
@@ -124,6 +125,7 @@ G.Creatures = class {
       state: 'idle', t: G.rand(0.3, 1.5), ph: Math.random() * 6.283, seed: Math.random(),
       face: Math.random() < 0.5 ? -1 : 1, hue: def.hues[Math.floor(Math.random() * def.hues.length)],
     };
+    if (def.winterCoat && G.SEASON_NOW.snow > 0.5) c.coat = true;   // a white winter coat
     if (def.move === 'flutter') { c.state = 'fly'; c.z = G.rand(8, 16); }
     if (def.move === 'moth') { c.ang = Math.random() * 6.283; c.rad = G.rand(14, 34); c.dirn = c.seed > 0.5 ? 1 : -1; }
     if (def.move === 'hop') c.state = 'sit';

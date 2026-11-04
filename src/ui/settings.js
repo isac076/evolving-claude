@@ -93,7 +93,7 @@ G.Settings = class {
     const s = this.state, w = s.world;
     const day = Math.floor(s.time / G.DAY_LENGTH) + 1;
     const lit = w.litCount(), friends = s.villagers ? s.villagers.list.length : 0;
-    const bits = [`Day ${day}`, `${lit} light${lit === 1 ? '' : 's'} lit`];
+    const sn = G.SEASON_NOW, bits = [`${sn.def.name}, day ${sn.day} of ${G.SEASON.days}`, `Day ${day}`, `${lit} light${lit === 1 ? '' : 's'} lit`];
     if (friends) bits.push(`${friends} friend${friends === 1 ? '' : 's'} at home`);
     const mem = (s.stats.memories || []).length;
     if (mem) bits.push(`${mem} memor${mem === 1 ? 'y' : 'ies'} remembered`);

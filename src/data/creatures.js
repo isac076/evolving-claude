@@ -14,12 +14,13 @@
 // sound    = effect played when it startles / leaps (see G.SFX)
 // meet     = message shown the first time you meet one
 // shelter  = hides away while it rains     rainy = only comes out while it rains
+// seasons  = only these seasons (see data/seasons.js)   winterCoat = turns white when snow lies
 window.G = window.G || {};
 
 G.CREATURES = {
   butterfly: {
     name: 'Butterfly', move: 'flutter', tiles: ['grass', 'forest', 'sand'], when: 'day', restore: 0.7,
-    cap: 9, group: [1, 2], flee: 34, shelter: true, hues: [48, 28, 200, 285, 330, 160],
+    cap: 9, group: [1, 2], flee: 34, shelter: true, hues: [48, 28, 200, 285, 330, 160], seasons: ['spring', 'summer', 'autumn'],
     meet: 'A butterfly! Life is finding its way back to the coloured land.',
   },
   bird: {
@@ -29,12 +30,12 @@ G.CREATURES = {
   },
   rabbit: {
     name: 'Rabbit', move: 'hop', tiles: ['grass'], when: 'day', restore: 0.8,
-    cap: 3, group: [1, 2], flee: 95, shelter: true, hues: [30, 35, 40],
+    cap: 3, group: [1, 2], flee: 95, shelter: true, hues: [30, 35, 40], winterCoat: true,
     meet: 'A rabbit peeks out of the grass. It will come back if it runs.',
   },
   frog: {
     name: 'Frog', move: 'hop', tiles: ['grass', 'sand'], when: 'any', restore: 0.6, rainy: true,
-    cap: 5, group: [1, 2], flee: 60, hues: [100, 120, 85, 140],
+    cap: 5, group: [1, 2], flee: 60, hues: [100, 120, 85, 140], seasons: ['spring', 'summer', 'autumn'],
     meet: 'A frog! Frogs only come out to play in the rain.',
   },
   fish: {

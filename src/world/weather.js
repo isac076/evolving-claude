@@ -23,15 +23,20 @@ G.Weather = class {
 
   get def() { return G.WEATHER[this.kind] || G.WEATHER.clear; }
 
+  // in winter the rain falls as snow: the snowy words, if this weather has them
+  get words() { const d = this.def; return d.snow && G.Seasons.snowing() > 0.5 ? d.snow : d; }
+  name() { return this.words.name; }
+
   pickNext() {
     const after = this.def.after;
     const weights = after || Object.fromEntries(Object.entries(G.WEATHER).map(([k, d]) => [k, d.weight]));
     let total = 0;
-    for (const k in weights) if (k !== this.kind && G.WEATHER[k]) total += weights[k];
+    const w = k => weights[k] * G.Seasons.weatherMul(k);   // each season has its favourite weathers
+    for (const k in weights) if (k !== this.kind && G.WEATHER[k]) total += w(k);
     let r = Math.random() * total;
     for (const k in weights) {
       if (k === this.kind || !G.WEATHER[k]) continue;
-      r -= weights[k];
+      r -= w(k);
       if (r <= 0) return k;
     }
     return 'clear';
@@ -69,7 +74,7 @@ G.Weather = class {
     const day = G.daylight(state.time);
     if (this.wasRainy && !d.rainbow && this.v.rain < 0.12) {
       this.wasRainy = false;
-      if (day > 0.6 && this.v.fog < 0.5) {
+      if (day > 0.6 && this.v.fog < 0.5 && G.Seasons.snowing() < 0.5) {
         this.rainbow = G.RAINBOW_TIME;
         if (this.onRainbow) this.onRainbow();
       }

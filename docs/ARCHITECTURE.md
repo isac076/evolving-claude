@@ -16,7 +16,8 @@ src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrum
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
-src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow
+src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow (+ snowy words)
+src/data/seasons.js   G.SEASON timing, G.SEASONS (ground colours, snow, leaves, blossom, drift, tint, liveliness, weather), G.AUTUMN_HUES, G.SNOW
 src/data/garden.js    G.GARDEN growth settings, G.GROW_KINDS (what sprouts/saplings become and how fast)
 src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
 src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / build / stat / house, words, rewards), G.WISH_SAYS
@@ -27,6 +28,7 @@ src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from t
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
+src/world/seasons.js  G.Seasons — which season the clock says, blends two seasons into G.SEASON_NOW, season-change hook, footprints in snow
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
 src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
 src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
@@ -53,7 +55,7 @@ src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatur
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -195,6 +197,21 @@ tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_
   and `stats.ruinsFound` track found sites (within `G.RUIN.findAt` tiles). Objects with `awakeLight` (keeper, fountain) glow
   at night once their site is awake (the sprite caches `site.awake` per lights version). The minimap marks found ruins.
   Friends' talk can point toward the nearest unfound ruin (`G.VILLAGER_SAYS.ruins`).
+- **Seasons** (Night 12; data in src/data/seasons.js): the season comes from `state.time` alone — `G.SEASON.days` days each,
+  blending over `G.SEASON.turn` days centred on the boundary (`G.Seasons.phase(time)` → `{i, from, k, day}`; `k` moves in
+  `G.SEASON.steps` small steps so the colour caches stay small). Nothing is saved; old saves simply land in whatever season their
+  clock says. Each frame main calls `G.Seasons.update(state)`, which rebuilds `G.SEASON_NOW` when the step changes: blended numbers
+  (`snow autumn bare blossom leafL tufts grow birds crickets fireflies tint`), `drift` (falling leaves/petals), `weather` multipliers,
+  and `tiles[type] = {h, s, l, snow, base}` — the ground colour this season with snow mixed in. **Readers:** `G.drawGround` (uses
+  `tiles`; `groundFill` lays thinner snow on faded land so restoration stays visible; `drawSnowCover` drifts), the tree sprite
+  (a third are evergreens by `tile.v`; leafy ones blossom, turn `G.AUTUMN_HUES`, go bare with snow on branches), rocks and cottage
+  roofs (snow caps), G.WeatherFX (season tint, `drawSnow` instead of rain when `G.Seasons.snowing()`, drifting leaves/petals),
+  G.Weather (`weatherMul` in `pickNext`, `words`/`name()` give the `snow` names, no rainbow from snow), G.Garden (`grow`),
+  G.Creatures (`seasons: [...]` on a kind limits it; `winterCoat` → `c.coat`), the renderer's fireflies, G.Ambience (`birds`,
+  `crickets`, snow hushes), the music (snowy land plays as `G.MUSIC_PLACES.snow`), villagers (scarves when snow lies; season lines
+  in `G.VILLAGER_SAYS[id]`), the minimap (season colours; its image key includes `G.Seasons.version`), the HUD `#season` and the
+  Resting summary. `onChange(def, firstTime)` → toast + `season` sound; `stats.seasons = {seen, turns}`. Footprints:
+  `G.Seasons.step()` from main's footsteps, drawn right after the ground. Tests jump seasons by setting `state.time`.
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

@@ -88,5 +88,14 @@ G.VILLAGER_SAYS = {
     'I dreamt of a pale little light to the {dir}. Someone is waiting there.'],
   ruins: ['I remember old stones standing to the {dir}. They used to hum at night.', 'There are ruins to the {dir}. My grandmother said the stones keep memories.',
     'Have you been {dir}? Someone built something there, long, long ago.'],
+  // the seasons (Night 12)
+  spring: ['Blossom! The trees are wearing their party clothes.', 'Everything is waking up. Seeds grow so fast in spring!',
+    'Listen — the birds have so much to say this time of year.'],
+  summer: ['Long, warm days. I could nap in the sun forever.', 'Have you seen the fireflies? Summer nights are full of them.',
+    'Everything is so green it almost hums.'],
+  autumn: ['Crunch, crunch! I love walking through the leaves.', 'The trees go gold before they sleep. Brave of them, isn\'t it?',
+    'Autumn mist… perfect weather for a lantern.'],
+  winter: ['Brr! Good thing I found my scarf.', 'Snow makes everything so quiet. Even my footsteps whisper.',
+    'Plants sleep in winter. They\'ll be back in spring, you\'ll see.', 'Look — the rabbits have put on their white coats!'],
   gift: ['Here — I saved these for you.', 'A little something, for all your kindness.', 'Take these! I have plenty.'],
 };

@@ -84,6 +84,14 @@ window.G = window.G || {};
       }
       ctx.fillStyle = G.shade(rh, rs, rl + 14, f);                    // light along the ridge
       ctx.beginPath(); ctx.moveTo(cx - 21, ry); ctx.lineTo(cx, ry - 19); ctx.lineTo(cx - 1, ry - 15); ctx.lineTo(cx - 17, ry); ctx.closePath(); ctx.fill();
+      const snow = G.SEASON_NOW.snow;
+      if (snow > 0.05) {   // a soft blanket of snow on the roof, with a lip hanging over the eaves (Night 12)
+        ctx.fillStyle = G.shade(212, 30, 94, f, snow.toFixed(2));
+        ctx.beginPath(); ctx.moveTo(cx - 23, ry + 1); ctx.lineTo(cx, ry - 22); ctx.lineTo(cx + 23, ry + 1);
+        ctx.quadraticCurveTo(cx + 12, ry - 6, cx, ry - 12); ctx.quadraticCurveTo(cx - 12, ry - 6, cx - 23, ry + 1); ctx.fill();
+        for (let i = -20; i <= 20; i += 8) circle(ctx, cx + i, ry + 1.2 - Math.abs(i) * 0.05, 1.8);
+        ctx.fillRect(chx - 3.5, by - wh - 25, 7, 2.5);
+      }
       // a round attic window
       ctx.fillStyle = G.shade(26, 40, 28, f); circle(ctx, cx, ry - 7, 3.2);
       ctx.fillStyle = lit ? 'rgba(255,214,140,.9)' : G.shade(205, 30, 52, f); circle(ctx, cx, ry - 7, 2.2);
