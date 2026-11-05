@@ -43,6 +43,9 @@ G.MUSIC_MOODS = {
     titles: ['Lullaby for the {place}', 'The {place} under the stars', 'The {place} is dreaming'] },
   rain:    { bpm: 70, beats: 4, density: 0.6, progs: [['Bm', 'A', 'G', 'A'], ['G', 'D', 'A', 'Bm'], ['Bm', 'G', 'Em', 'A']],
     titles: ['Rain on the {place}', 'Puddles in the {place}', 'The {place} in the rain'] },
+  // a village festival (Night 13): a lively waltz while friends dance around the ribbon pole
+  festival:{ bpm: 112, beats: 3, density: 1, progs: [['D', 'A', 'G', 'A'], ['D', 'G', 'A', 'D'], ['G', 'A', 'D', 'Bm']],
+    titles: ['Dance on the green', 'The {name} waltz', 'Lanterns over {name}', 'Ribbons and lanterns'] },
   fog:     { bpm: 58, beats: 3, density: 0.5, inst: 'glass', progs: [['Bm', 'G', 'Bm', 'A'], ['D', 'Em', 'G', 'A']],
     titles: ['Fog over the {place}', 'The {place}, softly'] },
 };

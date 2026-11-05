@@ -70,6 +70,7 @@ G.OBJECTS = {
 // fixed = can never be picked up (fixedSay = what to say when you try).  workbench = recipes marked `at: 'workbench'` work near it.
 // homes = how many rescued spirits can make their home by this light (see data/villagers.js).
 // house = a cottage a friend can move into (see data/wishes.js).
+// village = built by friends when their cottages make a village (data/village.js); fixed, never in a recipe.
 // grow = a planted thing that grows into a natural object (see data/garden.js); soil = ground types it can go in.
 G.STRUCTURES = {
   heart:   { name: 'Heart Stone', solid: true,  on: 'land', restore: 9, light: 320, sound: 'lantern', fixed: true, homes: 3 },
@@ -86,6 +87,13 @@ G.STRUCTURES = {
   memorystone: { name: 'Memory stone', solid: true, on: 'land', restore: 4, light: 170, sound: 'memory', fixed: true, homes: 1,
                  fixedSay: 'The memory stone has stood here since long before the Fading — it stays where it is.', map: [45, 70, 72] },
   sprout:  { name: 'Flower sprout', solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'flower', map: [110, 40, 34] },
+  // built by your friends themselves once their cottages make a village (see data/village.js)
+  well:    { name: 'Village well', solid: true, on: 'land', sound: 'placeStone', fixed: true, village: true, light: 90, map: [205, 30, 62],
+             fixedSay: 'Your friends built this well together — it belongs to the village now.' },
+  stall:   { name: 'Market stall', solid: true, on: 'land', sound: 'placeWood', fixed: true, village: true, light: 90, map: [10, 55, 60],
+             fixedSay: 'The market stall belongs to the village. Press E beside it to trade.' },
+  maypole: { name: 'Ribbon pole', solid: true, on: 'land', sound: 'placeWood', fixed: true, village: true, light: 110, map: [320, 60, 70],
+             fixedSay: 'The ribbon pole is the heart of the village green — it stays.' },
   sapling: { name: 'Sapling',     solid: false, on: 'land', soil: ['grass', 'forest'], sound: 'plant', grow: 'tree', map: [120, 40, 28] },
 };
 

@@ -131,6 +131,7 @@ G.Renderer = class {
       if (player.ty === ty) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
     if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
+    G.drawVillageDecor(ctx, state.village, world, camX, camY, W, H, time, nightGlows);   // bunting over the village green (Night 13)
 
     if (life) life.drawAir(ctx, camX, camY, time);
 

@@ -352,3 +352,34 @@ body.no-hints #hint { display: none; }
 #memory-journal:hover { text-decoration: underline; }
 body.big-text #journal, body.big-text #memory { zoom: 1.18; }
 @media (max-width: 600px) { #memory-text { font-size: 15.5px; } .memory-card { padding: 20px 18px 14px; } }
+
+/* ---------- the growing village (Night 13) ---------- */
+#market {
+  position: fixed; top: 14px; right: 14px; width: min(320px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px); overflow: auto; padding: 12px;
+  transform: translateX(calc(100% + 30px)); transition: transform .35s ease;
+}
+#market.open { transform: none; }
+#market-close { background: none; border: 0; font-size: 22px; line-height: 1; }
+#market-note { margin: 0 0 10px; font-size: 13px; color: var(--ink-dim); }
+#market-list { display: flex; flex-direction: column; gap: 8px; }
+.trade {
+  text-align: left; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.05);
+  border: 1px solid transparent; display: flex; flex-direction: column; gap: 4px;
+}
+.trade:hover { border-color: var(--edge); background: rgba(255,255,255,.09); }
+.trade div { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; }
+.trade div b { color: var(--gold); font-weight: 400; }
+.trade small { color: var(--ink-dim); font-size: 11px; }
+.trade.cant { opacity: .6; }
+body.big-text #market { zoom: 1.18; }
+#place-caption {
+  position: absolute; left: 50%; top: 18%; transform: translate(-50%, 8px); text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 1.6s ease, transform 1.6s ease; color: #fff3d6;
+  text-shadow: 0 0 16px rgba(255, 210, 130, .6), 0 2px 4px rgba(0, 0, 0, .8);
+}
+#place-caption.show { opacity: 1; transform: translate(-50%, 0); }
+#place-name { display: block; font-size: 30px; font-weight: 400; letter-spacing: .14em; }
+#place-sub { display: block; font-size: 14px; font-style: italic; letter-spacing: .05em; opacity: .85; margin-top: 2px; }
+#place-sub::before, #place-sub::after { content: ' ~ '; color: var(--gold); }
+@media (max-width: 600px) { #place-caption { top: 24%; } #place-name { font-size: 24px; } }

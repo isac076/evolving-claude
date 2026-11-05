@@ -177,6 +177,20 @@ G.Minimap = class {
         ctx.fillStyle = `hsl(${v.hue},70%,72%)`; G.circle(ctx, x, y, big ? 1.8 : 1.3);
       }
     }
+    // villages (Night 13): a little house mark, and the name on the big map
+    if (this.state.village) for (const vil of this.state.village.list) {
+      const w = vil.has.well;
+      if (!w) continue;
+      const x = toX((w.tx + 0.5) * T), y = toY((w.ty + 0.5) * T);
+      if (!big && Math.hypot(x - sx, y - sy) > 84) continue;
+      ctx.fillStyle = '#ffe2b0';
+      ctx.beginPath(); ctx.moveTo(x - 3.5, y); ctx.lineTo(x, y - 3.5); ctx.lineTo(x + 3.5, y); ctx.lineTo(x + 3.5, y + 3); ctx.lineTo(x - 3.5, y + 3); ctx.closePath(); ctx.fill();
+      if (big && vil.name) {
+        ctx.font = 'italic 12px Georgia, serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(vil.name, x + 1, y - 7);
+        ctx.fillStyle = '#ffe9c4'; ctx.fillText(vil.name, x, y - 8);
+      }
+    }
     // the player: a soft pulsing light
     const px = toX(player.x), py = toY(player.y), pulse = 0.5 + 0.5 * Math.sin(t * 3);
     ctx.strokeStyle = `rgba(255,250,235,${0.25 + 0.35 * (1 - pulse)})`;

@@ -134,6 +134,28 @@ G.GOALS = [
     progress: s => s.stats.wishes || 0, hint: 'Every friend has many wishes, one after another.',
     reward: { petal: 4, acorn: 2 } },
 
+  // ---- A growing village (Night 13) ----
+  { id: 'hamlet', chapter: 'A growing village', text: 'Let two neighbours start a hamlet', target: 1,
+    progress: s => s.world ? s.world.count('well') : 0,
+    hint: 'Build two cottages near each other (within 9 steps). Once friends live in both, they build a well between them.',
+    reward: { stone: 3, wood: 3 } },
+  { id: 'drawwater', chapter: 'A growing village', text: 'Draw water from the village well', target: 1,
+    progress: s => s.stats.wellUses || 0,
+    hint: 'Press E beside the well (or click it). It waters every garden around it.', reward: { seed: 2, acorn: 1 } },
+  { id: 'market', chapter: 'A growing village', text: 'Grow the hamlet to three homes', target: 1,
+    progress: s => s.world ? s.world.count('stall') : 0,
+    hint: 'A third cottage close by, with a friend living in it, and the village puts up a market stall.', reward: { wood: 4, fibre: 2 } },
+  { id: 'trade', chapter: 'A growing village', text: 'Make a swap at the market stall', target: 1,
+    progress: s => s.stats.trades || 0,
+    hint: 'Press E beside the stall. It offers new swaps every morning.', reward: { petal: 3 } },
+  { id: 'green', chapter: 'A growing village', text: 'Raise a village green (four homes)', target: 1,
+    progress: s => s.world ? s.world.count('maypole') : 0,
+    hint: 'Four cottages together make a real village — the friends raise a ribbon pole for festivals.', reward: { crystal: 2, stone: 3 } },
+  { id: 'festival', chapter: 'A growing village', text: 'Dance at a village festival', target: 1,
+    progress: s => s.stats.festivals || 0,
+    hint: 'The first festival is on the evening the ribbon pole goes up — then on the last evening of every season.',
+    reward: { petal: 4, seed: 3 } },
+
   // ---- Echoes of the old world (Night 11) ----
   { id: 'ruinfind', chapter: 'Echoes of the old world', text: 'Find the ruins of the old world', target: 1,
     progress: s => s.stats.ruinsFound || 0,

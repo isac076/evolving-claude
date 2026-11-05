@@ -13,6 +13,7 @@ import smoke_music
 import smoke_wishes
 import smoke_ruins
 import smoke_seasons
+import smoke_village
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -527,6 +528,7 @@ def play(page, errors):
         smoke_wishes.run(page, SHOTS, errors)   # Night 10: wishes, hearts and cottages
         smoke_ruins.run(page, SHOTS, errors)    # Night 11: ruins, memory stones, the journal
         smoke_seasons.run(page, SHOTS, errors)  # Night 12: the turning seasons
+        smoke_village.run(page, SHOTS, errors)  # Night 13: the growing village
 
 
 if __name__ == "__main__":

@@ -152,7 +152,15 @@ G.UI = class {
     this.captionTimer = 6;
   }
 
+  // a village's name, shown softly as you arrive (Night 13)
+  placeCaption(name, sub) {
+    this.$('place-name').textContent = name; this.$('place-sub').textContent = sub;
+    this.$('place-caption').classList.add('show');
+    this.placeTimer = 4.5;
+  }
+
   update(dt) {
+    if (this.placeTimer > 0 && (this.placeTimer -= dt) <= 0) this.$('place-caption').classList.remove('show');
     if (this.captionTimer > 0 && (this.captionTimer -= dt) <= 0) this.$('music-caption').classList.remove('show');
     if (this.toastTimer > 0) {
       this.toastTimer -= dt;

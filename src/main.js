@@ -59,6 +59,8 @@ window.G = window.G || {};
     },
   });
 
+  const sounds = new G.Soundscape(state, settings);   // feeds the music and the ambience
+
   // creatures that return to restored land (not saved — they come and go)
   const life = new G.Creatures();
   state.creatures = life;
@@ -118,6 +120,32 @@ window.G = window.G || {};
   wishes.onMoveIn = (v, st) => {
     map.touch(st.tx, st.ty);
     ui.toast(`${v.name} has moved into the cottage! At night you'll see the window glow.`, 6);
+  };
+
+  // friends' cottages grow into villages: a well, a market stall, a festival green (Night 13)
+  const village = new G.Village(folk);
+  folk.village = village; state.village = village;
+  village.fx = folk.fx;
+  const market = new G.Market(state, ui, village);
+  village.onRaise = (vil, stage, st) => { map.touch(st.tx, st.ty); ui.toast(stage.say, 7); };
+  village.onRisen = st => {
+    map.touch(st.tx, st.ty);
+    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE - 30, `${G.STRUCTURES[st.type].name}!`, '#ffd77a');
+    const vil = village.villageAt(st);
+    if (st.type === 'well' && vil) setTimeout(() => ui.placeCaption(vil.name, 'a new hamlet'), 900);
+  };
+  village.onArrive = vil => ui.placeCaption(vil.name, `a ${vil.title} of ${vil.homes} homes`);
+  village.onFestival = (vil, fest, gift) => {
+    G.Sound.play('rainbow');
+    const g = gift ? ' Gift: ' + Object.entries(gift).map(([k, n]) => `${n} ${G.ITEMS[k].name}`).join(', ') + '.' : '';
+    ui.toast(`The ${fest.def.name} in ${vil.name}! ${fest.def.say}${g}`, 7);
+    ui.placeCaption(fest.def.name, vil.name);
+    ui.refresh();
+  };
+  market.onTrade = (t, st) => {
+    const x = (st.tx + 0.5) * G.TILE, y = st.ty * G.TILE;
+    renderer.burst(x, y, 'rgba(255,225,150,A)', 12);
+    Object.entries(t.get).forEach(([k, n], i) => addFloater(x, y - 10 - i * 14, `+${n} ${G.ITEMS[k].name}`, G.ITEMS[k].color));
   };
 
   // gardens: sprouts and saplings grow into blooms, moonflowers and trees (not a separate save — they are structures)
@@ -182,7 +210,7 @@ window.G = window.G || {};
     state.goalsDone = []; state.goalsHidden = false;
     state.stats.met = {};
     state.weather = makeWeather();   // a new world begins under a clear sky
-    folk.reset();
+    folk.reset(); village.reset();
     afterLoad();
     setTimeout(() => G.Sound.play('welcome'), 350);   // give the audio a moment to wake up
     ui.toast('The world has faded. Gather wood, stone and glow petals, then craft a Lantern (C) to bring the colour back.', 9);
@@ -204,6 +232,7 @@ window.G = window.G || {};
     state.weather = makeWeather();
     state.weather.load(d.weather);   // older saves have no weather: it starts clear
     folk.load(d.villagers, state.world, state.player);   // older saves have nobody yet
+    village.reset();
     afterLoad();
     ui.toast('Welcome back.');
   }
@@ -267,6 +296,20 @@ window.G = window.G || {};
     ui.toast(garden.describe(state, st), 4);
   }
 
+  // the well waters gardens, the stall opens the market, the ribbon pole tells of festivals
+  function useVillage(st) {
+    const vil = village.villageAt(st), x = (st.tx + 0.5) * G.TILE, y = st.ty * G.TILE;
+    if (st.type === 'stall' && vil) { market.open(vil, st); return; }
+    if (st.type === 'well') {
+      const n = village.drawWater(state, st, garden);
+      G.Sound.play('water', { pan: panAt(x) }); renderer.burst(x, y + 6, 'rgba(150,210,255,A)', 16);
+      ui.toast(n ? G.pick(G.VILLAGE_SAYS.well) : G.VILLAGE_SAYS.wellDry, 4.5); ui.refresh();
+      return;
+    }
+    G.Sound.play('select');
+    ui.toast(village.festivalNear(state.player) ? 'Everyone is dancing around the ribbon pole — what a night!' : village.nextFestival(state), 4.5);
+  }
+
   function talkTo(v) {
     folk.talk(v, state);
     ui.refresh();
@@ -276,6 +319,8 @@ window.G = window.G || {};
     const p = state.player; let best = null, bd = Infinity, locked = null;
     const friend = folk.nearest(p.x, p.y, 46);
     if (friend) { talkTo(friend); return; }
+    const vb = village.nearest(state.world, p.x, p.y, 1.8 * G.TILE);
+    if (vb) { useVillage(vb); return; }
     if (G.Crafting.owns(state, 'can')) {   // water a dry planting before gathering
       const dry = garden.dryNear(state.world, p.x, p.y, REACH);
       if (dry) { waterPlant(dry); return; }
@@ -390,6 +435,7 @@ window.G = window.G || {};
       if (map.isOpen) map.toggle(false);
       else if (state.buildRecipe) { state.buildRecipe = null; state.placing = null; }
       else if (state.removing) state.setRemoving(false);
+      else if (market.isOpen) market.close();
       else if (ui.craftOpen) ui.toggleCraft(false);
       else { settings.toggle(true); return; }
     }
@@ -406,6 +452,7 @@ window.G = window.G || {};
         else p.moveTarget = { x: friend.x, y: friend.y + 14 };
       }
       else if (input.mouse.clicked && close && state.world.objectAt(tx, ty)) gatherAt(tx, ty);
+      else if (input.mouse.clicked && close && village.nearest(state.world, wx, wy + 8, 20)) useVillage(village.nearest(state.world, wx, wy + 8, 20));
       else if (input.mouse.clicked && close && state.world.structureAt(tx, ty) && G.STRUCTURES[state.world.structureAt(tx, ty).type].grow) tendPlant(state.world.structureAt(tx, ty));
       else p.moveTarget = { x: wx, y: wy };
     }
@@ -430,6 +477,7 @@ window.G = window.G || {};
     goals.update(dt);
     garden.update(dt, state);
     wishes.update(dt, state);
+    village.update(dt, state); market.update();
     wishPanel.update(dt);
     ruins.update(dt);
   }
@@ -446,47 +494,12 @@ window.G = window.G || {};
     G.Seasons.step(state.world, p.x, p.y, stepAlt);
   }
 
-  // how much water is near a point, 0..1 (sampled a few times a second)
-  let waterNear = 0, waterTimer = 0;
-  function updateMusic(realDt) {
-    if (!state.world) return;
-    const w = state.world, x = state.cam.x, y = state.cam.y, p = state.running ? state.player : null;
-    const tx = Math.floor((p ? p.x : x) / G.TILE), ty = Math.floor((p ? p.y : y) / G.TILE);
-    const st = w.structureAt(tx, ty), wv = state.weather.v;
-    G.Music.update(realDt, {
-      restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), phase: (state.time % G.DAY_LENGTH) / G.DAY_LENGTH,
-      rain: wv.rain * (1 - G.Seasons.snowing()), fog: wv.fog, ground: musicGround(st, w.tileAt(tx, ty).type),
-      player: p, friends: folk.list, active: state.running && !settings.isOpen, stats: state.stats,
-    });
-  }
-
-  function musicGround(st, type) {
-    if (st && st.type === 'bridge') return 'water';
-    return G.SEASON_NOW.tiles[type].snow > 0.5 ? 'snow' : type;   // snowy land rings like glass
-  }
-
-  function updateAmbience(dt) {
-    if (!G.Sound.ctx || !state.world) return;
-    const x = state.cam.x, y = state.cam.y, w = state.world;
-    waterTimer -= dt;
-    if (waterTimer <= 0) {
-      waterTimer = 0.3;
-      const tx = Math.floor(x / G.TILE), ty = Math.floor(y / G.TILE);
-      let n = 0;
-      for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) if (w.isWater(tx + dx, ty + dy)) n++;
-      waterNear = Math.min(1, n / 40);
-    }
-    const wv = state.weather.v;
-    const sn = G.SEASON_NOW, snow = G.Seasons.snowing();   // snow falls silently; the seasons change who sings
-    G.Ambience.update(dt, { restore: w.restoreAt(x, y, w.lights), day: G.daylight(state.time), water: waterNear, active: state.running && !settings.isOpen,
-      rain: wv.rain * (1 - snow), snow: wv.rain * snow, wind: G.windNow || 0, fog: wv.fog, birds: sn.birds, crickets: sn.crickets });
-  }
-
   // followers' threads of light and everyone's speech bubbles, above the night
   function drawFolk() {
     const ctx = renderer.ctx, camX = Math.round(state.cam.x - renderer.W / 2), camY = Math.round(state.cam.y - renderer.H / 2);
     G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
     G.MusicFX.draw(ctx, G.Music.notes, camX, camY, renderer.W, renderer.H);
+    G.drawSkyLanterns(ctx, village.lanterns, camX, camY, renderer.W, renderer.H, state.time);
     for (const v of folk.list) {
       if (folk.indoors(v)) continue;
       G.drawHeartFx(ctx, v, v.x - camX, v.y - camY, frameDt);
@@ -528,8 +541,8 @@ window.G = window.G || {};
     }
     life.update(dt, state, renderer.W, renderer.H);
     folk.update(dt, state, renderer.W, renderer.H);
-    updateAmbience(dt);
-    updateMusic(realDt);
+    sounds.ambience(dt);
+    sounds.music(realDt);
     input.endFrame();
     requestAnimationFrame(frame);
   }

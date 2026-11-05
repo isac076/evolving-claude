@@ -2,6 +2,13 @@
 
 What changed each night, newest first.
 
+## Night 13 — 2026-11-05 — The village grows
+When two friends' cottages stand close together, the friends build a little hamlet with its own name and a stone well
+(press E at the well to water every garden around it). A third home brings a market stall where you can swap things you
+have plenty of, and a fourth raises a ribbon pole on the village green. At dusk neighbours meet at the well to chat, and on
+the last evening of every season (and the night the pole goes up) the village holds a festival: everyone dances in a ring,
+bunting glows between the roofs, paper lanterns float into the night sky and the music turns into a lively waltz.
+
 ## Night 12 — 2026-11-04 — The turning seasons
 The year now turns every few days. Spring brings pink blossom and fresh green grass; summer is lush and golden with
 fireflies at night; in autumn the trees go gold, orange and red and leaves drift down through the mist; and in winter

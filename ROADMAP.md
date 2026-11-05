@@ -58,7 +58,7 @@ as the world does.
 - [x] Houses villagers build or you build for them (Night 10 — cottages: a friend near your light moves in, sleeps inside with a glowing window, smoke from the chimney)
 - [x] Dialogue and small requests (bring me 5 petals...) with rewards (Night 10 — friends' wishes: bring, build, plant, light, rescue; heart bubbles, a wishes list, friendship hearts, bigger gifts from close friends)
 - [ ] Villagers unlock new recipes, music, and abilities (Night 11: friends now also remember where ruins are; Night 9: music done — awake friends nearby join the song; Night 10: the first wish teaches the Cottage via `unlock` on recipes — more recipes/abilities to come)
-- [ ] A village that visibly grows over time (market, well, festival)
+- [x] A village that visibly grows over time (Night 13 — cottages within 9 steps form a named hamlet; friends build a well (waters gardens), then a market stall (daily swaps), then a ribbon pole; friends meet at the well at dusk; festivals with dancing, bunting and sky lanterns on each season's last evening)
 
 ## Chapter 5 — Exploration
 - [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
@@ -98,9 +98,20 @@ What a play-through taught us:
 - `tools/smoke_test.py` is near 600 lines: split it into a few files (by chapter) on the next review.
 - Next nights should lean on Chapter 3–5 content (gardens, houses, new biomes) — the systems are solid.
 
+## Notes for the next review (Night 14)
+- `src/main.js` is at ~585 lines even after the music/ambience feed moved to `src/game/soundscape.js` — split the
+  player actions (gather, build, pick up, use village things) into their own file.
+- `src/world/villagers.js` is ~495 lines; the talking (`hello`, `talk`) could move to its own file.
+- Check the village spot-finder in odd places (beside water, in forests): the well/stall/pole must never block a cottage door.
+
 ---
 
 ## Ideas (anyone can add here)
+- Village: more stages — a bakery (bread as a gift friends love), a little bridge or a lamp-lit square of paths, a village bell
+- Village: festival games (catch falling petals, a lantern-lighting race) and a festival goal per season ("see all four festivals")
+- Village: friends trade among themselves at the stall; the stall keeper changes each day and offers their kind's favourite swaps
+- Village: a signpost at the edge of each village showing its name (the sign idea from Chapter 3 could reuse it)
+- Village: two villages could become "sister villages" and friends walk the road between them (paths you build guide them)
 - Seasons: a harvest festival in autumn and a lantern festival on the longest winter night (friends gather at the Heart Stone)
 - Seasons: frozen ponds you can walk across in deep winter (only shallow water; fish asleep under the ice), and icicles on cottages
 - Seasons: build a snow-spirit (snowman) in winter; collect fallen leaves in autumn for a leaf-pile decoration that rabbits hide in

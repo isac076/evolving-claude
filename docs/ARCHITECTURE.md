@@ -22,6 +22,7 @@ src/data/garden.js    G.GARDEN growth settings, G.GROW_KINDS (what sprouts/sapli
 src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (likes, hat, gift, lines), G.VILLAGER_SAYS
 src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / build / stat / house, words, rewards), G.WISH_SAYS
 src/data/ruins.js     G.RUIN settings, G.RUIN_SITES (ruin kinds as little stamps), G.RUIN_PIECES, G.LORE (the 12 memories), G.RUIN_ECHOES
+src/data/village.js   G.VILLAGE settings, G.VILLAGE_STAGES (well → stall → ribbon pole), G.VILLAGE_NAMES, G.MARKET(_TRADES), G.FESTIVALS, G.VILLAGE_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -32,9 +33,11 @@ src/world/seasons.js  G.Seasons — which season the clock says, blends two seas
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
 src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
 src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
+src/world/village.js  G.Village — groups cottages into villages, raises their buildings, dusk at the well, festivals, sky lanterns, market swaps
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
+src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
@@ -45,6 +48,7 @@ src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bu
 src/render/music_fx.js G.MusicFX — the little glowing ♪ that float up from friends playing (drawn after lighting)
 src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbles), G.drawHeartFx (rising hearts)
 src/render/ruin_sprites.js pillars, stumps, walls, the arch (spans 3 tiles), keeper statue, fountain, rubble, memory stones, G.drawPave
+src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built scaffold), G.drawVillageDecor (bunting), G.drawSkyLanterns
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -52,10 +56,11 @@ src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebr
 src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
 src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
+src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, main loop, player actions, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -212,6 +217,24 @@ tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_
   in `G.VILLAGER_SAYS[id]`), the minimap (season colours; its image key includes `G.Seasons.version`), the HUD `#season` and the
   Resting summary. `onChange(def, firstTime)` → toast + `season` sound; `stats.seasons = {seen, turns}`. Footprints:
   `G.Seasons.step()` from main's footsteps, drawn right after the ground. Tests jump seasons by setting `state.time`.
+- **Villages** (Night 13; data in src/data/village.js, logic in G.Village = `state.village`, `folk.village`): every second
+  `find()` groups cottages that have an `owner` (set by G.Wishes.houses) — single-link within `G.VILLAGE.link` tiles; 2+ make a
+  village `{cottages, homes, cx, cy, folk, has: {well, stall, maypole}, key, name, title}`. Structures with `village: true` (fixed,
+  never in a recipe) belong to the nearest village centre within `reach`. `grow()` builds the next `G.VILLAGE_STAGES` entry at
+  `spotFor()` (a free tile near the middle with `room` clear around it, never in front of/behind a cottage); the structure gets
+  `st.rise` 0→1 (not saved: loaded ones are whole) and the sprite draws it rising from a scaffold, while awake village friends
+  'go' to help. The name comes from the well's tile (`nameAt`), so it is stable without saving. villagers.js asks
+  `village.evening(v, state)` from the idle branch (dusk, `G.VILLAGE.gather` day phase) → friends stand around their well.
+  **Festivals**: `festivalOn()` = ribbon pole risen + day phase in `G.VILLAGE.festival` + (last day of the season, or the pole key in
+  `stats.village.firstFest`). Friends of the village (and friends whose light is near) get `v.festival = key`, `state = 'dance'`
+  (villagers.js skips bedtime while `v.festival`), and `dance()` moves them round the pole; `pole.fest` = the festival hues (sprites
+  read it). Sky lanterns live in `village.lanterns` (drawn after the lighting by main). Joining (within 10 tiles) gives
+  `G.FESTIVALS[season].gift` once (`stats.festSeen`, `stats.festivals`). The music picks the `festival` mood when
+  `info.festival` (the village name) is set by G.Soundscape. **Using**: E (`village.nearest`, 1.8 tiles) or a click — the well
+  waters plantings within `wellWater` (`stats.wellUses`), the stall opens G.Market (`trades()` picks `G.MARKET.offers` swaps per
+  day per village by hash; uses in `stats.market = {day, used}`; `stats.trades`), the pole tells when the next festival is.
+  The big map prints village names, the journal's Places page lists villages first, arriving shows `ui.placeCaption()`.
+  Save: nothing new (structures + stats), no version bump; old saves with clustered cottages simply grow a village.
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

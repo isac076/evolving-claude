@@ -269,7 +269,7 @@ window.G = window.G || {};
           if (L) { this.setHome(v, L); this.toast(`${v.name} has moved to live by another light.`, 3.5); v.state = 'idle'; v.t = 0.5; }
         }
       }
-      const night = v.state === 'sleep' || v.state === 'tobed' ? day < 0.36 : day < 0.24;
+      const night = !v.festival && (v.state === 'sleep' || v.state === 'tobed' ? day < 0.36 : day < 0.24);   // festivals go on into the night
       if (night && v.state !== 'sleep' && v.state !== 'tobed') { v.state = 'tobed'; const b = this.bedFor(world, v); v.tx2 = b.x; v.ty2 = b.y; v.sit = 0; }
       if (!night && (v.state === 'sleep' || v.state === 'tobed')) {
         if (v.state === 'sleep' && v.house) {   // out of the cottage door, into the morning
@@ -291,6 +291,8 @@ window.G = window.G || {};
         v.sit -= v.sit * Math.min(1, dt * 6);
         if (near) return;
         if ((v.t -= dt) > 0) return;
+        const sq = this.village && this.village.evening(v, state);   // neighbours meet at the village well at dusk (Night 13)
+        if (sq) { v.state = 'go'; v.tx2 = sq.x; v.ty2 = sq.y; v.goal = sq; return; }
         const liked = Math.random() < 0.4 && day > 0.4 && this.findLiked(world, v);
         if (liked) { v.state = 'go'; v.tx2 = liked.x; v.ty2 = liked.y; v.goal = liked; return; }
         for (let i = 0; i < 8; i++) {

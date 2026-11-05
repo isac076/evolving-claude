@@ -67,9 +67,31 @@ G.Journal = class {
     return h;
   }
 
+  // your friends' villages (Night 13), shown above the ruins
+  villages() {
+    const V = this.state.village, p = this.state.player;
+    if (!V || !V.list.some(v => v.name)) return '';
+    let h = '';
+    for (const vil of V.list) {
+      if (!vil.name) continue;
+      const w = vil.has.well, d = Math.round(Math.hypot(w.tx - p.tx, w.ty - p.ty));
+      const where = d < 8 ? 'right here' : `about ${d} steps ${G.Ruins.direction(p.tx, p.ty, w.tx, w.ty)}`;
+      const built = ['well', 'stall', 'maypole'].filter(k => vil.has[k]).map(k => G.STRUCTURES[k].name.toLowerCase());
+      h += `<div class="j-place read"><b>${vil.name}</b><em>${where}</em><p>A ${vil.title} of ${vil.homes} homes: ${vil.folk.map(v => v.name).join(', ')}.</p>
+        <small>⌂ It has a ${built.join(', a ')}.</small></div>`;
+    }
+    return h;
+  }
+
   page_places() {
+    const vh = this.villages();
+    return vh + this.ruinPlaces(!!vh);
+  }
+
+  ruinPlaces(hasVillage) {
     const s = this.state, found = (s.stats.ruins && s.stats.ruins.found) || {}, p = s.player;
     const sites = Object.keys(found).map(id => { const [cx, cy] = id.split(',').map(Number); return G.Ruins.siteOf(s.world, cx, cy); }).filter(Boolean);
+    if (!sites.length && hasVillage) return '';
     if (!sites.length) return '<p class="j-note">You haven\'t found any ruins yet. Old stones stand all over the faded land — friends sometimes remember where. Found ruins show on your map as small stone marks.</p>';
     sites.sort((a, b) => Math.hypot(a.tx - p.tx, a.ty - p.ty) - Math.hypot(b.tx - p.tx, b.ty - p.ty));
     let h = `<p class="j-note">${sites.length} ruin${sites.length === 1 ? '' : 's'} found, nearest first.</p>`;

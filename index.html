@@ -23,6 +23,7 @@
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
   <div id="music-caption"></div>
+  <div id="place-caption"><b id="place-name"></b><span id="place-sub"></span></div>
   <div id="bottom">
     <div class="panel" id="inventory"></div>
     <div id="hint"></div>
@@ -37,6 +38,12 @@
   <div class="craft-head"><h2>Craft</h2><button id="craft-close" aria-label="Close">×</button></div>
   <div id="craft-list"></div>
   <button id="btn-pickup">Pick up a building <small>(X)</small></button>
+</div>
+
+<div class="panel" id="market">
+  <div class="craft-head"><h2 id="market-h">Market</h2><button id="market-close" aria-label="Close">×</button></div>
+  <p id="market-note"></p>
+  <div id="market-list"></div>
 </div>
 
 <div id="bigmap">
@@ -69,7 +76,7 @@
     <h3>How to play</h3>
     <div class="keys">
       <kbd>WASD</kbd><span>move — or click / tap where to go</span>
-      <kbd>E</kbd><span>gather, or talk to a friend</span>
+      <kbd>E</kbd><span>gather, talk to a friend, use a well or market stall</span>
       <kbd>C</kbd><span>craft lanterns, paths and more</span>
       <kbd>X</kbd><span>pick a building back up</span>
       <kbd>M</kbd><span>the map</span>
@@ -84,7 +91,7 @@
       <kbd>Map</kbd><span>tap the round map</span>
       <kbd>Book</kbd><span>tap the little book for your journal</span>
     </div>
-    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Old ruins hide memory stones — wake them to learn why the world faded. The seasons turn every few days: blossom, summer, falling leaves and snow.</p>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. The seasons turn every few days: blossom, summer, falling leaves and snow.</p>
 
     <div class="settings-buttons">
       <button id="set-resume" class="main">Keep playing</button>
@@ -139,6 +146,7 @@
 <script src="src/data/music.js"></script>
 <script src="src/data/wishes.js"></script>
 <script src="src/data/ruins.js"></script>
+<script src="src/data/village.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/explore.js"></script>
@@ -148,10 +156,12 @@
 <script src="src/world/villagers.js"></script>
 <script src="src/world/garden.js"></script>
 <script src="src/world/wishes.js"></script>
+<script src="src/world/village.js"></script>
 <script src="src/game/player.js"></script>
 <script src="src/game/save.js"></script>
 <script src="src/game/crafting.js"></script>
 <script src="src/game/ruin_play.js"></script>
+<script src="src/game/soundscape.js"></script>
 <script src="src/render/sprites.js"></script>
 <script src="src/render/workshop_sprites.js"></script>
 <script src="src/render/garden_sprites.js"></script>
@@ -161,6 +171,7 @@
 <script src="src/render/music_fx.js"></script>
 <script src="src/render/home_sprites.js"></script>
 <script src="src/render/ruin_sprites.js"></script>
+<script src="src/render/village_sprites.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>
@@ -168,6 +179,7 @@
 <script src="src/ui/settings.js"></script>
 <script src="src/ui/wishes_panel.js"></script>
 <script src="src/ui/journal.js"></script>
+<script src="src/ui/market.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

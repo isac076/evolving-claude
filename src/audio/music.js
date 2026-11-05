@@ -36,6 +36,7 @@ G.Music = {
   get playing() { return this.piece && !this.piece.resting && this.lv.melody > 0.5; },
 
   moodFor(i) {
+    if (i.festival) return 'festival';   // a village festival is near (Night 13)
     if (i.rain > 0.45) return 'rain';
     if (i.fog > 0.5) return 'fog';
     if (i.day < 0.25) return 'night';
@@ -92,7 +93,7 @@ G.Music = {
     const prog = names.map(n => G.CHORDS[n]), P = G.MUSIC.phrase;
     const rest = G.MUSIC.restBars[0] + Math.floor(Math.random() * (G.MUSIC.restBars[1] - G.MUSIC.restBars[0] + 1));
     const place = this.placeOf(i.ground), grey = i.restore < 0.4;
-    const title = grey ? G.pick(G.MUSIC_GREY_TITLES) : G.pick(mood.titles).replace('{place}', place.place).replace(/^\{Place\}/, place.place[0].toUpperCase() + place.place.slice(1));
+    const title = grey ? G.pick(G.MUSIC_GREY_TITLES) : G.pick(mood.titles).replace('{place}', place.place).replace('{name}', i.festival || '').replace(/^\{Place\}/, place.place[0].toUpperCase() + place.place.slice(1));
     this.piece = { key, mood, names, prog, melody: this.compose(mood, prog), playBars: P * G.MUSIC.repeats, total: P * G.MUSIC.repeats + rest, title, resting: false };
     this.bar = 0; this.counter = 19;
     const m = this.stats();
