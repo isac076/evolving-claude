@@ -217,6 +217,7 @@ window.G = window.G || {};
   // a paper speech bubble above someone's head
   G.drawSpeech = function (ctx, v, sx, sy, W, H) {
     if (!v.say) return;
+    if (sx < -30 || sx > W + 30 || sy < 0 || sy > H + 60) return;   // speaker off screen: no stray bubble in a corner (Night 14)
     const lost = v.mode === 'lost';
     const a = Math.min(1, v.sayT * 2.5);
     ctx.save();

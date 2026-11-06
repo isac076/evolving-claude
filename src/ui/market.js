@@ -23,6 +23,7 @@ G.Market = class {
       ? `${keeper.name} minds the stall today. Each swap can be made ${G.MARKET.times} times a day — new swaps every morning.`
       : 'Each swap can be made a couple of times a day — new swaps every morning.';
     this.el.classList.add('open');
+    document.body.classList.add('market-open');   // the minimap steps aside (Night 14)
     this.ui.toggleCraft(false);
     G.Sound.play('open');
     this.render();
@@ -31,6 +32,7 @@ G.Market = class {
   close() {
     if (!this.isOpen) return;
     this.el.classList.remove('open');
+    document.body.classList.remove('market-open');
     G.Sound.play('close');
   }
 

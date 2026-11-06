@@ -138,12 +138,14 @@ def run(page, shots, errors):
         const el = document.getElementById('market');
         if (!el.classList.contains('open')) return 'E beside the stall did not open the market';
         if (el.querySelectorAll('.trade').length !== G.MARKET.offers) return 'the market shows ' + el.querySelectorAll('.trade').length + ' swaps';
+        if (!document.body.classList.contains('market-open')) return 'the minimap still shows through the market';
         return 'ok';
     }""")
     page.screenshot(path=str(shots / "41-market.png"))
     page.keyboard.press("Escape")
     page.wait_for_timeout(500)
     check("Market closed", """() => document.getElementById('market').classList.contains('open') ? 'Esc did not close the market'
+        : document.body.classList.contains('market-open') ? 'the minimap stayed hidden after the market closed'
         : document.getElementById('settings').classList.contains('open') ? 'Esc opened the resting menu instead' : 'ok'""")
 
     # by day the village stands in the sun

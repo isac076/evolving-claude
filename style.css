@@ -136,7 +136,7 @@ body.removing #game { cursor: pointer; }
 #goals.show { opacity: 1; transform: none; }
 #goals.done { border-color: rgba(255, 215, 122, .7); box-shadow: 0 0 26px rgba(255, 210, 120, .35), 0 6px 24px rgba(0,0,0,.35); }
 .goal-head { display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 5px; }
-.pips { display: flex; gap: 3px; }
+.pips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 3px; max-width: 60%; }
 .pips i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.14); }
 .pips i.on { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
 .pips i.now { background: rgba(255, 215, 122, .35); box-shadow: 0 0 0 1px rgba(255,215,122,.7); }
@@ -158,7 +158,7 @@ body.removing #game { cursor: pointer; }
   transition: transform .25s;
 }
 #minimap:hover { transform: scale(1.03); }
-body.map-open #minimap, body.craft-open #minimap { opacity: 0; pointer-events: none; }
+body.map-open #minimap, body.craft-open #minimap, body.market-open #minimap { opacity: 0; pointer-events: none; }
 #minimap { transition: transform .25s, opacity .3s; }
 
 #bigmap {

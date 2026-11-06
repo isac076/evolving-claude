@@ -30,7 +30,8 @@ src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk 
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/seasons.js  G.Seasons — which season the clock says, blends two seasons into G.SEASON_NOW, season-change hook, footprints in snow
-src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, talking, gifts, save/load
+src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, save/load
+src/world/villager_talk.js hello() and talk() added to G.Villagers.prototype — wishes first, the daily gift, hints, lines for weather/season/time
 src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
 src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
 src/world/village.js  G.Village — groups cottages into villages, raises their buildings, dusk at the well, festivals, sky lanterns, market swaps
@@ -38,6 +39,7 @@ src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
+src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
 src/render/sprites.js how each tile / object / structure / the player is drawn
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
@@ -49,6 +51,7 @@ src/render/music_fx.js G.MusicFX — the little glowing ♪ that float up from f
 src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbles), G.drawHeartFx (rising hearts)
 src/render/ruin_sprites.js pillars, stumps, walls, the arch (spans 3 tiles), keeper statue, fountain, rubble, memory stones, G.drawPave
 src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built scaffold), G.drawVillageDecor (bunting), G.drawSkyLanterns
+src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -57,10 +60,10 @@ src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, co
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
 src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
 src/ui/market.js      G.Market — the market stall's swap panel
-src/main.js           game state, main loop, player actions, title screen
+src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -74,7 +77,7 @@ tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_
   sprite takes this as `f` and uses `G.shade(h, s, l, f)` for its colours.
 - **Lighting**: `G.daylight(time)` gives 0 (night) … 1 (day). At night the
   renderer darkens the screen and cuts holes for light sources (`light` in data).
-- **Drawing order**: ground → fish + ripples → floor structures → objects/standing
+- **Drawing order**: ground → shore foam (G.ShoreFX, water tiles with land beside them) → fish + ripples → floor structures → objects/standing
   structures, ground creatures and the player row by row (so things lower on screen
   are in front) → flying creatures → weather (G.WeatherFX) → particles → lighting → vignette.
 - **Soft colour edges**: the renderer also computes restoration at every tile
@@ -235,6 +238,9 @@ tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_
   day per village by hash; uses in `stats.market = {day, used}`; `stats.trades`), the pole tells when the next festival is.
   The big map prints village names, the journal's Places page lists villages first, arriving shows `ui.placeCaption()`.
   Save: nothing new (structures + stats), no version bump; old saves with clustered cottages simply grow a village.
+- **Player actions** (Night 14): main.js builds `act = new G.Actions({state, input, renderer, ui, map, ruins, garden, village,
+  market, folk, floater, panAt})`. `update()` calls `act.gatherNearest()` for E, `act.updateBuild()` / `act.updateRemove()` while
+  placing / picking up, and `act.click()` otherwise. Special build messages live in `G.Actions.BUILT_SAYS`.
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

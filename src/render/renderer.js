@@ -87,6 +87,15 @@ G.Renderer = class {
       nb[0] = tiles[i - gcols]; nb[1] = tiles[i + 1]; nb[2] = tiles[i + gcols]; nb[3] = tiles[i - 1];
       G.drawGround(ctx, tiles[i], tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, cornersAt(tx, ty), nb);
     }
+    // foam breathing along the shores (Night 14)
+    const n8 = new Array(8);
+    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+      const i = (ty - ty0 + 1) * gcols + (tx - tx0 + 1), tile = tiles[i];
+      if (!G.TILES[tile.type].water) continue;
+      n8[0] = tiles[i - gcols]; n8[1] = tiles[i + 1]; n8[2] = tiles[i + gcols]; n8[3] = tiles[i - 1];
+      n8[4] = tiles[i - gcols - 1]; n8[5] = tiles[i - gcols + 1]; n8[6] = tiles[i + gcols + 1]; n8[7] = tiles[i + gcols - 1];
+      G.ShoreFX.draw(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, n8);
+    }
     const life = state.creatures;
     if (life) life.drawWater(ctx, camX, camY, time);
     G.Seasons.drawPrints(ctx, camX, camY, dt);   // footprints in the snow

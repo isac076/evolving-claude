@@ -8,12 +8,15 @@ Needs: pip install playwright && python3 -m playwright install chromium
 import pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import smoke_weather
+import smoke_villagers
 import smoke_garden
 import smoke_music
 import smoke_wishes
 import smoke_ruins
 import smoke_seasons
 import smoke_village
+import smoke_review
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -188,84 +191,7 @@ def play(page, errors):
         if result != "ok":
             errors.append("Wildlife check failed: " + str(result))
 
-        # weather: rain (creatures shelter, frogs come out, plants regrow faster),
-        # wind, fog, and a rainbow when the rain clears on a bright day
-        result = page.evaluate("""() => {
-            const s = G.state, wx = s.weather, T = G.TILE, spot = window.__spot;
-            if (!wx || !G.WEATHER) return 'no weather';
-            for (const k in G.WEATHER) for (const f of ['rain', 'wind', 'fog', 'cloud']) if (typeof (G.WEATHER[k][f] || 0) !== 'number') return 'bad weather ' + k;
-            s.player.x = (spot.tx + 0.5) * T; s.player.y = (spot.ty + 0.5) * T; s.cam.x = s.player.x; s.cam.y = s.player.y;
-            s.time = Math.floor(s.time / G.DAY_LENGTH + 1) * G.DAY_LENGTH + 8;
-            // a gathered bloom should grow back faster in the rain
-            s.world.harvested.set('9999,9999', s.time + 100);
-            window.__wasHarvest = s.time + 100;
-            wx.set('rain', true);
-            const x = s.player.x, y = s.player.y;
-            s.creatures.spawn('frog', x + 60, y + 30); s.creatures.spawn('frog', x - 70, y + 50);
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Weather setup failed: " + str(result))
-        page.wait_for_timeout(3500)
-        page.screenshot(path=str(SHOTS / "10-rain.png"))
-        result = page.evaluate("""() => {
-            const s = G.state, wx = s.weather, L = s.creatures;
-            if (wx.kind !== 'rain' || wx.v.rain < 0.9) return 'rain did not start: ' + wx.kind + ' ' + wx.v.rain;
-            if (!document.getElementById('weather').textContent.includes('Rain')) return 'HUD does not show the rain';
-            const kinds = new Set(L.list.filter(c => !c.leaving && c.state !== 'fly').map(c => c.kind));
-            for (const k of ['butterfly', 'rabbit', 'bird']) if (kinds.has(k)) return k + ' did not shelter from the rain';
-            if (!kinds.has('frog')) return 'no frogs in the rain (have ' + [...kinds] + ')';
-            if (!(s.stats.rainTime > 1)) return 'time in the rain not counted';
-            const left = s.world.harvested.get('9999,9999');
-            if (!(left < window.__wasHarvest - 1)) return 'rain did not speed up regrowth';
-            s.world.harvested.delete('9999,9999');
-            // save and load the weather
-            G.Save.write(s);
-            const d = G.Save.read();
-            if (!d.weather || d.weather.kind !== 'rain') return 'weather was not saved: ' + JSON.stringify(d.weather);
-            const w2 = new G.Weather(); w2.load(d.weather);
-            if (w2.kind !== 'rain' || w2.v.rain !== 1) return 'weather did not load';
-            const w0 = new G.Weather(); w0.load(undefined);
-            if (w0.kind !== 'clear') return 'missing weather should be clear';
-            // every kind of weather can be picked, runs for a while and moves on
-            const seen = new Set();
-            const w3 = new G.Weather();
-            for (let i = 0; i < 400; i++) { w3.left = 0; w3.update(0.1, s); seen.add(w3.kind); }
-            if (seen.size < Object.keys(G.WEATHER).length) return 'some weather never happens: ' + [...seen];
-            for (let i = 0; i < 50; i++) for (const k in G.WEATHER) {
-                const n = w3.pickNext.call({ kind: k, def: G.WEATHER[k] });
-                if (!G.WEATHER[n] || n === k) return 'bad next weather after ' + k + ': ' + n;
-            }
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Rain check failed: " + str(result))
-        page.evaluate("() => { const w = G.state.weather; w.set('breezy', true); w.wasRainy = false; w.rainbow = 0; w.rainbowA = 0; }")
-        page.wait_for_timeout(3500)
-        page.screenshot(path=str(SHOTS / "11-breezy.png"))
-        result = page.evaluate("() => G.windNow > 0.4 ? 'ok' : 'wind too weak: ' + G.windNow")
-        if result != "ok":
-            errors.append("Wind check failed: " + str(result))
-        # rain, then clear skies on a bright day: a rainbow
-        result = page.evaluate("""() => {
-            const s = G.state, wx = s.weather, before = s.stats.rainbows || 0;
-            wx.set('rain', true); wx.update(0.05, s);
-            wx.set('clear', true); wx.update(0.05, s);
-            if ((s.stats.rainbows || 0) !== before + 1 || !(wx.rainbow > 0)) return 'no rainbow after the rain';
-            wx.rainbowA = 1;
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Rainbow check failed: " + str(result))
-        page.wait_for_timeout(1200)
-        page.screenshot(path=str(SHOTS / "12-rainbow.png"))
-        page.evaluate("() => { const s = G.state; s.weather.set('fog', true); s.weather.rainbow = 0; s.weather.rainbowA = 0; }")
-        page.wait_for_timeout(1200)
-        page.screenshot(path=str(SHOTS / "13-fog.png"))
-        page.evaluate("""() => { const s = G.state; s.time = Math.floor(s.time / G.DAY_LENGTH) * G.DAY_LENGTH + G.DAY_LENGTH * 0.5; s.weather.set('rain', true); }""")
-        page.wait_for_timeout(1500)
-        page.screenshot(path=str(SHOTS / "14-rain-night.png"))
-        page.evaluate("() => G.state.weather.set('clear', true)")
+        smoke_weather.run(page, SHOTS, errors)   # Night 5: rain, wind, fog, rainbows
 
         # workshop: build a workbench, craft tools there, mine crystal,
         # raise a beacon, decorate, and pick a building back up
@@ -353,128 +279,7 @@ def play(page, errors):
         if result != "ok":
             errors.append("Crystal check failed: " + str(result))
 
-        # villagers: find the first lost spirit, lead it home, fill a little
-        # village, watch their day and night, talk, save and load them
-        result = page.evaluate("""() => {
-            const s = G.state, F = s.villagers, w = s.world, T = G.TILE;
-            if (!F) return 'no villagers';
-            for (const k in G.VILLAGER_KINDS) {
-                const d = G.VILLAGER_KINDS[k];
-                if (!G.STRUCTURES[d.likes]) return k + ' likes an unknown structure ' + d.likes;
-                if (!G.VILLAGER_HATS[d.hat]) return k + ' has no hat ' + d.hat;
-                for (const i in d.gift) if (!G.ITEMS[i]) return k + ' gives an unknown item ' + i;
-                if (!d.lines.length || !d.wish || !d.visit) return k + ' has nothing to say';
-            }
-            F.reset();
-            const f = F.firstSpot(w);
-            if (!f) return 'no first lost spirit near the Heart Stone';
-            if (w.restoreAt((f.tx + 0.5) * T, (f.ty + 0.5) * T, w.lights) > 0.3) return 'first spirit is already in coloured land';
-            let n = 0;
-            for (let cy = -12; cy < 12; cy++) for (let cx = -12; cx < 12; cx++) if (F.spotOf(w, cx, cy)) n++;
-            if (n < 5) return 'too few lost spirits in the world: ' + n;
-            s.time = Math.floor(s.time / G.DAY_LENGTH + 1) * G.DAY_LENGTH + G.DAY_LENGTH * 0.08;
-            s.player.x = (f.tx + 0.5) * T + 95; s.player.y = (f.ty + 0.5) * T + 10;
-            s.cam.x = s.player.x - 40; s.cam.y = s.player.y;
-            F.refreshLost(w, s.cam);
-            if (!F.lost.get('first')) return 'first lost spirit did not appear';
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Villager setup failed: " + str(result))
-        page.wait_for_timeout(1800)
-        page.screenshot(path=str(SHOTS / "15-lost-spirit.png"))
-        result = page.evaluate("""() => {
-            const s = G.state, F = s.villagers, v = F.lost.get('first');
-            if (!v) return 'lost spirit wandered off';
-            const before = s.stats.spiritsFound || 0;
-            s.player.x = v.x + 12; s.player.y = v.y + 4;
-            F.update(0.05, s, 1100, 680);
-            if (F.followers.length !== 1 || F.lost.has('first')) return 'spirit did not take your light';
-            if ((s.stats.spiritsFound || 0) !== before + 1) return 'finding was not counted';
-            s.player.x += 70; s.cam.x = s.player.x; s.cam.y = s.player.y;
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Lost spirit check failed: " + str(result))
-        page.wait_for_timeout(900)
-        page.screenshot(path=str(SHOTS / "16-follow.png"))
-        result = page.evaluate("""() => {
-            const s = G.state, F = s.villagers, w = s.world, T = G.TILE, spot = window.__shop;
-            // walk into the beacon's light: the follower settles there
-            const B = w.lights.find(L => L.type === 'beacon');
-            if (!B) return 'no beacon from the workshop test';
-            s.player.x = B.x - 40; s.player.y = B.y + 50; s.cam.x = s.player.x; s.cam.y = s.player.y;
-            for (let i = 0; i < 40; i++) F.update(0.05, s, 1100, 680);
-            if (F.followers.length || F.list.length !== 1) return 'follower did not settle (' + F.followers.length + ' following, ' + F.list.length + ' home)';
-            if (!F.rescued.has('first')) return 'rescue not remembered';
-            // more friends move in: the beacon has room for 4, then it is full
-            const kinds = Object.keys(G.VILLAGER_KINDS);
-            for (let i = 0; i < 3; i++) {
-                const v = F.make(w, 'test' + i, B.x + 30 * i - 30, B.y + 40);
-                v.kind = kinds[(i + 1) % kinds.length]; v.def = G.VILLAGER_KINDS[v.kind]; v.hue = v.def.hues[0];
-                const h = F.homeFor(w, v.x, v.y);
-                if (!h || !h.light) return 'no home for friend ' + i;
-                F.settle(v, h.light, s);
-            }
-            if (F.living(F.lightKey(B)) !== 4) return 'beacon should have 4 friends: ' + F.living(F.lightKey(B));
-            const full = F.homeFor(w, B.x, B.y + 40);
-            if (full && full.light === B) return 'a full beacon still offered a home';
-            if (new Set(F.list.map(v => v.name)).size !== F.list.length) return 'two friends share a name';
-            // send each friend to something they love, and hear one speak
-            for (const v of F.list) {
-                v.say = null;
-                const g = F.findLiked(w, v);
-                if (g) { v.x = g.x; v.y = g.y; v.state = 'busy'; v.t = 60; v.goal = g; }
-            }
-            const talker = F.list[0];
-            talker.giftDay = -1;
-            const inv = JSON.stringify(s.inv), talks = s.stats.talks || 0;
-            F.talk(talker, s);
-            if (JSON.stringify(s.inv) === inv) return 'no gift on the first talk of the day';
-            if ((s.stats.talks || 0) !== talks + 1 || !talker.say) return 'talking did not work';
-            const g2 = JSON.stringify(s.inv); F.talk(talker, s);
-            if (JSON.stringify(s.inv) !== g2) return 'a second gift on the same day';
-            s.player.x = B.x - 20; s.player.y = B.y + 90; s.cam.x = s.player.x; s.cam.y = s.player.y - 20;
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Village check failed: " + str(result))
-        page.wait_for_timeout(1500)
-        page.screenshot(path=str(SHOTS / "17-village.png"))
-        result = page.evaluate("""() => {
-            const s = G.state, F = s.villagers, w = s.world;
-            // night: everyone walks home to sleep beside their light
-            s.time = Math.floor(s.time / G.DAY_LENGTH) * G.DAY_LENGTH + G.DAY_LENGTH * 0.5;
-            for (const v of F.list) { v.t = 0; v.say = null; }
-            for (let i = 0; i < 600; i++) F.update(0.05, s, 1100, 680);
-            const awake = F.list.filter(v => v.state !== 'sleep');
-            if (awake.length) return 'not asleep at night: ' + awake.map(v => v.name + ':' + v.state);
-            // save and load the village
-            G.Save.write(s);
-            const d = G.Save.read();
-            if (!d.villagers || d.villagers.list.length !== F.list.length) return 'villagers were not saved';
-            const F2 = new G.Villagers(); F2.load(d.villagers, w, s.player);
-            if (F2.list.map(v => v.name + v.home.key).join() !== F.list.map(v => v.name + v.home.key).join()) return 'villagers did not load the same';
-            if (!F2.rescued.has('first')) return 'rescued spirits not loaded';
-            const F3 = new G.Villagers(); F3.load(undefined, w, s.player);
-            if (F3.list.length || F3.followers.length) return 'a save without villagers should load empty';
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Village night check failed: " + str(result))
-        page.wait_for_timeout(1500)
-        page.screenshot(path=str(SHOTS / "18-village-night.png"))
-        result = page.evaluate("""() => {
-            const s = G.state, F = s.villagers, w = s.world, T = G.TILE;
-            // pick the beacon up: its friends move to another light
-            const B = w.lights.find(L => L.type === 'beacon');
-            G.Crafting.pickUp(s, Math.floor(B.x / T), Math.floor(B.y / T));
-            for (let i = 0; i < 60; i++) F.update(0.05, s, 1100, 680);
-            for (const v of F.list) if (!w.structureAt(v.home.tx, v.home.ty)) return v.name + ' was left without a home';
-            return 'ok';
-        }""")
-        if result != "ok":
-            errors.append("Rehoming check failed: " + str(result))
+        smoke_villagers.run(page, SHOTS, errors)   # Night 6: lost spirits and friends
 
         # continue an old version-1 save from the title screen
         page.evaluate("""() => {
@@ -529,6 +334,7 @@ def play(page, errors):
         smoke_ruins.run(page, SHOTS, errors)    # Night 11: ruins, memory stones, the journal
         smoke_seasons.run(page, SHOTS, errors)  # Night 12: the turning seasons
         smoke_village.run(page, SHOTS, errors)  # Night 13: the growing village
+        smoke_review.run(page, SHOTS, errors)   # Night 14: review-night fixes
 
 
 if __name__ == "__main__":

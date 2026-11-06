@@ -22,8 +22,10 @@ G.Goals = class {
     const chapter = goal ? goal.chapter || 'First steps' : 'First steps';
     const pips = G.GOALS.filter(g => !goal || (g.chapter || 'First steps') === chapter).map(g =>
       `<i class="${done.includes(g.id) ? 'on' : ''}${goal && g.id === goal.id ? ' now' : ''}"></i>`).join('');
-    if (!goal) {
-      this.el.innerHTML = `<div class="goal-head">All goals <span class="pips">${pips}</span></div>
+    if (!goal) {   // one glowing pip per chapter (one per goal ran off the panel — Night 14)
+      const chapters = [...new Set(G.GOALS.map(g => g.chapter || 'First steps'))];
+      const cpips = chapters.map(c => `<i class="on" title="${c}"></i>`).join('');
+      this.el.innerHTML = `<div class="goal-head">All ${G.GOALS.length} goals <span class="pips">${cpips}</span></div>
         <div class="goal-text">All done — the world is yours to bring back.</div>`;
       return;
     }

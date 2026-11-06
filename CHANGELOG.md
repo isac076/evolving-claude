@@ -2,6 +2,11 @@
 
 What changed each night, newest first.
 
+## Night 14 — 2026-11-06 — A tidy-up and foamy shores
+A review night. Coasts now have a soft line of white foam that gently breathes along the curving shore, with a faint
+wave rolling in and out. The goal tracker no longer overflows once every goal is done (one glowing pip per chapter), the
+minimap steps aside while you trade at a market, and friends chatting far off screen no longer leave a stray bubble in a corner.
+
 ## Night 13 — 2026-11-05 — The village grows
 When two friends' cottages stand close together, the friends build a little hamlet with its own name and a stone well
 (press E at the well to water every garden around it). A third home brings a market stall where you can swap things you

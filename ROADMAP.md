@@ -76,7 +76,7 @@ as the world does.
 
 ## Chapter 7 — Music & presentation
 - [x] Generative music that changes with time of day, biome and restoration (Night 9 — a new tune every piece; grey land gets lonely notes, colour adds bass, melody and sparkle; morning/day/dusk/night/rain/fog moods; the ground picks the instrument; a Music slider)
-- [ ] Richer lighting: light shafts, reflections in water, soft shadows
+- [ ] Richer lighting: light shafts, reflections in water, soft shadows (Night 14: breathing shore foam along the curved coasts)
 - [ ] Animated title screen; smooth transitions
 - [ ] Photo mode (hide UI, slow time)
 
@@ -98,15 +98,29 @@ What a play-through taught us:
 - `tools/smoke_test.py` is near 600 lines: split it into a few files (by chapter) on the next review.
 - Next nights should lean on Chapter 3–5 content (gardens, houses, new biomes) — the systems are solid.
 
-## Notes for the next review (Night 14)
-- `src/main.js` is at ~585 lines even after the music/ambience feed moved to `src/game/soundscape.js` — split the
-  player actions (gather, build, pick up, use village things) into their own file.
-- `src/world/villagers.js` is ~495 lines; the talking (`hello`, `talk`) could move to its own file.
-- Check the village spot-finder in odd places (beside water, in forests): the well/stall/pole must never block a cottage door.
+## Review notes (Night 14)
+What a play-through (all 44 screenshots) taught us:
+- With every goal done, the tracker drew one pip per goal (52!) — the row ran off the panel and under the toasts.
+  It now shows one glowing pip per chapter, and pips wrap if a chapter ever grows long.
+- The market panel sat on top of the minimap, which showed through it; the minimap now steps aside while trading.
+- A friend talking far off screen had their bubble pinned into the screen corner (half under the minimap); bubbles
+  of off-screen speakers are no longer drawn.
+- Code tidy: the player's actions (gather, water, talk, build, pick up, clicks) moved from `main.js` (585 → ~410 lines)
+  into `src/game/actions.js`; friends' talking moved into `src/world/villager_talk.js`; the weather and villager parts of
+  `tools/smoke_test.py` became `smoke_weather.py` and `smoke_villagers.py` (535 → ~340 lines).
+- The village spot-finder was read through: a cottage's own tile, the two above and the doorstep below are always kept
+  clear, and it only builds on land. It looked right in every screenshot.
+- Polish: shores now have a soft, breathing line of foam and a faint wave that rolls in and out, following the curved coast.
+
+## Notes for the next review (Night 21)
+- `src/world/creatures.js` (~400) and `src/audio/sound.js` (~380) are the next biggest files — fine for now, watch them.
+- Chunk caching for the ground is still the big performance win left (Chapter 8).
+- The phone layout has no virtual joystick yet; tap-to-walk works but a joystick would feel much better.
 
 ---
 
 ## Ideas (anyone can add here)
+- Shore foam could sparkle with moonlight at night, and freeze into a pale rim of ice in deep winter
 - Village: more stages — a bakery (bread as a gift friends love), a little bridge or a lamp-lit square of paths, a village bell
 - Village: festival games (catch falling petals, a lantern-lighting race) and a festival goal per season ("see all four festivals")
 - Village: friends trade among themselves at the stall; the stall keeper changes each day and offers their kind's favourite swaps
@@ -162,7 +176,6 @@ What a play-through taught us:
 - Lost spirits could appear in the big map legend; a far-off lost spirit's sigh could be heard in the ambience when it's near
 - Friends in the rain could open tiny leaf umbrellas
 - Villager kinds tied to new biomes (a snowy-peaks kind, a desert kind) once Chapter 5 arrives
-- Shore foam: a soft, slowly breathing light line where water meets land (follow the rounded corners)
 - Smooth grass lightness between tiles the same way restoration is blended (the faint grid would vanish)
 - Reduced-motion option in the Resting menu: calmer rain, no screen-wide leaves, slower water shimmer
 - The Resting menu could show a little "this world so far" page: days, lights, friends, creatures met, rainbows seen

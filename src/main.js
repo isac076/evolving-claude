@@ -5,8 +5,6 @@ window.G = window.G || {};
   const canvas = document.getElementById('game');
   const input = new G.Input(canvas);
   const renderer = new G.Renderer(canvas);
-  const REACH = 2.2 * G.TILE;       // how far the player can gather
-  const BUILD_REACH = 5 * G.TILE;   // how far away the player can build
 
   const state = {
     world: null, player: null, inv: {}, time: 0, stats: { gathered: 0, built: 0, got: {} },
@@ -249,174 +247,12 @@ window.G = window.G || {};
     ui.refresh();
   }
 
-  // ---------- actions ----------
-  function screenToTile(sx, sy) {
-    const wx = sx + state.cam.x - renderer.W / 2, wy = sy + state.cam.y - renderer.H / 2;
-    return { wx, wy, tx: Math.floor(wx / G.TILE), ty: Math.floor(wy / G.TILE) };
-  }
-
+  // ---------- actions (src/game/actions.js) ----------
   // stereo position of a world point relative to the player: -1 left .. 1 right
   const panAt = x => G.clamp((x - state.player.x) / 240, -1, 1);
-
-  function gatherAt(tx, ty) {
-    const w = state.world, obj = w.objectAt(tx, ty);
-    if (!obj) return false;
-    if (G.OBJECTS[obj].read) { ruins.wake(tx, ty); return true; }
-    if (!G.OBJECTS[obj].drops) { ruins.about(tx, ty, obj); return true; }
-    const why = G.Crafting.gatherBlocker(state, obj);
-    if (why) { G.Sound.play('deny'); ui.toast(why, 3); return true; }
-    const drops = G.Crafting.dropsFor(state, obj);
-    const o = w.harvest(tx, ty);
-    const def = G.OBJECTS[o];
-    G.Sound.play(def.sound, { pan: panAt((tx + 0.5) * G.TILE) });
-    for (const [k, n] of Object.entries(drops)) {
-      state.inv[k] = (state.inv[k] || 0) + n;
-      state.stats.got[k] = (state.stats.got[k] || 0) + n;
-      addFloater((tx + 0.5) * G.TILE, ty * G.TILE, `+${n} ${G.ITEMS[k].name}`, G.ITEMS[k].color);
-    }
-    const c = { bloom: 'rgba(255,220,140,A)', tree: 'rgba(150,220,120,A)', reeds: 'rgba(210,225,130,A)', crystal: 'rgba(160,235,255,A)' }[o] || 'rgba(200,205,220,A)';
-    renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, c);
-    state.stats.gathered++;
-    ui.refresh();
-    return true;
-  }
-
-  function waterPlant(st) {
-    garden.water(state, st);
-    const first = state.stats.watered === 1;
-    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE, 'Watered', '#9fd4ff');
-    if (first) ui.toast('Splish! Damp soil makes plants grow three times as fast. Rain waters them too.', 5);
-    ui.refresh();
-  }
-
-  // clicking a planting: water it if you can, otherwise say how it is doing
-  function tendPlant(st) {
-    if (st.wet <= 0 && G.Crafting.owns(state, 'can')) { waterPlant(st); return; }
-    G.Sound.play('select');
-    ui.toast(garden.describe(state, st), 4);
-  }
-
-  // the well waters gardens, the stall opens the market, the ribbon pole tells of festivals
-  function useVillage(st) {
-    const vil = village.villageAt(st), x = (st.tx + 0.5) * G.TILE, y = st.ty * G.TILE;
-    if (st.type === 'stall' && vil) { market.open(vil, st); return; }
-    if (st.type === 'well') {
-      const n = village.drawWater(state, st, garden);
-      G.Sound.play('water', { pan: panAt(x) }); renderer.burst(x, y + 6, 'rgba(150,210,255,A)', 16);
-      ui.toast(n ? G.pick(G.VILLAGE_SAYS.well) : G.VILLAGE_SAYS.wellDry, 4.5); ui.refresh();
-      return;
-    }
-    G.Sound.play('select');
-    ui.toast(village.festivalNear(state.player) ? 'Everyone is dancing around the ribbon pole — what a night!' : village.nextFestival(state), 4.5);
-  }
-
-  function talkTo(v) {
-    folk.talk(v, state);
-    ui.refresh();
-  }
-
-  function gatherNearest() {
-    const p = state.player; let best = null, bd = Infinity, locked = null;
-    const friend = folk.nearest(p.x, p.y, 46);
-    if (friend) { talkTo(friend); return; }
-    const vb = village.nearest(state.world, p.x, p.y, 1.8 * G.TILE);
-    if (vb) { useVillage(vb); return; }
-    if (G.Crafting.owns(state, 'can')) {   // water a dry planting before gathering
-      const dry = garden.dryNear(state.world, p.x, p.y, REACH);
-      if (dry) { waterPlant(dry); return; }
-    }
-    let stone = null, oldStone = null;
-    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
-      const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
-      if (!o) continue;
-      const d = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y);
-      if (d > REACH) continue;
-      if (G.OBJECTS[o].read) { stone = { tx, ty }; continue; }    // a sleeping memory stone comes first
-      if (!G.OBJECTS[o].drops) { oldStone = { tx, ty, o }; continue; }   // ruins can't be gathered
-      if (G.Crafting.gatherBlocker(state, o)) { locked = { tx, ty }; continue; }   // skip what you can't gather yet
-      if (d < bd) { bd = d; best = { tx, ty }; }
-    }
-    if (stone) ruins.wake(stone.tx, stone.ty);
-    else if (best || locked) gatherAt((best || locked).tx, (best || locked).ty);
-    else if (oldStone) ruins.about(oldStone.tx, oldStone.ty, oldStone.o);
-    else {
-      let plant = null;
-      for (const st of garden.plants(state.world)) if (Math.hypot((st.tx + 0.5) * G.TILE - p.x, (st.ty + 0.5) * G.TILE - p.y) <= REACH) plant = st;
-      if (plant) { tendPlant(plant); return; }
-      G.Sound.play('deny'); ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5);
-    }
-  }
-
-  // make an item (a tool) straight into your pockets
-  function craftItem(r) {
-    for (const [k, n] of Object.entries(r.cost)) state.inv[k] -= n;
-    state.inv[r.makes] = (state.inv[r.makes] || 0) + 1;
-    state.stats.crafted = state.stats.crafted || {};
-    state.stats.crafted[r.makes] = (state.stats.crafted[r.makes] || 0) + 1;
-    const it = G.ITEMS[r.makes], p = state.player;
-    G.Sound.play('craft');
-    renderer.burst(p.x, p.y - 10, 'rgba(255,225,150,A)', 18);
-    addFloater(p.x, p.y - 26, `${it.name}!`, it.color);
-    ui.toast(`You made a ${it.name}. ${it.desc || ''}`, 4.5);
-    ui.refresh();
-  }
-
-  // pick-up mode: click a building near you to take it back
-  function updateRemove() {
-    const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
-    const p = state.player, st = state.world.structureAt(tx, ty);
-    const near = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= BUILD_REACH;
-    state.removeHover = st ? { tx, ty, ok: near && !G.Crafting.pickupBlocker(state, st) } : null;
-    if (!input.mouse.clicked) return;
-    if (!st) { p.moveTarget = { x: wx, y: wy }; return; }
-    const why = G.Crafting.pickupBlocker(state, st);
-    if (why || !near) { G.Sound.play('deny'); ui.toast(why || 'Too far away — move closer.', 2.5); return; }
-    const refund = G.Crafting.pickUp(state, tx, ty);
-    map.touch(tx, ty);
-    const x = (tx + 0.5) * G.TILE, y = (ty + 0.5) * G.TILE;
-    G.Sound.play('pickup', { pan: panAt(x) });
-    renderer.burst(x, y, 'rgba(255,240,200,A)', 12);
-    let k = 0;
-    for (const [item, n] of Object.entries(refund)) { addFloater(x, y - 6 - k * 14, `+${n} ${G.ITEMS[item].name}`, G.ITEMS[item].color); k++; }
-    state.removeHover = null;
-    ui.refresh();
-  }
-
   function addFloater(x, y, text, color) { state.floaters.push({ x, y, text, color, life: 1.4 }); }
-
-  function updateBuild() {
-    const r = state.buildRecipe;
-    if (!r) { state.placing = null; return; }
-    const { tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
-    const p = state.player;
-    const near = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= BUILD_REACH;
-    const ok = near && state.world.canBuild(r.builds, tx, ty)
-      && !(Math.abs((tx + 0.5) * G.TILE - p.x) < 20 && Math.abs((ty + 0.5) * G.TILE - p.y) < 20 && G.STRUCTURES[r.builds].solid);
-    state.placing = { type: r.builds, tx, ty, ok };
-    if (input.mouse.clicked) {
-      if (!ok) { G.Sound.play('deny'); ui.toast(near ? "Can't build there." : 'Too far away — move closer.', 2); return; }
-      for (const [k, n] of Object.entries(r.cost)) state.inv[k] -= n;
-      state.world.build(r.builds, tx, ty);
-      map.touch(tx, ty);
-      state.stats.built++;
-      G.Sound.play(G.STRUCTURES[r.builds].sound, { pan: panAt((tx + 0.5) * G.TILE) });
-      renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
-      if (r.builds === 'lantern') ui.toast('The land around the lantern remembers its colour.');
-      if (r.builds === 'beacon') ui.toast('The crystal sings, and the land far around it remembers its colour.', 5);
-      if (G.STRUCTURES[r.builds].grow) planted(tx, ty);
-      if (r.builds === 'cottage') ui.toast('A cottage! A friend whose light is close by will move in.', 4.5);
-      if (r.builds === 'workbench') ui.toast('A workbench! Stand near it and open Craft (C) for tools and more.', 5);
-      ui.refresh();
-      if (!state.canAfford(r)) { state.buildRecipe = null; state.placing = null; }
-    }
-  }
-
-  function planted(tx, ty) {
-    state.stats.planted = (state.stats.planted || 0) + 1;
-    const f = state.world.restoreAt((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, state.world.lights);
-    if (f < G.GARDEN.colourNeeded * 0.5) ui.toast('Seeds grow only slowly in the grey. Plant them where the colour has come back.', 5);
-    else if (state.stats.planted === 1) ui.toast('Planted! Watch it grow — rain or a watering can (made at a workbench) speeds it up.', 6);
-  }
+  const act = new G.Actions({ state, input, renderer, ui, map, ruins, garden, village, market, folk, floater: addFloater, panAt });
+  const craftItem = r => act.craftItem(r);
 
   // ---------- loop ----------
   function update(dt) {
@@ -426,7 +262,7 @@ window.G = window.G || {};
     if (input.hit('c')) ui.toggleCraft();
     if (input.hit('x')) state.setRemoving();
     if (input.hit('n')) ui.toggleSound();
-    if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; gatherNearest(); }
+    if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; act.gatherNearest(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
     if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return; }
@@ -440,22 +276,9 @@ window.G = window.G || {};
       else { settings.toggle(true); return; }
     }
     if (map.isOpen) { /* the big map has the mouse */ }
-    else if (state.buildRecipe) updateBuild();
-    else if (state.removing) updateRemove();
-    else if (input.mouse.clicked || input.mouse.down) {
-      const { wx, wy, tx, ty } = screenToTile(input.mouse.x, input.mouse.y);
-      const p = state.player;
-      const close = Math.hypot((tx + 0.5) * G.TILE - p.x, (ty + 0.5) * G.TILE - p.y) <= REACH;
-      const friend = input.mouse.clicked && folk.at(wx, wy);
-      if (friend) {
-        if (Math.hypot(friend.x - p.x, friend.y - p.y) < 3 * G.TILE) talkTo(friend);
-        else p.moveTarget = { x: friend.x, y: friend.y + 14 };
-      }
-      else if (input.mouse.clicked && close && state.world.objectAt(tx, ty)) gatherAt(tx, ty);
-      else if (input.mouse.clicked && close && village.nearest(state.world, wx, wy + 8, 20)) useVillage(village.nearest(state.world, wx, wy + 8, 20));
-      else if (input.mouse.clicked && close && state.world.structureAt(tx, ty) && G.STRUCTURES[state.world.structureAt(tx, ty).type].grow) tendPlant(state.world.structureAt(tx, ty));
-      else p.moveTarget = { x: wx, y: wy };
-    }
+    else if (state.buildRecipe) act.updateBuild();
+    else if (state.removing) act.updateRemove();
+    else if (input.mouse.clicked || input.mouse.down) act.click();
 
     const px = state.player.x, py = state.player.y;
     state.player.update(dt, input, state.world);
