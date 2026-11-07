@@ -70,7 +70,7 @@ as the world does.
 
 ## Chapter 6 — The mystery of the Fading
 - [x] Lore fragments found in ruins tell what happened (Night 11 — 12 memories in `G.LORE`, told in order; they set up the Great Sun, the Heart and the Ember Shrines)
-- [ ] Ember Shrines: big goals spread across the world that each restore a huge area
+- [x] Ember Shrines: big goals spread across the world that each restore a huge area (Night 15 — four shrines further and further out; four ember bowls each want an offering; the hearth kindles and a wave of colour rolls out 26 tiles; sensed after 3 memories, an ember arrow points the way; the first one teaches the Ember lantern)
 - [ ] Gentle shadow creatures at night that dim your light — repelled by light, never fought
 - [ ] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing)
 
@@ -120,6 +120,11 @@ What a play-through (all 44 screenshots) taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Shrines: the Great Sun finale (Chapter 6) can read `stats.shrines.lit` — with all four embers burning, a path of light could lead to the Sun's hearth
+- Shrines: friends could make a pilgrimage to a kindled shrine and sit by its bowls; a festival of embers on the night the last one kindles
+- Shrines: each kindled shrine could add a "voice" to the music (G.MUSIC_BAND-like layer) or change the ambience near it (warm crackle)
+- Shrines: biome shrines once Chapter 5 arrives (an ice shrine in the snowy peaks wanting crystal and snow)
+- The ember arrow idea could guide to other things too (a lost spirit you were told about, a pinned map marker)
 - Shore foam could sparkle with moonlight at night, and freeze into a pale rim of ice in deep winter
 - Village: more stages — a bakery (bread as a gift friends love), a little bridge or a lamp-lit square of paths, a village bell
 - Village: festival games (catch falling petals, a lantern-lighting race) and a festival goal per season ("see all four festivals")

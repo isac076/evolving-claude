@@ -63,6 +63,7 @@ G.Minimap = class {
       else if (t.obj === 'rock') { s = 6; l = 58; }
       else if (t.obj === 'bloom' && f > 0.3) { h = t.hue; s = 80; l = 68; }
       else if (t.obj && G.OBJECTS[t.obj].ruin) { h = 36; s = 16; l = 74; }   // old stones (Night 11)
+      else if (t.pave && t.shrine) { h = 22; s = 40; l = 58; }   // ember flagstones (Night 15)
       else if (t.pave) { h = 36; s = 12; l = 60; }
       const S = s * (0.1 + 0.9 * f), L = l * (0.66 + 0.4 * f);
       const [r, g, b] = G.hslToRgb(h, S, Math.min(92, L));
@@ -152,6 +153,30 @@ G.Minimap = class {
       ctx.strokeRect(x - r, y - r, r * 2, r * 2);
       ctx.fillStyle = read ? '#ffd77a' : 'rgba(225,228,240,.7)';
       ctx.fillRect(x - r + 2, y - 0.6, r * 2 - 4, 1.2); ctx.fillRect(x - 0.6, y - r + 2, 1.2, r * 2 - 4);
+    }
+    // the Ember Shrines you know of (Night 15): a flame mark in the shrine's colour — hollow while cold, bright once kindled
+    for (const site of G.Shrines.known(this.state)) {
+      let x = toX((site.tx + 0.5) * T), y = toY((site.ty + 0.5) * T);
+      const lit = G.Shrines.isKindled(world, site), dx = x - sx, dy = y - sy, dd = Math.hypot(dx, dy);
+      if (!big && dd > 66) { x = sx + dx / dd * 66; y = sy + dy / dd * 66; }   // on the corner map, far shrines sit on the rim
+      if (big) {   // on the big map, shrines beyond the view wait at its edge (sx, sy is the middle of the view)
+        const k = Math.min(1, Math.abs(dx) > 0 ? (sx - 18) / Math.abs(dx) : 1, Math.abs(dy) > 0 ? (sy - 28) / Math.abs(dy) : 1);
+        x = sx + dx * k; y = sy + dy * k;
+      }
+      const r = big ? 6 : 4.5, fl = 0.5 + 0.5 * Math.sin(t * 3 + site.i);
+      ctx.globalCompositeOperation = 'lighter';
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.4);
+      g.addColorStop(0, `hsla(${site.hue},100%,62%,${lit ? 0.75 : 0.25 + fl * 0.2})`); g.addColorStop(1, `hsla(${site.hue},100%,60%,0)`);
+      ctx.fillStyle = g; G.circle(ctx, x, y, r * 2.4);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.beginPath(); ctx.moveTo(x, y - r * 1.3); ctx.quadraticCurveTo(x + r, y, x, y + r * 0.8); ctx.quadraticCurveTo(x - r, y, x, y - r * 1.3);
+      if (lit) { ctx.fillStyle = `hsl(${site.hue + 15},100%,78%)`; ctx.fill(); }
+      else { ctx.strokeStyle = `hsla(${site.hue},90%,72%,.95)`; ctx.lineWidth = 1.3; ctx.stroke(); }
+      if (big) {
+        ctx.font = 'italic 12px Georgia, serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(site.name, x + 1, y - r * 1.6);
+        ctx.fillStyle = lit ? '#ffe2b8' : '#e8dccb'; ctx.fillText(site.name, x, y - r * 1.6 - 1);
+      }
     }
     // lost spirits you have seen (pale, pulsing) and friends at home (their own colour)
     const folk = this.state.villagers;

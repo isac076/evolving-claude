@@ -353,6 +353,21 @@ G.SFX = {
     for (const n of [0, 2, 3]) S.tone(G.note(n, 3), { type: 'triangle', attack: 0.7, dur: 3.4, gain: 0.045, t: 0.6, rev: 0.8 });
     S.noise({ filter: 'bandpass', freq: 800, freqTo: 5000, q: 0.7, attack: 0.6, dur: 1.6, gain: 0.03, rev: 0.7 });
   },
+  // ---- the Ember Shrines (Night 15) ----
+  ember(S, o) {      // an ember bowl catches: a soft whoosh, a crackle, and a bell that climbs with each bowl lit
+    const n = o.n || 1;
+    S.noise({ filter: 'bandpass', freq: 300, freqTo: 1600, q: 0.7, attack: 0.08, dur: 0.7, gain: 0.09, pan: o.pan, rev: 0.3 });
+    for (let i = 0; i < 6; i++) S.noise({ filter: 'highpass', freq: 2500 + Math.random() * 2000, dur: 0.03, attack: 0.005, gain: 0.05, t: 0.15 + Math.random() * 0.6, pan: o.pan });
+    [0, 4, 7].forEach((k, i) => S.bell(G.note(k + (n - 1) * 2, 4), { gain: 0.06, dur: 2, t: 0.2 + i * 0.12, pan: o.pan, rev: 0.6 }));
+    S.tone(G.note((n - 1) * 2, 2), { type: 'triangle', attack: 0.3, dur: 1.8, gain: 0.05, rev: 0.6 });
+  },
+  kindle(S, o) {     // the great hearth kindles: a deep rush of flame, a wide warm chord, and bells pouring outward
+    S.noise({ filter: 'lowpass', freq: 200, freqTo: 1800, attack: 0.4, dur: 2.4, gain: 0.12, rev: 0.5 });
+    S.noise({ filter: 'bandpass', freq: 600, freqTo: 3000, q: 0.6, attack: 0.8, dur: 3, gain: 0.04, rev: 0.8 });
+    for (const n of [0, 7, 12, 16]) S.tone(G.note(n, 2), { type: 'triangle', attack: 1.2, dur: 6, gain: 0.05, rev: 0.9 });
+    [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.06, dur: 3, t: 0.6 + k * 0.13, pan: -0.8 + (k % 5) * 0.4, rev: 0.85 }));
+    S.bell(G.note(28, 4), { gain: 0.04, dur: 4, t: 2.4, rev: 0.9 });
+  },
   page(S) {          // a journal page turning
     S.noise({ filter: 'bandpass', freq: 1800, freqTo: 3600, q: 0.8, attack: 0.02, dur: 0.16, gain: 0.06 });
     S.noise({ filter: 'bandpass', freq: 3000, freqTo: 1500, q: 0.8, attack: 0.02, dur: 0.12, gain: 0.04, t: 0.1 });

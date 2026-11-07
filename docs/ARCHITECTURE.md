@@ -23,9 +23,11 @@ src/data/villagers.js G.SPIRITS settings, G.VILLAGER_NAMES, G.VILLAGER_KINDS (li
 src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / build / stat / house, words, rewards), G.WISH_SAYS
 src/data/ruins.js     G.RUIN settings, G.RUIN_SITES (ruin kinds as little stamps), G.RUIN_PIECES, G.LORE (the 12 memories), G.RUIN_ECHOES
 src/data/village.js   G.VILLAGE settings, G.VILLAGE_STAGES (well → stall → ribbon pole), G.VILLAGE_NAMES, G.MARKET(_TRADES), G.FESTIVALS, G.VILLAGE_SAYS
+src/data/shrines.js   G.SHRINE settings, G.SHRINES (four shrines: hue, bowl offerings, gift, words), G.SHRINE_STAMP, shrine objects/structures, the Ember lantern recipe, G.SHRINE_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
+src/world/shrines.js  G.Shrines — where the four shrines stand (from the seed, ground-only), pieceAt() for tileAt, bowls lit / kindled, known(), nextToKindle()
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
@@ -38,6 +40,7 @@ src/world/village.js  G.Village — groups cottages into villages, raises their 
 src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
+src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -50,6 +53,7 @@ src/render/villager_sprites.js G.drawVillager, G.VILLAGER_HATS, G.drawSpeech (bu
 src/render/music_fx.js G.MusicFX — the little glowing ♪ that float up from friends playing (drawn after lighting)
 src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbles), G.drawHeartFx (rising hearts)
 src/render/ruin_sprites.js pillars, stumps, walls, the arch (spans 3 tiles), keeper statue, fountain, rubble, memory stones, G.drawPave
+src/render/shrine_sprites.js ember posts, bowls, the great hearth, the Ember lantern, G.drawShrinePave, G.ShrineFX (floor rings, sky beam, kindling wave, leaping embers, guide arrow)
 src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built scaffold), G.drawVillageDecor (bunting), G.drawSkyLanterns
 src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
@@ -63,7 +67,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -241,6 +245,21 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Player actions** (Night 14): main.js builds `act = new G.Actions({state, input, renderer, ui, map, ruins, garden, village,
   market, folk, floater, panAt})`. `update()` calls `act.gatherNearest()` for E, `act.updateBuild()` / `act.updateRemove()` while
   placing / picking up, and `act.click()` otherwise. Special build messages live in `G.Actions.BUILT_SAYS`.
+- **Ember Shrines** (Night 15; data in src/data/shrines.js): `G.Shrines.list(world)` places `G.SHRINES.length` shrines once per
+  world (memoised in `world.shrineList`): shrine *i* at `G.SHRINE.dist[i]` tiles from `spawnSpot()`, a quarter turn apart, nudged
+  until the whole `G.SHRINE_STAMP` (11×11) is on land — using only `groundType`, so `tileAt` can ask `G.Shrines.pieceAt` (after the
+  ruins) without recursion. Shrine tiles get `tile.shrine` (and `pave`, drawn by `G.drawShrinePave`); ruins skip cells whose spot is
+  within `keepRuinsAway` tiles of a shrine. Pieces are objects with `shrine: true` (`bowl`, `hearth`) — E / clicks go to
+  `G.ShrinePlay.use()`. A lit bowl is an `emberflame` structure, the kindled hearth a `shrineflame` (fixed, `ember: true` → its light
+  entry carries `hue` = the shrine's colour, used by the night glow). So nothing new is saved except `stats.shrines = {sensed, found,
+  lit, bowls}`, `stats.shrinesFound`, `stats.shrinesLit` — no version bump. **Kindling**: when the 4th bowl burns, `kindle()` builds the
+  hearth and sets its light's `restore` small; `update()` grows it to `G.SHRINE.restore` over `kindleTime` (bumping `lightsVersion` 4×/s
+  so the map recolours), then `finish()` reveals the map around it, gives the gift, teaches `emberlamp` (via `stats.unlocked`) and opens
+  `journal.showCard()`. The renderer keeps lights whose restore radius reaches the screen (not just those within 16 tiles).
+  **Drawing**: `G.ShrineFX.floor` (carved rings, lines to lit bowls) after the floors; `G.ShrineFX.sky` after the lighting (beam over a
+  kindled hearth, the wave ring, embers leaping bowl → hearth, and the guide arrow that circles the spirit pointing to
+  `G.Shrines.nextToKindle`). Sensing: after `G.SHRINE.senseMemories` woken stones every shrine is `known()` — map + journal Places page.
+  `world.litCount()` (the HUD's "lanterns lit") does not count ember bowls.
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

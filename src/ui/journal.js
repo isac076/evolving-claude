@@ -17,7 +17,7 @@ G.Journal = class {
     this.el.addEventListener('pointerdown', e => { if (e.target === this.el) this.toggle(false); });
     for (const b of this.el.querySelectorAll('.journal-tabs button')) b.onclick = () => { this.show(b.dataset.tab); G.Sound.play('page'); };
     this.card.addEventListener('pointerdown', () => this.closeCard());
-    this.$('memory-journal').onclick = e => { e.stopPropagation(); this.closeCard(); this.toggle(true, 'memories'); };
+    this.$('memory-journal').onclick = e => { e.stopPropagation(); this.closeCard(); this.toggle(true, this.cardTab || 'memories'); };
   }
 
   get paused() { return this.isOpen || this.cardOpen; }
@@ -84,8 +84,24 @@ G.Journal = class {
   }
 
   page_places() {
-    const vh = this.villages();
+    const vh = this.villages() + this.shrinePlaces();
     return vh + this.ruinPlaces(!!vh);
+  }
+
+  // the Ember Shrines you know of (Night 15), shown above the ruins
+  shrinePlaces() {
+    const s = this.state, p = s.player, w = s.world, known = G.Shrines.known(s);
+    if (!known.length) return '';
+    let h = `<p class="j-note">${G.Shrines.kindledCount(w)} of ${G.SHRINES.length} Ember Shrines kindled.</p>`;
+    for (const site of known) {
+      const lit = G.Shrines.isKindled(w, site), n = G.Shrines.litBowls(w, site), d = Math.round(Math.hypot(site.tx - p.tx, site.ty - p.ty));
+      const where = d < 8 ? 'right here' : `about ${d} steps ${G.Ruins.direction(p.tx, p.ty, site.tx, site.ty)}`;
+      const wants = site.def.bowls.filter((c, i) => !G.Shrines.isBowlLit(w, site.bowls[i])).map(c => G.Shrines.costText(c)).join(' · ');
+      h += `<div class="j-place${lit ? ' read' : ''}" style="border-left:3px solid hsla(${site.hue},90%,62%,.75)"><b>${site.name}</b><em>${where}</em>
+        <p>${lit ? site.def.words : 'Four ember bowls ring a great cold hearth. Each wants an offering.'}</p>
+        <small>${lit ? '✦ Its hearth burns again.' : `◇ ${n} of 4 bowls burn.${wants ? ' Still wanted: ' + wants + '.' : ''}`}</small></div>`;
+    }
+    return h;
   }
 
   ruinPlaces(hasVillage) {
@@ -135,10 +151,17 @@ G.Journal = class {
   // Shows a memory that just woke. i = its place in G.LORE (or -1 for an echo).
   showMemory(i, site, echo) {
     const m = G.LORE[i];
-    this.$('memory-where').textContent = site ? site.name : '';
-    this.$('memory-title').textContent = m ? m.title : 'An echo';
-    this.$('memory-text').textContent = m ? m.text : echo;
-    this.$('memory-count').textContent = m ? `Memory ${roman(i + 1)} of ${roman(G.LORE.length)}` : 'You know the whole story now';
+    this.showCard(site ? site.name : '', m ? m.title : 'An echo', m ? m.text : echo,
+      m ? `Memory ${roman(i + 1)} of ${roman(G.LORE.length)}` : 'You know the whole story now');
+  }
+
+  // the same card for anything worth a pause: where, a title, a few words, a footnote (Night 15: the Ember Shrines)
+  showCard(where, title, text, foot, tab = 'memories') {
+    this.cardTab = tab;   // the journal page "Kept in your journal" opens
+    this.$('memory-where').textContent = where;
+    this.$('memory-title').textContent = title;
+    this.$('memory-text').textContent = text;
+    this.$('memory-count').textContent = foot;
     this.cardOpen = true; this.cardT = performance.now();
     this.card.classList.add('open');
     document.body.classList.add('paused');

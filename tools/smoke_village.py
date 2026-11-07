@@ -226,7 +226,7 @@ def run(page, shots, errors):
         const w2 = new G.World(d.seed); w2.loadStructures(d.structures);
         if (w2.count('maypole') !== 1) return 'the ribbon pole did not load';
         const vil = s.village.list.find(v => v.has.maypole);
-        const j = document.createElement('div'); j.innerHTML = G.Journal.prototype.page_places.call({ state: s, villages: G.Journal.prototype.villages, ruinPlaces: G.Journal.prototype.ruinPlaces });
+        const j = document.createElement('div'); j.innerHTML = G.Journal.prototype.page_places.call(Object.assign(Object.create(G.Journal.prototype), { state: s }));
         if (!j.textContent.includes(vil.name)) return 'the journal does not list the village';
         return 'ok';
     }""")

@@ -27,6 +27,7 @@ G.Actions = class {
   gatherAt(tx, ty) {
     const state = this.state, w = state.world, obj = w.objectAt(tx, ty);
     if (!obj) return false;
+    if (G.OBJECTS[obj].shrine) { this.shrines.use(tx, ty, obj); return true; }   // an Ember Shrine's stones (Night 15)
     if (G.OBJECTS[obj].read) { this.ruins.wake(tx, ty); return true; }
     if (!G.OBJECTS[obj].drops) { this.ruins.about(tx, ty, obj); return true; }
     const why = G.Crafting.gatherBlocker(state, obj);
@@ -92,20 +93,22 @@ G.Actions = class {
       const dry = this.garden.dryNear(state.world, p.x, p.y, REACH);
       if (dry) { this.waterPlant(dry); return; }
     }
-    let best = null, bd = Infinity, locked = null, stone = null, oldStone = null;
+    let best = null, bd = Infinity, locked = null, stone = null, oldStone = null, shrine = null, sd = Infinity;
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const tx = p.tx + dx, ty = p.ty + dy, o = state.world.objectAt(tx, ty);
       if (!o) continue;
       const d = this.far(tx, ty);
       if (d > REACH) continue;
-      if (G.OBJECTS[o].read) { stone = { tx, ty }; continue; }    // a sleeping memory stone comes first
+      if (G.OBJECTS[o].bowl || G.OBJECTS[o].hearth) { if (d < sd) { sd = d; shrine = { tx, ty, o }; } continue; }   // a shrine's bowl or hearth comes first
+      if (G.OBJECTS[o].read) { stone = { tx, ty }; continue; }    // then a sleeping memory stone
       if (!G.OBJECTS[o].drops) { oldStone = { tx, ty, o }; continue; }   // ruins can't be gathered
       if (G.Crafting.gatherBlocker(state, o)) { locked = { tx, ty }; continue; }   // skip what you can't gather yet
       if (d < bd) { bd = d; best = { tx, ty }; }
     }
-    if (stone) this.ruins.wake(stone.tx, stone.ty);
+    if (shrine) this.shrines.use(shrine.tx, shrine.ty, shrine.o);
+    else if (stone) this.ruins.wake(stone.tx, stone.ty);
     else if (best || locked) this.gatherAt((best || locked).tx, (best || locked).ty);
-    else if (oldStone) this.ruins.about(oldStone.tx, oldStone.ty, oldStone.o);
+    else if (oldStone) this.gatherAt(oldStone.tx, oldStone.ty);   // a look at an old stone (ruin or shrine)
     else {
       let plant = null, pd = REACH;
       for (const st of this.garden.plants(state.world)) { const d = this.far(st.tx, st.ty); if (d <= pd) { pd = d; plant = st; } }
@@ -131,6 +134,7 @@ G.Actions = class {
     if (vb) { this.useVillage(vb); return; }
     const st = close && state.world.structureAt(tx, ty);
     if (st && G.STRUCTURES[st.type].grow) { this.tendPlant(st); return; }
+    if (st && G.STRUCTURES[st.type].ember && st.type !== 'emberlamp') { this.shrines.about(st); return; }
     p.moveTarget = { x: wx, y: wy };
   }
 
@@ -210,5 +214,6 @@ G.Actions.BUILT_SAYS = {
   lantern: ['The land around the lantern remembers its colour.', 3.5],
   beacon: ['The crystal sings, and the land far around it remembers its colour.', 5],
   cottage: ['A cottage! A friend whose light is close by will move in.', 4.5],
+  emberlamp: ['A spark of the shrine\'s ember settles into the bowl. The land around it glows warm.', 4.5],
   workbench: ['A workbench! Stand near it and open Craft (C) for tools and more.', 5],
 };

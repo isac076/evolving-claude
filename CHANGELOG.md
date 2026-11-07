@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 15 — 2026-11-07 — The Ember Shrines
+Far out in the faded land stand four great Ember Shrines. Wake three memory stones and they appear on your map, with a
+soft ember arrow pointing the way. Each shrine has four ember bowls that ask for an offering (wood, petals, crystal…);
+light all four and embers leap into the great hearth, it bursts into flame, and a wave of colour rolls out across the land
+as far as you can see. At night a kindled shrine sends a beam of light into the sky, and the first one teaches you the Ember lantern.
+
 ## Night 14 — 2026-11-06 — A tidy-up and foamy shores
 A review night. Coasts now have a soft line of white foam that gently breathes along the curving shore, with a faint
 wave rolling in and out. The goal tracker no longer overflows once every goal is done (one glowing pip per chapter), the

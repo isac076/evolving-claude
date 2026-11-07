@@ -48,7 +48,10 @@ G.Renderer = class {
 
     // lights near the screen
     const margin = 16 * T;
-    const lights = world.lights.filter(L => L.x > camX - margin && L.x < camX + W + margin && L.y > camY - margin && L.y < camY + H + margin);
+    const lights = world.lights.filter(L => {   // a kindled shrine's colour reaches much further than a lantern's
+      const m = Math.max(margin, (L.restore + 4) * T);
+      return L.x > camX - m && L.x < camX + W + m && L.y > camY - m && L.y < camY + H + m;
+    });
 
     // restoration per visible tile (computed once per frame)
     const cols = tx1 - tx0 + 1;
@@ -101,10 +104,12 @@ G.Renderer = class {
     G.Seasons.drawPrints(ctx, camX, camY, dt);   // footprints in the snow
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const tile = tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)];
-      if (tile.pave) G.drawPave(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // a ruin's old flagstones
+      if (tile.pave) (tile.shrine ? G.drawShrinePave : G.drawPave)(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // old flagstones
       const st = world.structureAt(tx, ty);
       if (st && G.STRUCTURES[st.type].floor) G.STRUCTURE_SPRITES[st.type](ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), time, st);
     }
+
+    G.ShrineFX.floor(ctx, world, camX, camY, W, H, time);   // the carved rings of an Ember Shrine (Night 15)
 
     // objects, standing structures and the player, row by row (back to front)
     const nightGlows = [];
@@ -179,6 +184,7 @@ G.Renderer = class {
     ctx.globalCompositeOperation = 'source-over';
 
     this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
+    G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
 
     // soft vignette
     const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
@@ -240,7 +246,8 @@ G.Renderer = class {
     };
     glow(player.x - camX, player.y - camY - 8, 50 * fb, `rgba(255,210,140,${0.25 * dark})`);
     for (const L of lights) if (L.light) {
-      if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);
+      if (L.hue !== undefined) glow(L.x - camX, L.y - camY - 24, L.light * 0.4 * fb, `hsla(${L.hue},100%,62%,${0.34 * dark})`);
+      else if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);
       else glow(L.x - camX, L.y - camY - 18, L.light * 0.35 * fb, `rgba(255,190,110,${0.3 * dark})`);
     }
     for (const g of nightGlows) glow(g.x, g.y, 18, `hsla(${g.hue},90%,65%,${0.5 * dark})`);

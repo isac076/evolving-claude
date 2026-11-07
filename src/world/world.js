@@ -54,6 +54,13 @@ G.World = class {
       t.ruin = ruin.site;
       if (ruin.ch === '.') t.pave = true;
     }
+    // the Ember Shrines (world/shrines.js) do the same, with warm ember flagstones
+    const shrine = G.Shrines.pieceAt(this, tx, ty);
+    if (shrine && shrine.ch !== ' ') {
+      t.obj = G.SHRINE_PIECES[shrine.ch] || null;
+      t.shrine = shrine.site;
+      t.pave = true;
+    } else if (shrine) { t.obj = null; t.shrine = shrine.site; }
     if (this.cache.size > 150000) this.cache.clear();
     this.cache.set(k, t);
     return t;
@@ -144,8 +151,8 @@ G.World = class {
     return st;
   }
 
-  // lights that bring colour back, not counting the Heart Stone
-  litCount() { let n = 0; for (const L of this.lights) if (L.restore && L.type !== 'heart') n++; return n; }
+  // lights that bring colour back, not counting the Heart Stone or a shrine's ember bowls
+  litCount() { let n = 0; for (const L of this.lights) if (L.restore && L.type !== 'heart' && L.type !== 'emberflame') n++; return n; }
 
   count(type) { let n = 0; for (const s of this.structures.values()) if (s.type === type) n++; return n; }
 
@@ -158,6 +165,7 @@ G.World = class {
         this.lights.push({
           type: st.type, x: (st.tx + 0.5) * G.TILE, y: (st.ty + 0.5) * G.TILE,
           restore: def.restore || 0, light: def.light || 0,
+          hue: def.ember ? G.Shrines.hueAt(this, st.tx, st.ty) : undefined,   // a shrine's ember colour
         });
       }
     }

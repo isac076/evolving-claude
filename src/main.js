@@ -47,6 +47,12 @@ window.G = window.G || {};
     ui, map, journal, burst: (x, y, color, n) => renderer.burst(x, y, color, n),
     floater: (x, y, text, color) => addFloater(x, y, text, color), pan: x => panAt(x),
   });
+  // the Ember Shrines: offerings at their bowls, the kindling and its wave of colour (Night 15)
+  const shrines = new G.ShrinePlay(state, {
+    ui, map, journal, burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    floater: (x, y, text, color) => addFloater(x, y, text, color), pan: x => panAt(x),
+  });
+  state.shrines = shrines;
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -237,6 +243,7 @@ window.G = window.G || {};
 
   function afterLoad() {
     life.clear();
+    shrines.kindling = null; shrines.sparks = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
     state.stats.met = state.stats.met || {};
     state.world.time = state.time;
@@ -251,7 +258,7 @@ window.G = window.G || {};
   // stereo position of a world point relative to the player: -1 left .. 1 right
   const panAt = x => G.clamp((x - state.player.x) / 240, -1, 1);
   function addFloater(x, y, text, color) { state.floaters.push({ x, y, text, color, life: 1.4 }); }
-  const act = new G.Actions({ state, input, renderer, ui, map, ruins, garden, village, market, folk, floater: addFloater, panAt });
+  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, floater: addFloater, panAt });
   const craftItem = r => act.craftItem(r);
 
   // ---------- loop ----------
@@ -303,6 +310,7 @@ window.G = window.G || {};
     village.update(dt, state); market.update();
     wishPanel.update(dt);
     ruins.update(dt);
+    shrines.update(dt);
   }
 
   // ---------- sound ----------
