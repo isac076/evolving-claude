@@ -142,7 +142,7 @@ G.Renderer = class {
       }
       const people = folk && folk.get(ty);
       if (people) for (const v of people) G.drawVillager(ctx, v, v.x - camX, v.y - camY, time);
-      if (player.ty === ty) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
+      if (player.ty === ty && !player.flying) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
     if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
     G.drawVillageDecor(ctx, state.village, world, camX, camY, W, H, time, nightGlows);   // bunting over the village green (Night 13)
@@ -185,6 +185,7 @@ G.Renderer = class {
 
     this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
+    G.TravelFX.draw(ctx, state, camX, camY, W, H, time, dark);   // flying the lantern roads (Night 16)
 
     // soft vignette
     const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
@@ -231,7 +232,8 @@ G.Renderer = class {
       l.fillStyle = g; l.beginPath(); l.arc(x, y, r, 0, 6.2832); l.fill();
     };
     const pr = 120 + Math.sin(time * 3) * 3;
-    hole(player.x - camX, player.y - camY - 8, pr, 0.95);
+    const pz = player.z || 0;   // up in the sky on the lantern roads (Night 16)
+    hole(player.x - camX, player.y - camY - 8 - pz, pr, 0.95);
     for (const L of lights) if (L.light) hole(L.x - camX, L.y - camY - 14, L.light);
     for (const g of nightGlows) hole(g.x, g.y, g.r, 0.8);
     ctx.drawImage(this.light, 0, 0, this.light.width / this.ls, this.light.height / this.ls);
@@ -244,7 +246,7 @@ G.Renderer = class {
       g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     };
-    glow(player.x - camX, player.y - camY - 8, 50 * fb, `rgba(255,210,140,${0.25 * dark})`);
+    glow(player.x - camX, player.y - camY - 8 - pz, 50 * fb, `rgba(255,210,140,${0.25 * dark})`);
     for (const L of lights) if (L.light) {
       if (L.hue !== undefined) glow(L.x - camX, L.y - camY - 24, L.light * 0.4 * fb, `hsla(${L.hue},100%,62%,${0.34 * dark})`);
       else if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);

@@ -24,6 +24,7 @@ src/data/wishes.js    G.WISH settings, G.WISHES (what friends wish for: bring / 
 src/data/ruins.js     G.RUIN settings, G.RUIN_SITES (ruin kinds as little stamps), G.RUIN_PIECES, G.LORE (the 12 memories), G.RUIN_ECHOES
 src/data/village.js   G.VILLAGE settings, G.VILLAGE_STAGES (well → stall → ribbon pole), G.VILLAGE_NAMES, G.MARKET(_TRADES), G.FESTIVALS, G.VILLAGE_SAYS
 src/data/shrines.js   G.SHRINE settings, G.SHRINES (four shrines: hue, bowl offerings, gift, words), G.SHRINE_STAMP, shrine objects/structures, the Ember lantern recipe, G.SHRINE_SAYS
+src/data/travel.js    G.TRAVEL settings (reach, flight time, height, landing spots), G.TRAVEL_STOPS (which structures are stops + map names; sets `travel: true` on them), G.TRAVEL_PLACES, G.TRAVEL_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -41,6 +42,7 @@ src/game/player.js    G.Player — movement and collision
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
+src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -55,6 +57,7 @@ src/render/home_sprites.js the cottage, G.heartPath, G.drawWishMark (heart bubbl
 src/render/ruin_sprites.js pillars, stumps, walls, the arch (spans 3 tiles), keeper statue, fountain, rubble, memory stones, G.drawPave
 src/render/shrine_sprites.js ember posts, bowls, the great hearth, the Ember lantern, G.drawShrinePave, G.ShrineFX (floor rings, sky beam, kindling wave, leaping embers, guide arrow)
 src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built scaffold), G.drawVillageDecor (bunting), G.drawSkyLanterns
+src/render/travel_fx.js G.TravelFX — a flight: road of light ahead, the mote and its tail, shadow, beam over the destination, warm veil, landing ring
 src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
@@ -67,7 +70,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py, tools/smoke_travel.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -260,6 +263,18 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
   kindled hearth, the wave ring, embers leaping bowl → hearth, and the guide arrow that circles the spirit pointing to
   `G.Shrines.nextToKindle`). Sensing: after `G.SHRINE.senseMemories` woken stones every shrine is `known()` — map + journal Places page.
   `world.litCount()` (the HUD's "lanterns lit") does not count ember bowls.
+- **Lantern roads** (Night 16; data in src/data/travel.js, logic in G.Travel = `state.travel`, also `map.travel`): stops are
+  `world.lights` whose structure has `travel` (set from `G.TRAVEL_STOPS`). `here()` is the stop within `G.TRAVEL.reach` tiles of the
+  player (null while flying). The big map (`Minimap.drawRoads`, after the vignette) draws curved dashed threads from `here()` to every
+  stop, rings, and the hovered stop's name (`nameOf`: `{place}` = the nearest village or the ground, `{shrine}` = the shrine's name);
+  a press that hardly moved is a click → `pick()` → `travel.go(L)`. E with nothing else to do, or clicking a stop structure close by,
+  opens the map when `canTravel()`. **A flight** (`trip = {x0,y0,x1,y1,cx,cy,h,t,dur,from,to,z}`): a quadratic curve from the player to
+  `landing(L)` (first non-solid tile of `G.TRAVEL.land` around the light), bent sideways by `bend`, eased in/out, with height
+  `sin(πu)·h`. While `trip` is set main's `update()` calls `flying()` instead of `walking()` (only N and Esc work), travel moves
+  `player.x/y` (`player.flying`, `player.z` for the night light) and sets the camera; the renderer skips the spirit sprite, the
+  minimap doesn't reveal tiles, the shrine guide arrow hides, autosave waits (unload/title land the trip first). `arrive()` sets the
+  spirit down, brings followers, `stats.travel = {trips, seen{tileKey}, hinted, far}` (inside stats — no version bump), toast + floater.
+  G.TravelFX draws after G.ShrineFX.sky. Goals 'travel' / 'travel3' (chapter "The lantern roads", after the workshop).
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

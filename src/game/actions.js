@@ -5,7 +5,7 @@
 window.G = window.G || {};
 
 G.Actions = class {
-  // h = { state, input, renderer, ui, map, ruins, garden, village, market, folk, floater(x, y, text, color), panAt(x) }
+  // h = { state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, floater(x, y, text, color), panAt(x) }
   constructor(h) {
     Object.assign(this, h);
     this.REACH = 2.2 * G.TILE;       // how far the player can gather
@@ -113,6 +113,7 @@ G.Actions = class {
       let plant = null, pd = REACH;
       for (const st of this.garden.plants(state.world)) { const d = this.far(st.tx, st.ty); if (d <= pd) { pd = d; plant = st; } }
       if (plant) { this.tendPlant(plant); return; }
+      if (this.travel && this.travel.canTravel()) { this.map.toggle(true); this.ui.toggleCraft(false); return; }   // beside a light: the lantern roads
       G.Sound.play('deny'); this.ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5);
     }
   }
@@ -135,6 +136,7 @@ G.Actions = class {
     const st = close && state.world.structureAt(tx, ty);
     if (st && G.STRUCTURES[st.type].grow) { this.tendPlant(st); return; }
     if (st && G.STRUCTURES[st.type].ember && st.type !== 'emberlamp') { this.shrines.about(st); return; }
+    if (st && G.STRUCTURES[st.type].travel && this.travel.canTravel()) { this.map.toggle(true); this.ui.toggleCraft(false); return; }   // Night 16
     p.moveTarget = { x: wx, y: wy };
   }
 

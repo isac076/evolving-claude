@@ -50,6 +50,14 @@ G.GOALS = [
     progress: s => s.world.count('fence') + s.world.count('flowerbed') + s.world.count('bench'),
     hint: 'Changed your mind? Press X to pick a building back up.' },
 
+  // ---- The lantern roads (Night 16) ----
+  { id: 'travel', chapter: 'The lantern roads', text: 'Fly the lantern roads', target: 1,
+    progress: s => (s.stats.travel && s.stats.travel.trips) || 0,
+    hint: 'Stand beside a lantern, open the map (M) and click another of your lights.', reward: { petal: 2 } },
+  { id: 'travel3', chapter: 'The lantern roads', text: 'Land at 3 different lights', target: 3,
+    progress: s => Object.keys((s.stats.travel && s.stats.travel.seen) || {}).length,
+    hint: 'Every light you build is a stop — beacons, woken memory stones and kindled shrines too.', reward: { wood: 3, stone: 3 } },
+
   // ---- Sky & weather (Night 5) ----
   { id: 'rain', chapter: 'Sky & weather', text: 'Stand out in the rain', target: 20,
     progress: s => Math.floor(s.stats.rainTime || 0),

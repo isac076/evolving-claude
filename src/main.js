@@ -55,7 +55,7 @@ window.G = window.G || {};
   state.shrines = shrines;
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
-    title() { G.Save.write(state); state.running = false; location.href = location.pathname; },
+    title() { if (state.travel && state.travel.trip) state.travel.arrive(); G.Save.write(state); state.running = false; location.href = location.pathname; },
     newWorld() {
       G.Save.clear(); state.running = false;
       try { sessionStorage.setItem('lumen-new', '1'); } catch (e) {}
@@ -244,6 +244,7 @@ window.G = window.G || {};
   function afterLoad() {
     life.clear();
     shrines.kindling = null; shrines.sparks = [];
+    travel.trip = null; travel.landed = null; travel.trail = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
     state.stats.met = state.stats.met || {};
     state.world.time = state.time;
@@ -258,7 +259,10 @@ window.G = window.G || {};
   // stereo position of a world point relative to the player: -1 left .. 1 right
   const panAt = x => G.clamp((x - state.player.x) / 240, -1, 1);
   function addFloater(x, y, text, color) { state.floaters.push({ x, y, text, color, life: 1.4 }); }
-  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, floater: addFloater, panAt });
+  // the lantern roads: fly from light to light on the big map (Night 16)
+  const travel = new G.Travel(state, { ui, map, renderer, folk, floater: addFloater, panAt });
+  state.travel = travel; map.travel = travel;
+  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, floater: addFloater, panAt });
   const craftItem = r => act.craftItem(r);
 
   // ---------- loop ----------
@@ -266,13 +270,38 @@ window.G = window.G || {};
     state.time += dt;
     state.world.time = state.time;
 
+    travel.update(dt);
+    if (travel.trip) flying();
+    else if (walking(dt)) return;   // the journal or the resting menu just opened
+
+    for (const f of state.floaters) { f.life -= dt; f.y -= 22 * dt; }
+    state.floaters = state.floaters.filter(f => f.life > 0);
+
+    if (state.weather.rain > 0.3) state.stats.rainTime = (state.stats.rainTime || 0) + dt;
+
+    state.saveTimer += dt;
+    if (state.saveTimer > 10 && !travel.trip) { state.saveTimer = 0; G.Save.write(state); }
+    ui.updateClock(state.time, state.world.litCount(), state.weather, folk.list.length);
+    ui.update(dt);
+    map.update(dt, state.time);
+    goals.update(dt);
+    garden.update(dt, state);
+    wishes.update(dt, state);
+    village.update(dt, state); market.update();
+    wishPanel.update(dt);
+    ruins.update(dt);
+    shrines.update(dt);
+  }
+
+  // on foot: keys, clicks, walking and the camera
+  function walking(dt) {
     if (input.hit('c')) ui.toggleCraft();
     if (input.hit('x')) state.setRemoving();
     if (input.hit('n')) ui.toggleSound();
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; act.gatherNearest(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
-    if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return; }
+    if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return true; }
     // Esc closes the nearest thing first; with nothing open it is time to rest
     if (input.hit('escape')) {
       if (map.isOpen) map.toggle(false);
@@ -280,7 +309,7 @@ window.G = window.G || {};
       else if (state.removing) state.setRemoving(false);
       else if (market.isOpen) market.close();
       else if (ui.craftOpen) ui.toggleCraft(false);
-      else { settings.toggle(true); return; }
+      else { settings.toggle(true); return true; }
     }
     if (map.isOpen) { /* the big map has the mouse */ }
     else if (state.buildRecipe) act.updateBuild();
@@ -293,24 +322,12 @@ window.G = window.G || {};
     const k = 1 - Math.pow(0.02, dt);
     state.cam.x += (state.player.x - state.cam.x) * k;
     state.cam.y += (state.player.y - state.cam.y) * k;
+  }
 
-    for (const f of state.floaters) { f.life -= dt; f.y -= 22 * dt; }
-    state.floaters = state.floaters.filter(f => f.life > 0);
-
-    if (state.weather.rain > 0.3) state.stats.rainTime = (state.stats.rainTime || 0) + dt;
-
-    state.saveTimer += dt;
-    if (state.saveTimer > 10) { state.saveTimer = 0; G.Save.write(state); }
-    ui.updateClock(state.time, state.world.litCount(), state.weather, folk.list.length);
-    ui.update(dt);
-    map.update(dt, state.time);
-    goals.update(dt);
-    garden.update(dt, state);
-    wishes.update(dt, state);
-    village.update(dt, state); market.update();
-    wishPanel.update(dt);
-    ruins.update(dt);
-    shrines.update(dt);
+  // in the air on the lantern roads: G.Travel moves the spirit and the camera; keys only pause or mute
+  function flying() {
+    if (input.hit('n')) ui.toggleSound();
+    if (input.hit('escape')) settings.toggle(true);
   }
 
   // ---------- sound ----------
@@ -393,7 +410,7 @@ window.G = window.G || {};
     G.Save.clear();
     newGame(Math.floor(Math.random() * 1e9));
   };
-  window.addEventListener('beforeunload', () => { if (state.running) G.Save.write(state); });
+  window.addEventListener('beforeunload', () => { if (state.running) { if (travel.trip) travel.arrive(); G.Save.write(state); } });
 
   // a peaceful world drifts behind the title screen
   state.world = new G.World(saved ? saved.seed : 12345);

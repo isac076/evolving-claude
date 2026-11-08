@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 16 — 2026-11-08 — The lantern roads
+Your lights are now joined by old roads of light. Stand beside any lantern, open the map (M) and golden threads run to
+every other light you've lit — click one and your spirit leaps into the sky as a bright mote, flies along a curving road
+over the land (any friends following you come too) and lands softly beside it in a ring of light. Beacons, ember lanterns,
+woken memory stones and kindled shrines are stops as well, so the far-off Ember Shrines are now just a flight away.
+
 ## Night 15 — 2026-11-07 — The Ember Shrines
 Far out in the faded land stand four great Ember Shrines. Wake three memory stones and they appear on your map, with a
 soft ember arrow pointing the way. Each shrine has four ember bowls that ask for an offering (wood, petals, crystal…);

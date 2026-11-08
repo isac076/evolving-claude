@@ -65,7 +65,7 @@ as the world does.
 - [ ] Each biome has its own materials, plants, creatures and restoration look
 - [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
 - [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
-- [ ] Lantern network fast travel
+- [x] Lantern network fast travel (Night 16 — the lantern roads: stand by a light, open the map, click another light; the spirit leaps up as a mote and flies along a curving road of light; lanterns, beacons, ember lanterns, woken memory stones, kindled shrines and the Heart Stone are all stops; followers come along)
 - [ ] Boats to cross wide seas
 
 ## Chapter 6 — The mystery of the Fading
@@ -116,10 +116,17 @@ What a play-through (all 44 screenshots) taught us:
 - `src/world/creatures.js` (~400) and `src/audio/sound.js` (~380) are the next biggest files — fine for now, watch them.
 - Chunk caching for the ground is still the big performance win left (Chapter 8).
 - The phone layout has no virtual joystick yet; tap-to-walk works but a joystick would feel much better.
+- Night 16 split `walking()` / `flying()` out of main's `update()`; main.js is ~430 lines and minimap.js ~410 (the roads overlay) — split the big-map overlays into their own file if either grows.
+- Watch the travel hint toast (`G.Travel.hint`) doesn't talk over another toast; play a flight on a phone (tap a light on the map).
 
 ---
 
 ## Ideas (anyone can add here)
+- Lantern roads: once a road has been flown, a faint dotted line of light could stay on the big map (a web that grows as you travel)
+- Lantern roads: friends could ride along to visit another village; a "road keeper" friend kind who tends the roads
+- Lantern roads: flying over grey land could leave a brief trail of colour behind; at night shooting-star motes cross the sky on old roads
+- Lantern roads: name a lantern (ties in with the signpost idea) so the map label reads "Lantern at Mossy Bend"
+- Lantern roads: the Great Sun finale could open a road to the sky itself
 - Shrines: the Great Sun finale (Chapter 6) can read `stats.shrines.lit` — with all four embers burning, a path of light could lead to the Sun's hearth
 - Shrines: friends could make a pilgrimage to a kindled shrine and sit by its bowls; a festival of embers on the night the last one kindles
 - Shrines: each kindled shrine could add a "voice" to the music (G.MUSIC_BAND-like layer) or change the ambience near it (warm crackle)

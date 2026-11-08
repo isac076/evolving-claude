@@ -266,7 +266,7 @@ window.G = window.G || {};
         ctx.fillStyle = 'rgba(255,250,230,.9)'; circle(ctx, x, y, 2);
       }
       ctx.globalCompositeOperation = 'source-over';
-      if (play) this.guide(ctx, state, camX, camY, W, H, t);
+      if (play && !state.player.flying) this.guide(ctx, state, camX, camY, W, H, t);
     },
 
     // a soft ember arrow at the edge of the screen pointing to the next shrine to kindle

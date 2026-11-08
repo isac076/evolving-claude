@@ -267,10 +267,85 @@ G.Minimap = class {
     const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.7);
     g.addColorStop(0, 'rgba(11,14,38,0)'); g.addColorStop(1, 'rgba(11,14,38,.7)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    this.drawRoads(ctx, ox, oy, W / 2, H / 2, s, t, W, H);
     const ex = this.state.explored.count, lit = this.state.world.litCount();
     const fr = this.state.villagers ? this.state.villagers.list.length : 0;
     document.getElementById('bigmap-info').textContent =
       `${ex.toLocaleString()} tiles explored · ${lit} lantern${lit === 1 ? '' : 's'} lit` + (fr ? ` · ${fr} friend${fr === 1 ? '' : 's'} home` : '');
+  }
+
+  // ---------- the lantern roads (Night 16) ----------
+  // Beside a light, threads of light run from it to every other light; the one under
+  // the pointer grows and shows its name. Clicking it sets off (G.Travel.go).
+  drawRoads(ctx, ox, oy, sx, sy, s, t, W, H) {
+    const tr = this.travel, T = G.TILE;
+    this.stopsOnScreen = [];
+    const help = document.getElementById('bigmap-help');
+    if (!tr) return;
+    const here = tr.here(), stops = tr.stops();
+    if (help) help.textContent = here && stops.length > 1 ? G.TRAVEL_SAYS.mapNear : G.TRAVEL_SAYS.mapFar;
+    if (!here || stops.length < 2) return;
+    const toX = px => sx + (px / T - ox) * s, toY = py => sy + (py / T - oy) * s;
+    const hx = toX(here.x), hy = toY(here.y);
+    let hover = null, hd = G.TRAVEL.pick;
+    for (const L of stops) {
+      const x = toX(L.x), y = toY(L.y);
+      this.stopsOnScreen.push({ L, x, y });
+      if (L !== here && this.hover) { const d = Math.hypot(x - this.hover.x, y - this.hover.y); if (d < hd) { hd = d; hover = { L, x, y }; } }
+    }
+    this.hoverStop = hover;
+    this.bcanvas.style.cursor = hover ? 'pointer' : '';
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    for (const o of this.stopsOnScreen) {
+      if (o.L === here) continue;
+      const on = hover && hover.L === o.L, dx = o.x - hx, dy = o.y - hy, len = Math.hypot(dx, dy) || 1;
+      const side = G.hash2(Math.floor(o.L.x / T), Math.floor(here.x / T), 61) < 0.5 ? -1 : 1, bend = len * G.TRAVEL.bend * side;
+      const cx = (hx + o.x) / 2 - dy / len * bend, cy = (hy + o.y) / 2 + dx / len * bend;
+      ctx.setLineDash(on ? [] : [2, 6]); ctx.lineDashOffset = -t * 14;
+      ctx.lineWidth = on ? 2.4 : 1.3;
+      ctx.strokeStyle = on ? 'rgba(255,232,170,.85)' : 'rgba(255,215,140,.32)';
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.quadraticCurveTo(cx, cy, o.x, o.y); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // a soft ring on every stop; the one you stand by breathes gold
+    const pulse = 0.5 + 0.5 * Math.sin(t * 3);
+    for (const o of this.stopsOnScreen) {
+      const me = o.L === here, on = hover && hover.L === o.L, def = G.TRAVEL_STOPS[o.L.type] || { hue: 40 };
+      const r = me ? 8 + pulse * 3 : on ? 11 : 6.5;
+      ctx.lineWidth = on ? 2.2 : 1.3;
+      ctx.strokeStyle = `hsla(${o.L.hue !== undefined ? o.L.hue : def.hue},95%,${on ? 80 : 72}%,${me ? 0.5 + pulse * 0.4 : on ? 0.95 : 0.55})`;
+      ctx.beginPath(); ctx.arc(o.x, o.y, r, 0, 6.2832); ctx.stroke();
+      if (on) {
+        const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, 24);
+        g.addColorStop(0, 'rgba(255,235,180,.45)'); g.addColorStop(1, 'rgba(255,220,150,0)');
+        ctx.fillStyle = g; G.circle(ctx, o.x, o.y, 24);
+      }
+    }
+    ctx.restore();
+    if (hover) {   // the name, and how long the flight is
+      const name = this.travel.nameOf(hover.L), tiles = Math.round(Math.hypot(hover.L.x - here.x, hover.L.y - here.y) / T);
+      ctx.font = 'italic 13px Georgia, serif'; ctx.textAlign = 'center';
+      const y = hover.y + 26 > this.bcanvas.clientHeight - 20 ? hover.y - 30 : hover.y + 26, x = G.clamp(hover.x, 80, W - 80);
+      const sub = `${tiles} steps · ${'ontouchstart' in window ? 'tap' : 'click'} to fly`;
+      const bw = Math.max(ctx.measureText(name).width, sub.length * 5.6) + 18;
+      ctx.fillStyle = 'rgba(12,14,36,.82)'; ctx.strokeStyle = 'rgba(255,215,140,.45)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - bw / 2, y - 15, bw, 34, 8) : ctx.rect(x - bw / 2, y - 15, bw, 34); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff0cc'; ctx.fillText(name, x, y);
+      ctx.font = '11px Georgia, serif';
+      ctx.fillStyle = 'rgba(255,230,180,.75)'; ctx.fillText(sub, x, y + 14);
+    }
+  }
+
+  // a click or tap on the big map (not a drag): fly to the light under it
+  pick(x, y) {
+    if (!this.travel || !this.travel.here()) return false;
+    let best = null, bd = G.TRAVEL.pick + 4;
+    for (const o of this.stopsOnScreen || []) { const d = Math.hypot(o.x - x, o.y - y); if (d < bd) { bd = d; best = o; } }
+    if (!best) return false;
+    this.travel.go(best.L);
+    return true;
   }
 
   // ---------- big map controls ----------
@@ -287,18 +362,26 @@ G.Minimap = class {
   bindBigMap() {
     const c = this.bcanvas;
     let drag = null;
-    const start = (x, y) => { drag = { x, y, px: this.pan.x, py: this.pan.y }; };
+    const start = (x, y) => { drag = { x, y, px: this.pan.x, py: this.pan.y, moved: 0 }; };
+    const local = (x, y) => { const r = c.getBoundingClientRect(); return { x: x - r.left, y: y - r.top }; };
+    const end = (x, y) => {   // a press that hardly moved is a click
+      if (drag && drag.moved < 6 && x !== undefined) { const q = local(x, y); this.pick(q.x, q.y); }
+      drag = null;
+    };
     const move = (x, y) => {
       if (!drag) return;
+      drag.moved = Math.max(drag.moved, Math.hypot(x - drag.x, y - drag.y));
       this.pan.x = drag.px - (x - drag.x) / this.zoom;
       this.pan.y = drag.py - (y - drag.y) / this.zoom;
     };
     c.addEventListener('mousedown', e => start(e.clientX, e.clientY));
     window.addEventListener('mousemove', e => move(e.clientX, e.clientY));
-    window.addEventListener('mouseup', () => { drag = null; });
-    c.addEventListener('touchstart', e => { const p = e.touches[0]; start(p.clientX, p.clientY); e.preventDefault(); }, { passive: false });
+    window.addEventListener('mouseup', e => end(e.target === c ? e.clientX : undefined, e.clientY));
+    c.addEventListener('mousemove', e => { this.hover = local(e.clientX, e.clientY); });
+    c.addEventListener('mouseleave', () => { this.hover = null; });
+    c.addEventListener('touchstart', e => { const p = e.touches[0]; start(p.clientX, p.clientY); this.hover = local(p.clientX, p.clientY); e.preventDefault(); }, { passive: false });
     c.addEventListener('touchmove', e => { const p = e.touches[0]; move(p.clientX, p.clientY); e.preventDefault(); }, { passive: false });
-    c.addEventListener('touchend', () => { drag = null; });
+    c.addEventListener('touchend', e => { const p = e.changedTouches[0]; end(p && p.clientX, p && p.clientY); });
     c.addEventListener('dblclick', () => { this.pan.x = this.pan.y = 0; });
     c.addEventListener('wheel', e => { e.preventDefault(); this.zoomBy(e.deltaY < 0 ? 1 : -1); }, { passive: false });
     document.getElementById('bigmap-in').onclick = () => this.zoomBy(1);
@@ -315,7 +398,7 @@ G.Minimap = class {
   // ---------- per frame ----------
   update(dt, t) {
     const ex = this.state.explored, p = this.state.player;
-    if (p.tx !== this.lastTx || p.ty !== this.lastTy) {
+    if (!p.flying && (p.tx !== this.lastTx || p.ty !== this.lastTy)) {   // not while flying the lantern roads
       this.lastTx = p.tx; this.lastTy = p.ty;
       ex.reveal(p.tx, p.ty, 11);
     }

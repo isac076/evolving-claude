@@ -85,7 +85,15 @@ G.Journal = class {
 
   page_places() {
     const vh = this.villages() + this.shrinePlaces();
-    return vh + this.ruinPlaces(!!vh);
+    return this.roads() + vh + this.ruinPlaces(!!vh);
+  }
+
+  // the lantern roads (Night 16): one line about your flights
+  roads() {
+    const tr = this.state.stats.travel;
+    if (!tr || !tr.trips) return '';
+    const stops = this.state.travel ? this.state.travel.stops().length : 0;
+    return `<p class="j-note">✦ Lantern roads: ${stops} lights on the roads · ${tr.trips} flight${tr.trips === 1 ? '' : 's'} · the longest ${tr.far} steps.</p>`;
   }
 
   // the Ember Shrines you know of (Night 15), shown above the ruins

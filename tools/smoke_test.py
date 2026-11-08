@@ -18,6 +18,7 @@ import smoke_seasons
 import smoke_village
 import smoke_review
 import smoke_shrines
+import smoke_travel
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -337,6 +338,7 @@ def play(page, errors):
         smoke_village.run(page, SHOTS, errors)  # Night 13: the growing village
         smoke_review.run(page, SHOTS, errors)   # Night 14: review-night fixes
         smoke_shrines.run(page, SHOTS, errors)  # Night 15: the Ember Shrines
+        smoke_travel.run(page, SHOTS, errors)   # Night 16: the lantern roads
 
 
 if __name__ == "__main__":

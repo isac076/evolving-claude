@@ -51,7 +51,7 @@
     <div class="bigmap-head"><h2>Map</h2><span id="bigmap-info"></span><button id="bigmap-close" aria-label="Close map">×</button></div>
     <canvas id="bigmap-canvas"></canvas>
     <div class="bigmap-foot">
-      <span>Drag to look around · scroll to zoom · M to close</span>
+      <span id="bigmap-help">Drag to look around · scroll to zoom · M to close</span>
       <span class="bigmap-buttons"><button id="bigmap-out" aria-label="Zoom out">−</button><button id="bigmap-home" aria-label="Back to you">◎</button><button id="bigmap-in" aria-label="Zoom in">+</button></span>
     </div>
   </div>
@@ -79,7 +79,7 @@
       <kbd>E</kbd><span>gather, talk to a friend, use a well or market stall</span>
       <kbd>C</kbd><span>craft lanterns, paths and more</span>
       <kbd>X</kbd><span>pick a building back up</span>
-      <kbd>M</kbd><span>the map</span>
+      <kbd>M</kbd><span>the map — beside a lantern, click another light to fly there</span>
       <kbd>J</kbd><span>your journal: memories, places, creatures, friends</span>
       <kbd>N</kbd><span>sound on / off</span>
       <kbd>Esc</kbd><span>rest here (this menu)</span>
@@ -88,10 +88,10 @@
       <kbd>Tap</kbd><span>walk there — or tap a tree, rock or friend</span>
       <kbd>Gather</kbd><span>gather what's close, or talk</span>
       <kbd>Craft</kbd><span>lanterns, paths, and picking things up</span>
-      <kbd>Map</kbd><span>tap the round map</span>
+      <kbd>Map</kbd><span>tap the round map — beside a lantern, tap another light to fly there</span>
       <kbd>Book</kbd><span>tap the little book for your journal</span>
     </div>
-    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land. The seasons turn every few days: blossom, summer, falling leaves and snow.</p>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow.</p>
 
     <div class="settings-buttons">
       <button id="set-resume" class="main">Keep playing</button>
@@ -148,6 +148,7 @@
 <script src="src/data/ruins.js"></script>
 <script src="src/data/village.js"></script>
 <script src="src/data/shrines.js"></script>
+<script src="src/data/travel.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/shrines.js"></script>
@@ -166,6 +167,7 @@
 <script src="src/game/ruin_play.js"></script>
 <script src="src/game/shrine_play.js"></script>
 <script src="src/game/soundscape.js"></script>
+<script src="src/game/travel.js"></script>
 <script src="src/render/sprites.js"></script>
 <script src="src/render/workshop_sprites.js"></script>
 <script src="src/render/garden_sprites.js"></script>
@@ -178,6 +180,7 @@
 <script src="src/render/shrine_sprites.js"></script>
 <script src="src/render/village_sprites.js"></script>
 <script src="src/render/shore_fx.js"></script>
+<script src="src/render/travel_fx.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>

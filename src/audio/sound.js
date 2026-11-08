@@ -368,6 +368,19 @@ G.SFX = {
     [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.06, dur: 3, t: 0.6 + k * 0.13, pan: -0.8 + (k % 5) * 0.4, rev: 0.85 }));
     S.bell(G.note(28, 4), { gain: 0.04, dur: 4, t: 2.4, rev: 0.9 });
   },
+  // ---- the lantern roads (Night 16) ----
+  travelGo(S, o) {   // the spirit leaps into the sky: a harp sweeping upward and a long soft rush of air
+    const d = o.dur || 2.4;
+    [0, 2, 4, 5, 7, 9, 10, 12].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.055, dur: 1.6, t: k * 0.05, pan: -0.6 + k * 0.17, rev: 0.7 }));
+    S.noise({ filter: 'bandpass', freq: 400, freqTo: 2400, q: 0.6, attack: d * 0.45, dur: d, gain: 0.05, rev: 0.6 });
+    S.tone(G.note(0, 3), { type: 'sine', attack: d * 0.4, dur: d + 0.6, gain: 0.05, rev: 0.8 });
+    S.tone(G.note(7, 3), { type: 'triangle', attack: d * 0.5, dur: d + 0.4, gain: 0.025, rev: 0.8 });
+  },
+  travelArrive(S) {  // setting down softly: a falling sparkle and a warm open chord
+    [12, 10, 9, 7].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.05, dur: 1.4, t: k * 0.06, pan: 0.5 - k * 0.3, rev: 0.6 }));
+    for (const n of [0, 4, 7]) S.bell(G.note(n, 4), { gain: 0.05, dur: 2.4, t: 0.28, rev: 0.7 });
+    S.noise({ filter: 'lowpass', freq: 600, freqTo: 200, attack: 0.02, dur: 0.4, gain: 0.05, rev: 0.3 });
+  },
   page(S) {          // a journal page turning
     S.noise({ filter: 'bandpass', freq: 1800, freqTo: 3600, q: 0.8, attack: 0.02, dur: 0.16, gain: 0.06 });
     S.noise({ filter: 'bandpass', freq: 3000, freqTo: 1500, q: 0.8, attack: 0.02, dur: 0.12, gain: 0.04, t: 0.1 });
