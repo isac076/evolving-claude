@@ -53,6 +53,8 @@ window.G = window.G || {};
     floater: (x, y, text, color) => addFloater(x, y, text, color), pan: x => panAt(x),
   });
   state.shrines = shrines;
+  // the Glowcap Hollows: noticing when you walk into one (Night 17)
+  const hollows = new G.HollowPlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { if (state.travel && state.travel.trip) state.travel.arrive(); G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -162,7 +164,7 @@ window.G = window.G || {};
   };
   garden.onGrown = (st, into, first) => {
     const k = G.GROW_KINDS[G.STRUCTURES[st.type].grow];
-    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE - 10, `${G.OBJECTS[into].name}!`, into === 'tree' ? '#a8e090' : into === 'moonflower' ? '#bfe2ff' : '#ffc8e6');
+    addFloater((st.tx + 0.5) * G.TILE, st.ty * G.TILE - 10, `${G.OBJECTS[into].name}!`, into === 'tree' ? '#a8e090' : into === 'moonflower' ? '#bfe2ff' : G.OBJECTS[into].drops.spore ? '#a8f0e0' : '#ffc8e6');
     if (first) ui.toast(into === k.rare ? k.firstRare : k.first, 6);
   };
 
@@ -291,6 +293,7 @@ window.G = window.G || {};
     wishPanel.update(dt);
     ruins.update(dt);
     shrines.update(dt);
+    hollows.update(dt);
   }
 
   // on foot: keys, clicks, walking and the camera

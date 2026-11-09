@@ -1,5 +1,5 @@
 // G.Creatures — the little lives that return to restored land: butterflies,
-// songbirds, rabbits, fish and moths (kinds are data in data/creatures.js).
+// songbirds, rabbits, fish, moths and glow snails (kinds are data in data/creatures.js).
 // They appear around the screen where the land is coloured, behave on their
 // own, shy away from the spirit, and quietly leave again. Nothing is saved.
 // Also owns water ripples (from fish and from walking along the shore).
@@ -130,6 +130,7 @@ G.Creatures = class {
     if (def.move === 'moth') { c.ang = Math.random() * 6.283; c.rad = G.rand(14, 34); c.dirn = c.seed > 0.5 ? 1 : -1; }
     if (def.move === 'hop') c.state = 'sit';
     if (def.move === 'swim') { c.state = 'swim'; c.dir = Math.random() * 6.283; }
+    if (def.move === 'crawl') { c.dir = Math.random() * 6.283; c.trail = []; c.hide = 0; }
     if (def.move === 'bird') {          // birds glide in from somewhere and land
       const a = Math.random() * 6.283;
       c.state = 'arrive'; c.x = x - Math.cos(a) * 170; c.y = y - Math.sin(a) * 110; c.z = 70;
@@ -303,6 +304,22 @@ G.Creatures = class {
     return false;
   }
 
+  // a glow snail (Night 17): slides slowly about, leaving a glistening trail, and
+  // tucks itself into its shell while the spirit is close
+  crawl(c, dt, world, p, dx, dy, dp) {
+    if (dp < c.def.flee) { c.hide = Math.min(1, c.hide + dt * 5); return; }
+    c.hide = Math.max(0, c.hide - dt * 0.6);
+    if (c.hide > 0.05) return;
+    c.ph += dt;
+    if ((c.t -= dt) <= 0) { c.t = G.rand(3, 8); c.dir += G.rand(-1.2, 1.2); c.rest = Math.random() < 0.3; }
+    if (c.rest) return;
+    const nx = c.x + Math.cos(c.dir) * 5 * dt, ny = c.y + Math.sin(c.dir) * 3.5 * dt;
+    if (this.groundOk(world, nx, ny) && Math.hypot(nx - c.hx, ny - c.hy) < 70) { c.x = nx; c.y = ny; c.face = Math.cos(c.dir) >= 0 ? 1 : -1; }
+    else c.dir += Math.PI * G.rand(0.6, 1.4);
+    const last = c.trail[c.trail.length - 1];
+    if (!last || Math.hypot(c.x - last.x, c.y - last.y) > 3) { c.trail.push({ x: c.x, y: c.y }); if (c.trail.length > 10) c.trail.shift(); }
+  }
+
   swim(c, dt, world, p, dx, dy, dp) {
     if (c.state === 'jump') {
       c.jt += dt;
@@ -372,7 +389,7 @@ G.Creatures = class {
   groundRows() {
     const rows = new Map();
     for (const c of this.list) {
-      const ground = c.def.move === 'hop' || (c.def.move === 'bird' && (c.state === 'peck' || c.state === 'hop'));
+      const ground = c.def.move === 'hop' || c.def.move === 'crawl' || (c.def.move === 'bird' && (c.state === 'peck' || c.state === 'hop'));
       if (!ground) continue;
       const ty = Math.floor(c.y / G.TILE);
       if (!rows.has(ty)) rows.set(ty, []);

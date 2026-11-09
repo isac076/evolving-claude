@@ -12,7 +12,7 @@ G.Shrines = {
     if (world.shrineList) return world.shrineList;
     const rows = G.SHRINE_STAMP, w = rows[0].length, h = rows.length, s = world.seed;
     const sp = world.spawnSpot(), a0 = G.hash2(3, 7, s + 901) * 6.2832, out = [];
-    const water = (x, y) => !!G.TILES[world.groundType(x, y)].water;
+    const water = (x, y) => !!G.TILES[world.groundType(x, y, true)].water;
     const fits = (cx, cy) => {   // the whole stamp (and a one-tile rim) on land, with step-every-other for speed
       for (let y = -Math.floor(h / 2) - 1; y <= Math.floor(h / 2) + 1; y++)
         for (let x = -Math.floor(w / 2) - 1; x <= Math.floor(w / 2) + 1; x++)

@@ -33,12 +33,12 @@ G.Ruins = {
       const ctx = cx * C + 6 + Math.floor(G.hash2(cx * 3 + i, cy, s + 507) * (C - 13));
       const cty = cy * C + 6 + Math.floor(G.hash2(cx, cy * 3 + i, s + 509) * (C - 13));
       if (Math.hypot(ctx - spawn.tx, cty - spawn.ty) < R.awayFromStart) continue;
-      if (!def.ground.includes(world.groundType(ctx, cty))) continue;
+      if (!def.ground.includes(world.groundType(ctx, cty, true))) continue;
       if (G.Shrines.near(world, ctx, cty, G.SHRINE.keepRuinsAway)) continue;   // the Ember Shrines keep their ground
       const x0 = ctx - Math.floor(w / 2), y0 = cty - Math.floor(h / 2);
       let ok = true;
       for (let y = y0 - 1; y <= y0 + h && ok; y++) for (let x = x0 - 1; x <= x0 + w && ok; x++)
-        if (G.TILES[world.groundType(x, y)].water) ok = false;
+        if (G.TILES[world.groundType(x, y, true)].water) ok = false;
       if (!ok) continue;
       const site = { id: cx + ',' + cy, kind, def, name: def.name, x0, y0, w, h, rows, tx: ctx, ty: cty, memory: null };
       for (let y = 0; y < h; y++) { const m = rows[y].indexOf('M'); if (m >= 0) site.memory = { tx: x0 + m, ty: y0 + y }; }

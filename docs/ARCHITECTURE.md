@@ -25,10 +25,12 @@ src/data/ruins.js     G.RUIN settings, G.RUIN_SITES (ruin kinds as little stamps
 src/data/village.js   G.VILLAGE settings, G.VILLAGE_STAGES (well → stall → ribbon pole), G.VILLAGE_NAMES, G.MARKET(_TRADES), G.FESTIVALS, G.VILLAGE_SAYS
 src/data/shrines.js   G.SHRINE settings, G.SHRINES (four shrines: hue, bowl offerings, gift, words), G.SHRINE_STAMP, shrine objects/structures, the Ember lantern recipe, G.SHRINE_SAYS
 src/data/travel.js    G.TRAVEL settings (reach, flight time, height, landing spots), G.TRAVEL_STOPS (which structures are stops + map names; sets `travel: true` on them), G.TRAVEL_PLACES, G.TRAVEL_SAYS
+src/data/hollow.js    the Glowcap Hollows (Night 17): G.HOLLOW settings, the `mushwood` ground, spore item, giant mushroom + glowcap objects, Mushroom lamp + Spore patch, the glow snail, music place, road stop, G.HOLLOW_NAMES, G.HOLLOW_SAYS (adds to the other data tables)
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
 src/world/shrines.js  G.Shrines — where the four shrines stand (from the seed, ground-only), pieceAt() for tileAt, bowls lit / kindled, known(), nextToKindle()
+src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land, none near the start), first() (the one a walk from the start), placeOf() (each hollow's id + name)
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
@@ -43,6 +45,7 @@ src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
 src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
+src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -59,6 +62,8 @@ src/render/shrine_sprites.js ember posts, bowls, the great hearth, the Ember lan
 src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built scaffold), G.drawVillageDecor (bunting), G.drawSkyLanterns
 src/render/travel_fx.js G.TravelFX — a flight: road of light ahead, the mote and its tail, shadow, beam over the destination, warm veil, landing ring
 src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
+src/render/hollow_sprites.js G.drawHollowGround (moss, tiny toadstools), giant mushroom, glowcaps, Mushroom lamp, Spore patch, their regrow sprites, the glow snail
+src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and from Mushroom lamps, snail halos; drawn after the night layer
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -70,7 +75,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
-tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py, tools/smoke_travel.py  chapter tests, called at the end of smoke_test.py
+tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py, tools/smoke_travel.py, tools/smoke_hollow.py  chapter tests, called at the end of smoke_test.py
 ```
 
 ## Key ideas
@@ -290,3 +295,14 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 2. Add a draw function with the same name to `G.STRUCTURE_SPRITES` in `src/render/sprites.js`.
 3. Optionally give it a `sound` (an effect in `G.SFX`) for when it's built.
 That's it — the crafting menu, placing, saving and lighting all pick it up.
+- **Biomes / the Glowcap Hollows** (Night 17, data in src/data/hollow.js): `world.groundType(tx, ty)` first finds the old
+  ground; damp grass/forest (moisture > 0.2) then asks `G.Hollow.at()` whether a wide, slow noise is above `G.HOLLOW.at` (and
+  moisture above `wet`) — then the tile is `mushwood`. `groundType(tx, ty, true)` skips the overlay: the start (`spawnSpot`),
+  ruins, shrines and the hollows' own placement use it, so adding a biome never moves the old world. No hollow within ~34 tiles of
+  the start (it fades in), and `G.Hollow.first()` boosts the noise around one spot ~62 tiles out in the most wooded direction, so
+  every world has one to find (`G.HollowPlay.hint` points the goal tracker at it). Objects for a ground type are picked in
+  `tileAt`. Goals may give `hint` as a function of the state (the tracker re-renders when it changes). Structures may set
+  `lightHue`: their light carries that hue (renderer glow, minimap). Glowcaps draw with `Math.max(f, 0.6)` — they kept their colour
+  through the Fading. Stats: `stats.hollow = { found, at: { placeId: [tx, ty, name] } }` (optional, no version bump).
+  To add a biome: a ground in `G.TILES` (+ season `ground` shifts, `G.SNOW.cover`, `G.MUSIC_PLACES`, `G.TRAVEL_PLACES`),
+  an overlay rule in `groundType`, objects in `tileAt`, sprites, and its creatures.

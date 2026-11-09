@@ -127,8 +127,9 @@ G.Minimap = class {
       const heart = L.type === 'heart', beacon = L.type === 'beacon';
       const r = (heart || beacon ? 9 : 6) * (big ? 1.2 : 1);
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, heart ? 'rgba(255,240,190,.95)' : beacon ? 'rgba(170,240,255,.95)' : 'rgba(255,214,130,.9)');
-      g.addColorStop(1, beacon ? 'rgba(90,190,255,0)' : 'rgba(255,190,90,0)');
+      const lh = G.STRUCTURES[L.type].lightHue;   // a coloured light (the mushroom lamp's teal)
+      g.addColorStop(0, heart ? 'rgba(255,240,190,.95)' : beacon ? 'rgba(170,240,255,.95)' : lh !== undefined ? `hsla(${lh},85%,72%,.95)` : 'rgba(255,214,130,.9)');
+      g.addColorStop(1, beacon ? 'rgba(90,190,255,0)' : lh !== undefined ? `hsla(${lh},85%,60%,0)` : 'rgba(255,190,90,0)');
       ctx.fillStyle = g; G.circle(ctx, x, y, r);
     }
     ctx.globalCompositeOperation = 'source-over';
@@ -136,7 +137,7 @@ G.Minimap = class {
       if (!L.restore) continue;
       const x = toX(L.x), y = toY(L.y);
       const big9 = L.type === 'heart' || L.type === 'beacon';
-      ctx.fillStyle = L.type === 'heart' ? '#fff6dc' : L.type === 'beacon' ? '#dff8ff' : '#ffd77a';
+      ctx.fillStyle = L.type === 'heart' ? '#fff6dc' : L.type === 'beacon' ? '#dff8ff' : G.STRUCTURES[L.type].lightHue !== undefined ? '#c8fff0' : '#ffd77a';
       if (big9) { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3, y); ctx.fill(); }
       else G.circle(ctx, x, y, 1.6);
     }

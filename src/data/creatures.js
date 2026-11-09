@@ -3,7 +3,7 @@
 // function in render/creature_sprites.js and (if it needs new behaviour) a
 // move type in world/creatures.js.
 //
-// move     = how it behaves: 'flutter', 'moth', 'bird', 'hop', 'swim'
+// move     = how it behaves: 'flutter', 'moth', 'bird', 'hop', 'swim', 'crawl' (the glow snail, data/hollow.js)
 // tiles    = ground types it appears on
 // when     = 'day', 'night' or 'any'
 // restore  = how restored (0..1) the land must be for it to appear

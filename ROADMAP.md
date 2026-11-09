@@ -62,7 +62,9 @@ as the world does.
 
 ## Chapter 5 — Exploration
 - [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
-- [ ] Each biome has its own materials, plants, creatures and restoration look
+  - [x] Mushroom forest — the Glowcap Hollows (Night 17: violet mossy ground in damp woods; giant mushrooms and glowcaps that kept their light through the Fading; glow spores → Mushroom lamp (teal, restores 7, a lantern-road stop) and Spore patches that grow glowcaps; glow snails; drifting glowing spores; a music-box tune; one hollow always ~60 steps from the start, named hollows in the journal)
+  - [ ] Snowy peaks · [ ] Desert · [ ] Crystal caverns · [ ] Islands (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at`, its own data file like data/hollow.js)
+- [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four)
 - [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
 - [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
 - [x] Lantern network fast travel (Night 16 — the lantern roads: stand by a light, open the map, click another light; the spirit leaps up as a mote and flies along a curving road of light; lanterns, beacons, ember lanterns, woken memory stones, kindled shrines and the Heart Stone are all stops; followers come along)
@@ -118,10 +120,18 @@ What a play-through (all 44 screenshots) taught us:
 - The phone layout has no virtual joystick yet; tap-to-walk works but a joystick would feel much better.
 - Night 16 split `walking()` / `flying()` out of main's `update()`; main.js is ~430 lines and minimap.js ~410 (the roads overlay) — split the big-map overlays into their own file if either grows.
 - Watch the travel hint toast (`G.Travel.hint`) doesn't talk over another toast; play a flight on a phone (tap a light on the map).
+- Night 17: a screen full of glowcaps at night costs ~20% more to draw (each glowcap is a night glow). If phones struggle, cap
+  `nightGlows` per frame or draw glowcap halos into a cached sprite. The hollow goal chapter sits before "Echoes of the old world" —
+  check it reads well in order for a brand-new player.
 
 ---
 
 ## Ideas (anyone can add here)
+- Hollows: a "mushroom keeper" friend kind found only in hollows (likes glowcaps, plays a music-box part in the band)
+- Hollows: glowcap rings (fairy rings) — step into one at night and the spores swirl up in a little dance; a ring as a garden decoration
+- Hollows: friends could mention "a place where the mushrooms glow" in their hints; the big map could show a faint violet shimmer over unexplored hollows
+- Hollows: puffballs that burst into a cloud of spores when you walk past; a spore lantern you carry (a small light that follows you)
+- Hollows: an Ember Shrine or ruin made for the hollows (an overgrown mushroom temple) once more biomes exist
 - Lantern roads: once a road has been flown, a faint dotted line of light could stay on the big map (a web that grows as you travel)
 - Lantern roads: friends could ride along to visit another village; a "road keeper" friend kind who tends the roads
 - Lantern roads: flying over grey land could leave a brief trail of colour behind; at night shooting-star motes cross the sky on old roads

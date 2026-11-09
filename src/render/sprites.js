@@ -111,6 +111,8 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
       ctx.moveTo(ox + 6, oy + 6); ctx.lineTo(ox + 9 + sw, oy + 1);
       ctx.stroke();
     }
+  } else if (tile.type === 'mushwood') {
+    G.drawHollowGround(ctx, tile, d, x, y, f, t);   // moss and tiny toadstools (render/hollow_sprites.js)
   } else if (d.water && tile.v > 0.9) {
     const a = Math.max(0, Math.sin(t * 2 + tile.v * 40)) * 0.5 * (0.3 + 0.7 * f);
     ctx.fillStyle = `rgba(220,240,255,${a})`;

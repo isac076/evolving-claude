@@ -164,6 +164,21 @@ G.GOALS = [
     hint: 'The first festival is on the evening the ribbon pole goes up — then on the last evening of every season.',
     reward: { petal: 4, seed: 3 } },
 
+  // ---- The Glowcap Hollows (Night 17) ----  (hint may be a function of the state: it points the way)
+  { id: 'hollowfind', chapter: 'The Glowcap Hollows', text: 'Find a hollow of giant mushrooms', target: 1,
+    progress: s => (s.stats.hollow && s.stats.hollow.found) || 0, hint: s => G.HollowPlay.hint(s) },
+  { id: 'spores', chapter: 'The Glowcap Hollows', text: 'Gather glow spores', target: 5,
+    progress: s => s.stats.got.spore || 0, hint: 'Glowcaps and giant mushrooms both give spores (E).', reward: { fibre: 2 } },
+  { id: 'shroomlamp', chapter: 'The Glowcap Hollows', text: 'Light a Mushroom lamp', target: 1,
+    progress: s => s.world.count('shroomlamp'),
+    hint: 'Craft it (C) from spores, wood and fibre. Its cool light reaches further than a lantern\'s.', reward: { spore: 3 } },
+  { id: 'snail', chapter: 'The Glowcap Hollows', text: 'Meet a glow snail', target: 1,
+    progress: s => (s.stats.met && s.stats.met.snail) || 0,
+    hint: 'Snails come out where a hollow has its colour back. Move gently — they hide in their shells.', reward: { petal: 3 } },
+  { id: 'sporegrow', chapter: 'The Glowcap Hollows', text: 'Grow glowcaps from spores', target: 1,
+    progress: s => ((s.stats.grown || {}).glowcap || 0) + ((s.stats.grown || {}).bigshroom || 0),
+    hint: 'Plant a Spore patch (Craft → Garden) in a hollow or a forest where the colour is back.', reward: { crystal: 2, spore: 2 } },
+
   // ---- Echoes of the old world (Night 11) ----
   { id: 'ruinfind', chapter: 'Echoes of the old world', text: 'Find the ruins of the old world', target: 1,
     progress: s => s.stats.ruinsFound || 0,

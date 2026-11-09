@@ -36,7 +36,7 @@ G.Goals = class {
     this.el.innerHTML = `<div class="goal-head">${chapter} <span class="pips">${pips}</span></div>
       <div class="goal-text">${justDone ? '✓ ' : ''}${goal.text}<b>${justDone ? 'Done!' : count}</b></div>
       <div class="goal-bar"><span style="width:${(justDone ? 1 : frac) * 100}%"></span></div>
-      <div class="goal-hint">${goal.hint || ''}${reward ? ' <span class="rewards">Reward ' + reward + '</span>' : ''}</div>`;
+      <div class="goal-hint">${(typeof goal.hint === 'function' ? goal.hint(this.state) : goal.hint) || ''}${reward ? ' <span class="rewards">Reward ' + reward + '</span>' : ''}</div>`;
   }
 
   update(dt) {
@@ -67,7 +67,7 @@ G.Goals = class {
     }
     const value = goal.progress(s);
     if (value >= goal.target) { this.complete(goal); return; }
-    const key = goal.id + ':' + value;
+    const key = goal.id + ':' + value + (typeof goal.hint === 'function' ? ':' + goal.hint(s) : '');   // a hint that points the way follows you
     if (key !== this.shownId) { this.shownId = key; this.render(goal, value); this.el.classList.add('show'); }
   }
 

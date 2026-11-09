@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 17 — 2026-11-09 — The Glowcap Hollows
+A brand-new kind of land: deep, damp hollows of violet moss where giant mushrooms grow and little glowcaps kept their light
+all through the Fading — at night they shine in the dark and glowing spores drift up into the air. Every world has one a short
+walk from the Heart Stone (the goal tracker points the way). Gather glow spores to build a teal Mushroom lamp, plant spore
+patches that grow into glowcaps, and once the colour is back, look for shy glow snails leaving shiny trails.
+
 ## Night 16 — 2026-11-08 — The lantern roads
 Your lights are now joined by old roads of light. Stand beside any lantern, open the map (M) and golden threads run to
 every other light you've lit — click one and your spirit leaps into the sky as a bright mote, flies along a curving road

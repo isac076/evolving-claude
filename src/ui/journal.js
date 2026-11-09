@@ -84,7 +84,7 @@ G.Journal = class {
   }
 
   page_places() {
-    const vh = this.villages() + this.shrinePlaces();
+    const vh = this.villages() + this.shrinePlaces() + G.HollowPlay.places(this.state);
     return this.roads() + vh + this.ruinPlaces(!!vh);
   }
 

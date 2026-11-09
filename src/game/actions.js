@@ -217,5 +217,6 @@ G.Actions.BUILT_SAYS = {
   beacon: ['The crystal sings, and the land far around it remembers its colour.', 5],
   cottage: ['A cottage! A friend whose light is close by will move in.', 4.5],
   emberlamp: ['A spark of the shrine\'s ember settles into the bowl. The land around it glows warm.', 4.5],
+  shroomlamp: ['The mushroom lamp glows, cool and kind. The land around it remembers its colour.', 4.5],
   workbench: ['A workbench! Stand near it and open Craft (C) for tools and more.', 5],
 };

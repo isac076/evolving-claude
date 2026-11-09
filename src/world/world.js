@@ -18,7 +18,9 @@ G.World = class {
 
   // ---------- generation ----------
   // The ground type at a tile, straight from the seed (no cache, no objects).
-  groundType(tx, ty) {
+  // base = the old ground only, without the Glowcap Hollows (Night 17): the start,
+  // the ruins and the hollows themselves are placed from it, so they never move.
+  groundType(tx, ty, base) {
     const s = this.seed;
     const e = G.fbm(tx * 0.018, ty * 0.018, s, 5);            // elevation
     if (e < 0.36) return 'deep';
@@ -26,6 +28,7 @@ G.World = class {
     if (e < 0.445) return 'sand';
     if (e > 0.68) return 'stone';
     const m = G.fbm(tx * 0.03 + 100, ty * 0.03, s + 777, 3);  // moisture
+    if (!base && m > 0.2 && G.Hollow.at(this, tx, ty, m)) return 'mushwood';
     return m > 0.55 ? 'forest' : 'grass';
   }
 
@@ -44,6 +47,7 @@ G.World = class {
     else if (type === 'stone') obj = o < 0.14 ? 'rock' : o > 0.99 ? 'crystal' : null;
     else if (type === 'sand') obj = o < 0.015 ? 'rock' : o > 0.93 ? 'reeds' : null;
     if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
+    if (type === 'mushwood') obj = o < 0.035 ? 'tree' : o < 0.15 ? 'bigshroom' : o > 0.956 ? 'glowcap' : null;
 
     const soft = G.valueNoise(tx * 0.15, ty * 0.15, s + 55);  // gentle colour patches
     t = { type, v, soft, obj, hue: Math.floor(G.hash2(tx, ty, s + 99) * 360) };
@@ -165,7 +169,7 @@ G.World = class {
         this.lights.push({
           type: st.type, x: (st.tx + 0.5) * G.TILE, y: (st.ty + 0.5) * G.TILE,
           restore: def.restore || 0, light: def.light || 0,
-          hue: def.ember ? G.Shrines.hueAt(this, st.tx, st.ty) : undefined,   // a shrine's ember colour
+          hue: def.ember ? G.Shrines.hueAt(this, st.tx, st.ty) : def.lightHue,   // a shrine's ember colour, a mushroom lamp's teal
         });
       }
     }
@@ -187,7 +191,7 @@ G.World = class {
   // Uses only the ground (not objects or ruins), so ruins can stay away from it.
   spawnSpot() {
     if (this.spawn) return this.spawn;
-    const water = (x, y) => !!G.TILES[this.groundType(x, y)].water;
+    const water = (x, y) => !!G.TILES[this.groundType(x, y, true)].water;
     for (let r = 0; r < 400; r += 2) {
       for (let a = 0; a < 16; a++) {
         const tx = Math.round(Math.cos(a / 16 * 6.283) * r);
@@ -196,7 +200,7 @@ G.World = class {
         for (let dx = -3; dx <= 3 && ok; dx++)
           for (let dy = -3; dy <= 3 && ok; dy++)
             if (water(tx + dx, ty + dy)) ok = false;
-        if (ok && this.groundType(tx, ty) === 'grass') return (this.spawn = { tx, ty });
+        if (ok && this.groundType(tx, ty, true) === 'grass') return (this.spawn = { tx, ty });
       }
     }
     return (this.spawn = { tx: 0, ty: 0 });

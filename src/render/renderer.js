@@ -184,6 +184,7 @@ G.Renderer = class {
     ctx.globalCompositeOperation = 'source-over';
 
     this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
+    G.SporeFX.draw(ctx, state, camX, camY, W, H, dt, time, dark);   // glowing spores over the hollows (Night 17)
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
     G.TravelFX.draw(ctx, state, camX, camY, W, H, time, dark);   // flying the lantern roads (Night 16)
 

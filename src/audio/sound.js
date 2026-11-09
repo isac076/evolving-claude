@@ -408,3 +408,19 @@ G.STEP_SOUNDS = {
 };
 
 G.Sound.init();
+
+// ---- the Glowcap Hollows (Night 17) ----
+G.SFX.spore = function (S, o) {   // a soft puff of spores and a glassy twinkle
+  S.noise({ filter: 'lowpass', freq: 900, freqTo: 300, attack: 0.02, dur: 0.25, gain: 0.07, pan: o.pan, rev: 0.3 });
+  const i = Math.floor(Math.random() * 5);
+  S.bell(G.note(i, 5), { gain: 0.05, dur: 1.8, t: 0.05, pan: o.pan, rev: 0.7 });
+  S.bell(G.note(i + 3, 5), { gain: 0.035, dur: 2, t: 0.16, pan: o.pan, rev: 0.7 });
+};
+G.SFX.hollow = function (S) {   // you come upon a hollow: a low, round hum and a music box that winds up slowly
+  S.tone(G.note(0, 2), { type: 'sine', attack: 0.8, dur: 3, gain: 0.06, rev: 0.8 });
+  S.tone(G.note(4, 2), { type: 'sine', attack: 1, dur: 2.8, gain: 0.035, t: 0.3, rev: 0.8 });
+  [7, 9, 4, 7, 12].forEach((n, k) => S.bell(G.note(n, 4), { gain: 0.05, dur: 2.2, t: 0.4 + k * 0.3, pan: -0.5 + k * 0.25, rev: 0.8 }));
+};
+G.STEP_SOUNDS.moss = function (S, o) {   // soft, springy moss
+  S.noise({ filter: 'lowpass', freq: o.alt ? 520 : 600, dur: 0.11, attack: 0.02, gain: 0.13, rev: 0.06 });
+};
