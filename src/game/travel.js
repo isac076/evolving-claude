@@ -53,7 +53,9 @@ G.Travel = class {
     if (def.name.includes('{place}')) {
       const vils = this.state.village ? this.state.village.list : [];
       const vil = vils.find(v => v.name && Math.hypot(v.cx - tx, v.cy - ty) < 12);
-      place = vil ? G.TRAVEL_PLACES.village.replace('{name}', vil.name)
+      const sign = this.state.signs && this.state.signs.near(tx, ty);   // a name you gave the place wins (Night 18)
+      place = sign ? G.TRAVEL_PLACES.sign.replace('{name}', sign.name)
+        : vil ? G.TRAVEL_PLACES.village.replace('{name}', vil.name)
         : G.TRAVEL_PLACES[world.tileAt(tx, ty + 1).type] || '';
     }
     return def.name.replace('{shrine}', shrine || 'Kindled shrine').replace('{place}', place).trim();

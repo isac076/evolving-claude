@@ -20,6 +20,7 @@ import smoke_review
 import smoke_shrines
 import smoke_travel
 import smoke_hollow
+import smoke_riverbank
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -341,6 +342,7 @@ def play(page, errors):
         smoke_shrines.run(page, SHOTS, errors)  # Night 15: the Ember Shrines
         smoke_travel.run(page, SHOTS, errors)   # Night 16: the lantern roads
         smoke_hollow.run(page, SHOTS, errors)   # Night 17: the Glowcap Hollows
+        smoke_riverbank.run(page, SHOTS, errors)   # Night 18: clay, stepping stones, signposts, banners
 
 
 if __name__ == "__main__":

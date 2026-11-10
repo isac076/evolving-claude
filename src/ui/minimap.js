@@ -217,6 +217,7 @@ G.Minimap = class {
         ctx.fillStyle = '#ffe9c4'; ctx.fillText(vil.name, x, y - 8);
       }
     }
+    if (this.state.signs) this.state.signs.drawMap(ctx, toX, toY, big, sx, sy);   // named places (Night 18)
     // the player: a soft pulsing light
     const px = toX(player.x), py = toY(player.y), pulse = 0.5 + 0.5 * Math.sin(t * 3);
     ctx.strokeStyle = `rgba(255,250,235,${0.25 + 0.35 * (1 - pulse)})`;

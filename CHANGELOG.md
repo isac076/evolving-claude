@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 18 — 2026-11-10 — Riverbanks & waymarks
+Soft reddish clay now lies where shallow water meets a beach or meadow — dig it with E (the goal tracker points the way).
+Clay makes stepping stones you can lay across the shallows and hop over, and signposts: put one up and type a name for
+the place — it floats over the post when you walk by, shows on your map and journal, and nearby lanterns take the name on the
+lantern roads ("Lantern at Otter Ford"). Bright banners stream in the wind (click one to change its colour), and a workbench makes clay flower planters.
+
 ## Night 17 — 2026-11-09 — The Glowcap Hollows
 A brand-new kind of land: deep, damp hollows of violet moss where giant mushrooms grow and little glowcaps kept their light
 all through the Fading — at night they shine in the dark and glowing spores drift up into the air. Every world has one a short

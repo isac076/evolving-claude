@@ -7,6 +7,7 @@ G.Input = class {
     this.pressed = {};        // keys pressed this frame
     this.mouse = { x: 0, y: 0, down: false, clicked: false };
     window.addEventListener('keydown', e => {
+      if (G.Input.typing(e)) return;   // writing a sign's name: the letters are not for walking
       const k = e.key.toLowerCase();
       if (!this.keys[k]) this.pressed[k] = true;
       this.keys[k] = true;
@@ -26,6 +27,7 @@ G.Input = class {
     canvas.addEventListener('touchmove', e => { pos(e); e.preventDefault(); }, { passive: false });
     canvas.addEventListener('touchend', () => { this.mouse.down = false; });
   }
+  static typing(e) { const t = e.target; return !!t && (t.tagName === 'INPUT' && t.type === 'text' || t.tagName === 'TEXTAREA'); }
   held(...ks) { return ks.some(k => this.keys[k]); }
   hit(...ks) { return ks.some(k => this.pressed[k]); }
   endFrame() { this.pressed = {}; this.mouse.clicked = false; }

@@ -48,6 +48,9 @@ G.World = class {
     else if (type === 'sand') obj = o < 0.015 ? 'rock' : o > 0.93 ? 'reeds' : null;
     if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
     if (type === 'mushwood') obj = o < 0.035 ? 'tree' : o < 0.15 ? 'bigshroom' : o > 0.956 ? 'glowcap' : null;
+    // soft clay where the shallows meet the shore (Night 18)
+    const cr = !obj && G.RIVER.clayOn[type];
+    if (cr && o >= cr[0] && o < cr[1] && this.besideShallows(tx, ty)) obj = 'claybank';
 
     const soft = G.valueNoise(tx * 0.15, ty * 0.15, s + 55);  // gentle colour patches
     t = { type, v, soft, obj, hue: Math.floor(G.hash2(tx, ty, s + 99) * 360) };
@@ -68,6 +71,12 @@ G.World = class {
     if (this.cache.size > 150000) this.cache.clear();
     this.cache.set(k, t);
     return t;
+  }
+
+  // is shallow water right next to this tile? (ground only, so it is safe inside tileAt)
+  besideShallows(tx, ty) {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (this.groundType(tx + dx, ty + dy) === 'water') return true;
+    return false;
   }
 
   // ---------- queries ----------
@@ -124,6 +133,7 @@ G.World = class {
       if (!def.soil.includes(t.type) || t.obj || this.grown.has(k)) return false;
     }
     const water = this.isWater(tx, ty);
+    if (def.on === 'shallow') return this.tileAt(tx, ty).type === 'water';   // stepping stones: not in the deep
     return def.on === 'water' ? water : !water;
   }
 

@@ -28,7 +28,7 @@ G.Soundscape = class {
   }
 
   ground(st, type) {
-    if (st && st.type === 'bridge') return 'water';
+    if (st && G.STRUCTURES[st.type].bridge) return 'water';   // bridges and stepping stones
     return G.SEASON_NOW.tiles[type].snow > 0.5 ? 'snow' : type;   // snowy land rings like glass
   }
 

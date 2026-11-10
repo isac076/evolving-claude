@@ -45,10 +45,10 @@ as the world does.
 - [x] Workbench: more recipes unlock when standing near it (Night 4)
 - [x] New materials: fibre (reeds) and crystal (highlands) (Night 4)
 - [x] Seeds (from blooms) and acorns (from trees) (Night 8)
-- [ ] More materials: clay (riverbanks)
+- [x] More materials: clay (riverbanks) (Night 18 — soft clay banks where shallow water meets a beach or meadow; a pick digs more)
 - [x] Gardens: plant seeds, water them, watch them grow (Night 8 — sprouts, saplings, watering can, rain waters gardens, rare moonflowers)
 - [x] Decorations: fences that join up, flower beds, benches (Night 4)
-- [ ] More decorations: banners, signposts (with a name you type), stepping stones
+- [x] More decorations: banners, signposts (with a name you type), stepping stones (Night 18 — signpost names float over the post, show on the big map and the journal, and name nearby lights on the lantern roads; banners stream in the wind and change colour when clicked; stepping stones cross the shallows; a clay planter at the workbench)
 - [x] Bigger lanterns / beacons with larger restore radius (Night 4 — Crystal Beacon)
 - [ ] Storage chest
 
@@ -120,6 +120,9 @@ What a play-through (all 44 screenshots) taught us:
 - The phone layout has no virtual joystick yet; tap-to-walk works but a joystick would feel much better.
 - Night 16 split `walking()` / `flying()` out of main's `update()`; main.js is ~430 lines and minimap.js ~410 (the roads overlay) — split the big-map overlays into their own file if either grows.
 - Watch the travel hint toast (`G.Travel.hint`) doesn't talk over another toast; play a flight on a phone (tap a light on the map).
+- Night 18: the sign-naming panel is the first text box in the game — `G.Input.typing(e)` keeps typed letters from walking the
+  spirit, and the panel pauses the world. Check it on a phone (the on-screen keyboard pushes the page up). Goal chapter
+  "Riverbanks & waymarks" sits after the hollows; `G.Signs.clayHint` scans up to 45 tiles out (memoised per 6 steps walked).
 - Night 17: a screen full of glowcaps at night costs ~20% more to draw (each glowcap is a night glow). If phones struggle, cap
   `nightGlows` per frame or draw glowcap halos into a cached sprite. The hollow goal chapter sits before "Echoes of the old world" —
   check it reads well in order for a brand-new player.
@@ -127,6 +130,12 @@ What a play-through (all 44 screenshots) taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Clay: a kiln (fire clay into bricks/tiles) → brick paths, tiled cottage roofs, a clay oven for the bakery idea
+- Clay: friends who love clay (a potter kind) and a wish "bring me 4 clay"; pots that friends put flowers in by their doors
+- Signposts: friends could read the name ("Good morning from Otter Ford!"); a village's well could take a sign's name instead of its own
+- Signposts: an arrow sign that points at another named place ("→ Mossy Bend, 40 steps")
+- Banners: festival bunting reuses banner colours; a banner's flag could show a little emblem you pick (leaf, star, moon)
+- Stepping stones: frogs sit on them in the rain; fish swim between them; in deep winter the shallows freeze around them
 - Hollows: a "mushroom keeper" friend kind found only in hollows (likes glowcaps, plays a music-box part in the band)
 - Hollows: glowcap rings (fairy rings) — step into one at night and the spores swirl up in a little dance; a ring as a garden decoration
 - Hollows: friends could mention "a place where the mushrooms glow" in their hints; the big map could show a faint violet shimmer over unexplored hollows

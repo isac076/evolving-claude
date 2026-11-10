@@ -179,6 +179,19 @@ G.GOALS = [
     progress: s => ((s.stats.grown || {}).glowcap || 0) + ((s.stats.grown || {}).bigshroom || 0),
     hint: 'Plant a Spore patch (Craft → Garden) in a hollow or a forest where the colour is back.', reward: { crystal: 2, spore: 2 } },
 
+  // ---- Riverbanks & waymarks (Night 18) ----
+  { id: 'clay', chapter: 'Riverbanks & waymarks', text: 'Dig clay from a riverbank', target: 3,
+    progress: s => s.stats.got.clay || 0, hint: s => G.Signs.clayHint(s) },
+  { id: 'stepstones', chapter: 'Riverbanks & waymarks', text: 'Lay stepping stones in shallow water', target: 1,
+    progress: s => s.world.count('stepstones'),
+    hint: 'Craft them (C) from clay and stone, then place them in the light-blue shallows.', reward: { clay: 2 } },
+  { id: 'signpost', chapter: 'Riverbanks & waymarks', text: 'Name a place with a signpost', target: 1,
+    progress: s => s.world.count('signpost'),
+    hint: 'Craft a Signpost (C) and put it up somewhere you love. Then write its name.', reward: { petal: 2, fibre: 2 } },
+  { id: 'banner', chapter: 'Riverbanks & waymarks', text: 'Raise a banner', target: 1,
+    progress: s => s.world.count('banner'),
+    hint: 'Banners are made from wood, fibre and a glow petal. Click one to change its colour.', reward: { seed: 2 } },
+
   // ---- Echoes of the old world (Night 11) ----
   { id: 'ruinfind', chapter: 'Echoes of the old world', text: 'Find the ruins of the old world', target: 1,
     progress: s => s.stats.ruinsFound || 0,

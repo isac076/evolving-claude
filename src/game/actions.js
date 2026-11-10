@@ -5,7 +5,7 @@
 window.G = window.G || {};
 
 G.Actions = class {
-  // h = { state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, floater(x, y, text, color), panAt(x) }
+  // h = { state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, signs, floater(x, y, text, color), panAt(x) }
   constructor(h) {
     Object.assign(this, h);
     this.REACH = 2.2 * G.TILE;       // how far the player can gather
@@ -33,6 +33,7 @@ G.Actions = class {
     const why = G.Crafting.gatherBlocker(state, obj);
     if (why) { G.Sound.play('deny'); this.ui.toast(why, 3); return true; }
     const drops = G.Crafting.dropsFor(state, obj);
+    const firstSay = G.Actions.FIRST_GATHER[obj] && !state.stats.got[Object.keys(drops)[0]] && G.Actions.FIRST_GATHER[obj];
     const o = w.harvest(tx, ty);
     G.Sound.play(G.OBJECTS[o].sound, { pan: this.panAt((tx + 0.5) * G.TILE) });
     let k = 0;
@@ -44,6 +45,7 @@ G.Actions = class {
     const c = { bloom: 'rgba(255,220,140,A)', tree: 'rgba(150,220,120,A)', reeds: 'rgba(210,225,130,A)', crystal: 'rgba(160,235,255,A)' }[o] || 'rgba(200,205,220,A)';
     this.renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, c);
     state.stats.gathered++;
+    if (firstSay) this.ui.toast(firstSay, 6.5);
     this.ui.refresh();
     return true;
   }
@@ -113,6 +115,8 @@ G.Actions = class {
       let plant = null, pd = REACH;
       for (const st of this.garden.plants(state.world)) { const d = this.far(st.tx, st.ty); if (d <= pd) { pd = d; plant = st; } }
       if (plant) { this.tendPlant(plant); return; }
+      const sign = this.signs && this.signs.near(p.tx, p.ty, 2);   // read a signpost (Night 18)
+      if (sign && this.far(sign.tx, sign.ty) <= REACH) { this.signs.read(sign); return; }
       if (this.travel && this.travel.canTravel()) { this.map.toggle(true); this.ui.toggleCraft(false); return; }   // beside a light: the lantern roads
       G.Sound.play('deny'); this.ui.toast('Nothing to gather here — walk up to a tree, rock or bloom.', 2.5);
     }
@@ -136,6 +140,8 @@ G.Actions = class {
     const st = close && state.world.structureAt(tx, ty);
     if (st && G.STRUCTURES[st.type].grow) { this.tendPlant(st); return; }
     if (st && G.STRUCTURES[st.type].ember && st.type !== 'emberlamp') { this.shrines.about(st); return; }
+    if (st && G.STRUCTURES[st.type].sign) { this.signs.open(st); return; }        // write a new name (Night 18)
+    if (st && G.STRUCTURES[st.type].banner) { this.signs.recolour(st); return; }  // the next colour
     if (st && G.STRUCTURES[st.type].travel && this.travel.canTravel()) { this.map.toggle(true); this.ui.toggleCraft(false); return; }   // Night 16
     p.moveTarget = { x: wx, y: wy };
   }
@@ -195,8 +201,10 @@ G.Actions = class {
     state.stats.built++;
     G.Sound.play(def.sound, { pan: this.panAt((tx + 0.5) * G.TILE) });
     this.renderer.burst((tx + 0.5) * G.TILE, (ty + 0.5) * G.TILE, 'rgba(255,230,160,A)', 20);
-    const say = G.Actions.BUILT_SAYS[r.builds];
+    const say = G.Actions.BUILT_SAYS[r.builds], first = G.Actions.FIRST_BUILT[r.builds];
     if (say) this.ui.toast(say[0], say[1]);
+    else if (first && state.world.count(r.builds) === 1) this.ui.toast(first, 6);
+    if (def.sign && this.signs) this.signs.placed(state.world.structureAt(tx, ty));
     if (def.grow) this.planted(tx, ty);
     this.ui.refresh();
     if (!state.canAfford(r)) { state.buildRecipe = null; state.placing = null; }
@@ -210,6 +218,10 @@ G.Actions = class {
     else if (state.stats.planted === 1) this.ui.toast('Planted! Watch it grow — rain or a watering can (made at a workbench) speeds it up.', 6);
   }
 };
+
+// said the first time you gather / build these (Night 18)
+G.Actions.FIRST_GATHER = { claybank: G.RIVER_SAYS.clayFirst };
+G.Actions.FIRST_BUILT = { stepstones: G.RIVER_SAYS.stepFirst, banner: G.RIVER_SAYS.bannerFirst };
 
 // a word when you build something special: [text, seconds]
 G.Actions.BUILT_SAYS = {

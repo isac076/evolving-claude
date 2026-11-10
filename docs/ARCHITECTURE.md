@@ -26,6 +26,7 @@ src/data/village.js   G.VILLAGE settings, G.VILLAGE_STAGES (well → stall → r
 src/data/shrines.js   G.SHRINE settings, G.SHRINES (four shrines: hue, bowl offerings, gift, words), G.SHRINE_STAMP, shrine objects/structures, the Ember lantern recipe, G.SHRINE_SAYS
 src/data/travel.js    G.TRAVEL settings (reach, flight time, height, landing spots), G.TRAVEL_STOPS (which structures are stops + map names; sets `travel: true` on them), G.TRAVEL_PLACES, G.TRAVEL_SAYS
 src/data/hollow.js    the Glowcap Hollows (Night 17): G.HOLLOW settings, the `mushwood` ground, spore item, giant mushroom + glowcap objects, Mushroom lamp + Spore patch, the glow snail, music place, road stop, G.HOLLOW_NAMES, G.HOLLOW_SAYS (adds to the other data tables)
+src/data/riverbank.js riverbanks & waymarks (Night 18): G.RIVER settings, clay item + `claybank` object, stepping stones / signpost / banner / clay planter + recipes, G.BANNER_HUES, G.SIGN_WORDS (suggested names), G.RIVER_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -46,6 +47,7 @@ src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, wakin
 src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
 src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
+src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -64,6 +66,7 @@ src/render/travel_fx.js G.TravelFX — a flight: road of light ahead, the mote a
 src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
 src/render/hollow_sprites.js G.drawHollowGround (moss, tiny toadstools), giant mushroom, glowcaps, Mushroom lamp, Spore patch, their regrow sprites, the glow snail
 src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and from Mushroom lamps, snail halos; drawn after the night layer
+src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost, banner (streams with G.windNow), clay planter, G.drawSignTags (name tags over nearby signposts)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -74,6 +77,7 @@ src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatur
 src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_riverbank.py  Night 18 chapter test (clay, stepping stones, naming a sign by typing, banner click, road names)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
 tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py, tools/smoke_travel.py, tools/smoke_hollow.py  chapter tests, called at the end of smoke_test.py
 ```
@@ -306,3 +310,15 @@ That's it — the crafting menu, placing, saving and lighting all pick it up.
   through the Fading. Stats: `stats.hollow = { found, at: { placeId: [tx, ty, name] } }` (optional, no version bump).
   To add a biome: a ground in `G.TILES` (+ season `ground` shifts, `G.SNOW.cover`, `G.MUSIC_PLACES`, `G.TRAVEL_PLACES`),
   an overlay rule in `groundType`, objects in `tileAt`, sprites, and its creatures.
+- **Riverbanks & waymarks** (Night 18; data in src/data/riverbank.js, logic in G.Signs = `state.signs`): in `tileAt`, a sand or
+  grass tile whose object roll falls in `G.RIVER.clayOn[type]` becomes a `claybank` if `world.besideShallows()` (a 'water' — not
+  'deep' — neighbour, ground only). Structures may use `on: 'shallow'` (only 'water' tiles; `canBuild`) — stepping stones are
+  `bridge: true` floors, so you walk on them and the music/soundscape treat them as water. `sign: true` structures carry a name in
+  `stats.signs["tx,ty"]` (no version bump); building one (Actions.updateBuild) calls `signs.placed()` which stores a suggested name
+  (`suggest()` from `G.SIGN_WORDS` by ground + hash) and opens the naming panel (`#signpanel`). While it is open the frame is paused
+  and `G.Input` ignores keys typed into text inputs (`G.Input.typing`). Clicking a signpost reopens it; E beside one reads it.
+  `signs.list()` (refreshed every 0.5s) feeds `G.drawSignTags` (after drawFolk, above the night), the big map labels
+  (`drawMap`, called from Minimap after villages) and the journal Places page. `Travel.nameOf` uses `signs.near()` (within
+  `G.RIVER.signNear` tiles) before the village name. `banner: true` structures: a click cycles `stats.banners[key]` through
+  `G.BANNER_HUES`. First-time words: `G.Actions.FIRST_GATHER` (by object) and `G.Actions.FIRST_BUILT` (by structure, when the
+  world holds exactly one). Goal chapter 'Riverbanks & waymarks' (after the hollows).

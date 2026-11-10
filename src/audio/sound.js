@@ -424,3 +424,25 @@ G.SFX.hollow = function (S) {   // you come upon a hollow: a low, round hum and 
 G.STEP_SOUNDS.moss = function (S, o) {   // soft, springy moss
   S.noise({ filter: 'lowpass', freq: o.alt ? 520 : 600, dur: 0.11, attack: 0.02, gain: 0.13, rev: 0.06 });
 };
+
+// ---- Riverbanks & waymarks (Night 18) ----
+G.SFX.clay = function (S, o) {   // a soft, wet squelch and a low pat
+  S.noise({ filter: 'lowpass', freq: 700, freqTo: 250, attack: 0.01, dur: 0.18, gain: 0.16, pan: o.pan, rev: 0.08 });
+  S.tone(G.rand(120, 140), { type: 'sine', glide: 70, dur: 0.16, gain: 0.16, t: 0.03, pan: o.pan, rev: 0.05 });
+  S.noise({ filter: 'bandpass', freq: 1500, q: 4, dur: 0.05, gain: 0.05, t: 0.12, pan: o.pan });
+};
+G.SFX.stepstones = function (S, o) {   // stones settle into the shallows: a clunk and a plop
+  S.tone(140, { type: 'triangle', glide: 90, dur: 0.12, gain: 0.22, pan: o.pan, rev: 0.1 });
+  S.tone(G.rand(520, 600), { type: 'sine', glide: 1400, dur: 0.09, gain: 0.08, t: 0.1, pan: o.pan, rev: 0.4 });
+  S.noise({ filter: 'bandpass', freq: 1800, q: 1.5, dur: 0.12, gain: 0.08, t: 0.1, pan: o.pan, rev: 0.3 });
+};
+G.SFX.banner = function (S, o) {   // cloth snapping in the wind and a bright little chime
+  S.noise({ filter: 'bandpass', freq: 1200, q: 1.2, attack: 0.01, dur: 0.07, gain: 0.12, pan: o.pan });
+  S.noise({ filter: 'bandpass', freq: 1500, q: 1.2, attack: 0.01, dur: 0.06, gain: 0.09, t: 0.09, pan: o.pan });
+  S.bell(G.note(4, 5), { gain: 0.05, dur: 1, t: 0.12, pan: o.pan, rev: 0.5 });
+};
+G.SFX.sign = function (S, o) {   // a name is carved: tap-tap of a knife on wood and a warm two-note bell
+  [0, 0.07, 0.14, 0.26].forEach((t, k) => S.noise({ filter: 'bandpass', freq: 2400 - k * 150, q: 3, dur: 0.03, gain: 0.1, t, pan: o.pan }));
+  S.bell(G.note(2, 4), { gain: 0.07, dur: 1.6, t: 0.34, pan: o.pan, rev: 0.6 });
+  S.bell(G.note(6, 4), { gain: 0.06, dur: 1.8, t: 0.46, pan: o.pan, rev: 0.6 });
+};

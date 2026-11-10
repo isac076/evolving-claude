@@ -248,6 +248,7 @@ window.G = window.G || {};
     shrines.kindling = null; shrines.sparks = [];
     travel.trip = null; travel.landed = null; travel.trail = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
+    signs.close(); signs.refreshList();
     state.stats.met = state.stats.met || {};
     state.world.time = state.time;
     state.cam.x = state.player.x; state.cam.y = state.player.y;
@@ -264,7 +265,10 @@ window.G = window.G || {};
   // the lantern roads: fly from light to light on the big map (Night 16)
   const travel = new G.Travel(state, { ui, map, renderer, folk, floater: addFloater, panAt });
   state.travel = travel; map.travel = travel;
-  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, floater: addFloater, panAt });
+  // signposts with names you write, and banners (Night 18)
+  const signs = new G.Signs(state, { ui, input, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: addFloater, panAt });
+  state.signs = signs;
+  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, signs, floater: addFloater, panAt });
   const craftItem = r => act.craftItem(r);
 
   // ---------- loop ----------
@@ -294,6 +298,7 @@ window.G = window.G || {};
     ruins.update(dt);
     shrines.update(dt);
     hollows.update(dt);
+    signs.update(dt);
   }
 
   // on foot: keys, clicks, walking and the camera
@@ -373,17 +378,19 @@ window.G = window.G || {};
 
   let prev = performance.now(), frameDt = 0;
   function frame(now) {
-    const paused = settings.isOpen || journal.paused;
+    const paused = settings.isOpen || journal.paused || signs.isOpen;   // writing a sign's name pauses too
     const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
     frameDt = dt;
     if (settings.isOpen) { if (input.hit('escape')) settings.toggle(false); }
     else if (journal.paused) journal.keys(input);
+    else if (signs.isOpen) { if (input.hit('escape')) signs.close(); else if (input.hit('enter')) signs.confirm(); }
     G.Sound.duck(paused);
     if (state.world) { G.Seasons.update(state, !state.running); state.weather.update(dt, state); }
     if (state.running) {
       if (!paused) update(dt);
       renderer.render(state, dt);
       drawFolk();
+      G.drawSignTags(renderer.ctx, signs.list(), state.player, Math.round(state.cam.x - renderer.W / 2), Math.round(state.cam.y - renderer.H / 2), renderer.W, renderer.H, state.time);
       drawFloaters();
     } else {
       renderer.render(state, dt);   // title screen: world drifts behind the menu

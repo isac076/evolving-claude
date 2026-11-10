@@ -54,7 +54,7 @@ G.Crafting = {
     const def = G.STRUCTURES[st.type];
     if (def.fixed) return def.fixedSay || `The ${def.name} can't be moved — it holds the world together.`;
     const p = state.player;
-    if (def.bridge && p.tx === st.tx && p.ty === st.ty) return 'Step off the bridge first.';
+    if (def.bridge && p.tx === st.tx && p.ty === st.ty) return `Step off the ${def.name.toLowerCase()} first.`;
     return null;
   },
 
