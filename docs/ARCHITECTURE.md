@@ -12,6 +12,7 @@ src/core/input.js     keyboard / mouse / touch (G.Input)
 src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noise), G.SFX effects, G.STEP_SOUNDS footsteps
 src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/audio/instruments.js G.INSTRUMENTS — the music's instruments (flute, marimba, kalimba, glass, harp, music box, bass, voice, pipe…), G.musicVoice
+src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lantern's chord (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
@@ -27,6 +28,7 @@ src/data/shrines.js   G.SHRINE settings, G.SHRINES (four shrines: hue, bowl offe
 src/data/travel.js    G.TRAVEL settings (reach, flight time, height, landing spots), G.TRAVEL_STOPS (which structures are stops + map names; sets `travel: true` on them), G.TRAVEL_PLACES, G.TRAVEL_SAYS
 src/data/hollow.js    the Glowcap Hollows (Night 17): G.HOLLOW settings, the `mushwood` ground, spore item, giant mushroom + glowcap objects, Mushroom lamp + Spore patch, the glow snail, music place, road stop, G.HOLLOW_NAMES, G.HOLLOW_SAYS (adds to the other data tables)
 src/data/riverbank.js riverbanks & waymarks (Night 18): G.RIVER settings, clay item + `claybank` object, stepping stones / signpost / banner / clay planter + recipes, G.BANNER_HUES, G.SIGN_WORDS (suggested names), G.RIVER_SAYS
+src/data/hush.js      the hush of night (Night 19): G.HUSH settings, starlight + Starlit charm items, the Moon lantern + recipes, the goal chapter (spliced in before the ruins), G.HUSH_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -41,7 +43,8 @@ src/world/villager_talk.js hello() and talk() added to G.Villagers.prototype —
 src/world/garden.js   G.Garden — grows planted structures, watering, turns them into natural objects (world.grown)
 src/world/wishes.js   G.Wishes — friends' wishes (choose, progress, grant, hearts, unlocks) and who lives in which cottage
 src/world/village.js  G.Village — groups cottages into villages, raises their buildings, dusk at the well, festivals, sky lanterns, market swaps
-src/game/player.js    G.Player — movement and collision
+src/world/hush.js     G.Hush (`state.hush`) — hushlings: spawning in the grey at night, drift / cling / leave, sipping `player.glow`, easing in light, shine(), starlight motes, holes() for the night layer
+src/game/player.js    G.Player — movement and collision (and `glow`, the spirit's light)
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
@@ -67,6 +70,7 @@ src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along 
 src/render/hollow_sprites.js G.drawHollowGround (moss, tiny toadstools), giant mushroom, glowcaps, Mushroom lamp, Spore patch, their regrow sprites, the glow snail
 src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and from Mushroom lamps, snail halos; drawn after the night layer
 src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost, banner (streams with G.windNow), clay planter, G.drawSignTags (name tags over nearby signposts)
+src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -77,6 +81,7 @@ src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatur
 src/ui/market.js      G.Market — the market stall's swap panel
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_hush.py   Night 19 chapter test (hushlings come, cling, Shine eases, lantern light eases, Moon lantern calm, never goes out, gone by day)
 tools/smoke_riverbank.py  Night 18 chapter test (clay, stepping stones, naming a sign by typing, banner click, road names)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
 tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/smoke_music.py, tools/smoke_wishes.py, tools/smoke_ruins.py, tools/smoke_seasons.py, tools/smoke_village.py, tools/smoke_review.py, tools/smoke_shrines.py, tools/smoke_travel.py, tools/smoke_hollow.py  chapter tests, called at the end of smoke_test.py
@@ -322,3 +327,15 @@ That's it — the crafting menu, placing, saving and lighting all pick it up.
   `G.RIVER.signNear` tiles) before the village name. `banner: true` structures: a click cycles `stats.banners[key]` through
   `G.BANNER_HUES`. First-time words: `G.Actions.FIRST_GATHER` (by object) and `G.Actions.FIRST_BUILT` (by structure, when the
   world holds exactly one). Goal chapter 'Riverbanks & waymarks' (after the hollows).
+- **The hush of night** (Night 19; data in src/data/hush.js, logic in G.Hush = `state.hush`): `player.glow` (1 … `G.HUSH.minGlow`, not
+  saved — every load starts full) is the spirit's light. The renderer scales the spirit's night hole, its warm glow, its own small patch
+  of colour and its sprite by it. Every `spawnEvery` s, when it is dark (`G.HUSH.dark`), you stand in grey land, `litCount() >= minLit`,
+  and no Moon lantern is near, a hushling rises `dist` tiles away out of grey land (cap shrinks as the land gets colour). Modes:
+  `drift` (toward you; it will not move into land warmer than `warm` on its own, so they hover at a light's edge), `cling` (orbits you,
+  sips `drain`/s each, max `clingMax`), `leave` (day, a flight, too far, or you ran low — fades, then removed). `warmth()` = restoration
+  there, raised to 0.9 inside a structure's `calm` radius (Moon lantern). Above `easeAt` a hushling's `e` grows; at 1 `ease()` turns it
+  into a starlight mote that flies to you (+1 starlight). The first ease teaches `moonlantern`, the third `charm` (via `stats.unlocked`).
+  `shine()` (F / the Shine touch button, `state.wantShine`) costs glow, has a cooldown, adds `e` and pushes them off. Glow refills
+  by a light, by day, slowly in the grey. At `minGlow` they are full (`sated()`): they let go and none come for `rest` s. `holes()`
+  adds Shine rings / easing hushlings / motes to the night layer (`nightGlows` entries may carry `a`). Drawn by G.HushFX after the spores.
+  Stats: `stats.hush = {met, eased, shines, dimmed}` (no version bump). The journal's Creatures page has a Hushling card (not counted as wildlife).

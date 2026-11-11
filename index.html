@@ -30,6 +30,7 @@
   </div>
   <div id="touch-buttons">
     <button id="btn-gather">Gather</button>
+    <button id="btn-shine">Shine</button>
     <button id="btn-craft">Craft</button>
   </div>
 </div>
@@ -83,6 +84,7 @@
     <div class="keys">
       <kbd>WASD</kbd><span>move — or click / tap where to go</span>
       <kbd>E</kbd><span>gather, talk to a friend, use a well or market stall</span>
+      <kbd>F</kbd><span>Shine — a ring of light that eases hushlings at night</span>
       <kbd>C</kbd><span>craft lanterns, paths and more</span>
       <kbd>X</kbd><span>pick a building back up</span>
       <kbd>Click</kbd><span>a signpost to name the place · a banner to change its colour</span>
@@ -94,11 +96,12 @@
     <div class="keys touch">
       <kbd>Tap</kbd><span>walk there — or tap a tree, rock or friend</span>
       <kbd>Gather</kbd><span>gather what's close, or talk</span>
+      <kbd>Shine</kbd><span>a ring of light that eases hushlings at night</span>
       <kbd>Craft</kbd><span>lanterns, paths, and picking things up</span>
       <kbd>Map</kbd><span>tap the round map — beside a lantern, tap another light to fly there</span>
       <kbd>Book</kbd><span>tap the little book for your journal</span>
     </div>
-    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow. Clay lies where shallow water meets the shore — it makes stepping stones and signposts that name your places.</p>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow. Clay lies where shallow water meets the shore — it makes stepping stones and signposts that name your places. On dark nights little hushlings drift out of the grey and sip your light — lead them into a lantern's glow, or Shine (F), and they turn into starlight.</p>
 
     <div class="settings-buttons">
       <button id="set-resume" class="main">Keep playing</button>
@@ -143,6 +146,7 @@
 <script src="src/audio/ambience.js"></script>
 <script src="src/audio/instruments.js"></script>
 <script src="src/audio/music.js"></script>
+<script src="src/audio/hush_sfx.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
@@ -158,6 +162,7 @@
 <script src="src/data/travel.js"></script>
 <script src="src/data/hollow.js"></script>
 <script src="src/data/riverbank.js"></script>
+<script src="src/data/hush.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/shrines.js"></script>
@@ -171,6 +176,7 @@
 <script src="src/world/garden.js"></script>
 <script src="src/world/wishes.js"></script>
 <script src="src/world/village.js"></script>
+<script src="src/world/hush.js"></script>
 <script src="src/game/player.js"></script>
 <script src="src/game/save.js"></script>
 <script src="src/game/crafting.js"></script>
@@ -196,6 +202,7 @@
 <script src="src/render/hollow_sprites.js"></script>
 <script src="src/render/spore_fx.js"></script>
 <script src="src/render/riverbank_sprites.js"></script>
+<script src="src/render/hush_sprites.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>

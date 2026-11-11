@@ -8,6 +8,7 @@ G.UI = class {
     this.toastTimer = 0;
     this.$('btn-craft').onclick = () => this.toggleCraft();
     this.$('btn-gather').onclick = () => { state.wantGather = true; };
+    this.$('btn-shine').onclick = () => { state.wantShine = true; };
     this.$('craft-close').onclick = () => this.toggleCraft(false);
     this.$('btn-sound').onclick = () => this.toggleSound();
     this.$('btn-pickup').onclick = () => { state.setRemoving(); this.toggleCraft(false); };
@@ -175,6 +176,6 @@ G.UI = class {
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
       : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
-      : 'WASD / arrows or click to move · E gather / talk / water · C craft · X pick up · M map · Esc rest';
+      : 'WASD / arrows or click to move · E gather / talk / water · F shine · C craft · X pick up · M map · Esc rest';
   }
 };

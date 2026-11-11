@@ -54,13 +54,14 @@ G.Renderer = class {
     });
 
     // restoration per visible tile (computed once per frame)
+    const warm = 0.3 * (0.4 + 0.6 * (player.glow === undefined ? 1 : player.glow));
     const cols = tx1 - tx0 + 1;
     const fmap = new Float32Array(cols * (ty1 - ty0 + 1));
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const px = (tx + 0.5) * T, py = (ty + 0.5) * T;
       let f = world.restoreAt(px, py, lights);
-      const dp = Math.hypot(px - player.x, py - player.y) / T;      // the spirit's own small warmth
-      f = Math.max(f, 0.3 * G.clamp(1 - (dp - 1.5) / 2, 0, 1));
+      const dp = Math.hypot(px - player.x, py - player.y) / T;      // the spirit's own small warmth (smaller when hushlings sip it)
+      f = Math.max(f, warm * G.clamp(1 - (dp - 1.5) / 2, 0, 1));
       fmap[(ty - ty0) * cols + (tx - tx0)] = f;
     }
     const fAt = (tx, ty) => fmap[(ty - ty0) * cols + (tx - tx0)];
@@ -70,7 +71,7 @@ G.Renderer = class {
       const px = tx * T, py = ty * T;
       let f = world.restoreAt(px, py, lights);
       const dp = Math.hypot(px - player.x, py - player.y) / T;
-      f = Math.max(f, 0.3 * G.clamp(1 - (dp - 1.5) / 2, 0, 1));
+      f = Math.max(f, warm * G.clamp(1 - (dp - 1.5) / 2, 0, 1));
       cmap[(ty - ty0) * ccols + (tx - tx0)] = f;
     }
     const fc = [0, 0, 0, 0];
@@ -145,6 +146,7 @@ G.Renderer = class {
       if (player.ty === ty && !player.flying) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
     if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
+    if (state.hush) state.hush.holes(nightGlows, camX, camY);   // a Shine, easing hushlings, starlight (Night 19)
     G.drawVillageDecor(ctx, state.village, world, camX, camY, W, H, time, nightGlows);   // bunting over the village green (Night 13)
 
     if (life) life.drawAir(ctx, camX, camY, time);
@@ -185,6 +187,7 @@ G.Renderer = class {
 
     this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
     G.SporeFX.draw(ctx, state, camX, camY, W, H, dt, time, dark);   // glowing spores over the hollows (Night 17)
+    G.HushFX.draw(ctx, state, camX, camY, W, H, time, dark);   // hushlings, Shines and starlight (Night 19)
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
     G.TravelFX.draw(ctx, state, camX, camY, W, H, time, dark);   // flying the lantern roads (Night 16)
 
@@ -192,6 +195,12 @@ G.Renderer = class {
     const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
     vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(5,5,20,.45)');
     ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  }
+
+  // a few fireflies released at a spot (a hushling turned to light, Night 19)
+  fireflies(x, y, n) {
+    for (let i = 0; i < n; i++) this.particles.push({ x: x + G.rand(-8, 8), y: y + G.rand(-8, 8), vx: G.rand(-14, 14), vy: G.rand(-20, -4),
+      life: 1, decay: G.rand(0.12, 0.25), color: 'rgba(255,240,150,A)', size: G.rand(1.2, 2.2), grav: 0, firefly: true, ph: Math.random() * 6 });
   }
 
   updateParticles(dt, dark, camX, camY, lights, world) {
@@ -232,11 +241,12 @@ G.Renderer = class {
       g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(0.55, `rgba(0,0,0,${a * 0.6})`); g.addColorStop(1, 'rgba(0,0,0,0)');
       l.fillStyle = g; l.beginPath(); l.arc(x, y, r, 0, 6.2832); l.fill();
     };
-    const pr = 120 + Math.sin(time * 3) * 3;
+    const pg = player.glow === undefined ? 1 : player.glow;   // hushlings sip the spirit's light (Night 19)
+    const pr = (120 + Math.sin(time * 3) * 3) * (0.4 + 0.6 * pg);
     const pz = player.z || 0;   // up in the sky on the lantern roads (Night 16)
     hole(player.x - camX, player.y - camY - 8 - pz, pr, 0.95);
     for (const L of lights) if (L.light) hole(L.x - camX, L.y - camY - 14, L.light);
-    for (const g of nightGlows) hole(g.x, g.y, g.r, 0.8);
+    for (const g of nightGlows) hole(g.x, g.y, g.r, g.a === undefined ? 0.8 : g.a);
     ctx.drawImage(this.light, 0, 0, this.light.width / this.ls, this.light.height / this.ls);
 
     // warm glow on top (lights bloom wider in the mist)
@@ -247,13 +257,13 @@ G.Renderer = class {
       g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     };
-    glow(player.x - camX, player.y - camY - 8 - pz, 50 * fb, `rgba(255,210,140,${0.25 * dark})`);
+    glow(player.x - camX, player.y - camY - 8 - pz, 50 * fb * (0.5 + 0.5 * pg), `rgba(255,210,140,${0.25 * dark})`);
     for (const L of lights) if (L.light) {
       if (L.hue !== undefined) glow(L.x - camX, L.y - camY - 24, L.light * 0.4 * fb, `hsla(${L.hue},100%,62%,${0.34 * dark})`);
       else if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);
       else glow(L.x - camX, L.y - camY - 18, L.light * 0.35 * fb, `rgba(255,190,110,${0.3 * dark})`);
     }
-    for (const g of nightGlows) glow(g.x, g.y, 18, `hsla(${g.hue},90%,65%,${0.5 * dark})`);
+    for (const g of nightGlows) if (g.a === undefined || g.a > 0.1) glow(g.x, g.y, 18, `hsla(${g.hue},90%,65%,${0.5 * dark})`);
     ctx.globalCompositeOperation = 'source-over';
   }
 };

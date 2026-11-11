@@ -276,12 +276,12 @@ G.STRUCTURE_SPRITES = {
 
 // ---------- player ----------
 G.drawPlayer = function (ctx, p, sx, sy, t) {
-  const b = Math.sin(p.bob) * 2.5;
+  const b = Math.sin(p.bob) * 2.5, gr = 13 * (0.7 + 0.3 * (p.glow === undefined ? 1 : p.glow));   // smaller while hushlings sip its glow
   shadow(ctx, sx, sy + 8, 8, 3, 0.3);
   // soft body
-  const g = ctx.createRadialGradient(sx, sy - 8 + b, 0, sx, sy - 8 + b, 13);
+  const g = ctx.createRadialGradient(sx, sy - 8 + b, 0, sx, sy - 8 + b, gr);
   g.addColorStop(0, 'rgba(255,250,235,1)'); g.addColorStop(0.5, 'rgba(255,226,160,.9)'); g.addColorStop(1, 'rgba(255,200,120,0)');
-  ctx.fillStyle = g; circle(ctx, sx, sy - 8 + b, 13);
+  ctx.fillStyle = g; circle(ctx, sx, sy - 8 + b, gr);
   // eyes
   ctx.fillStyle = '#3b2c4a';
   circle(ctx, sx - 2.5 + p.facing * 1.5, sy - 9 + b, 1.3);

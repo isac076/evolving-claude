@@ -10,6 +10,7 @@ G.Player = class {
     this.facing = 1;
     this.moveTarget = null;
     this.bob = 0;
+    this.glow = 1;         // the spirit's light: hushlings sip it at night (Night 19)
   }
 
   update(dt, input, world) {

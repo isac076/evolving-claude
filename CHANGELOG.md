@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 19 — 2026-11-11 — The hush of night
+On dark nights, out in the grey far from your lanterns, little hushlings rise out of the dark — soft shadows with pale eyes,
+left over from the Fading. They drift after you, hold on, and sip your glow (your light grows small, but never goes out). They
+are never fought: lead them back into a lantern's light, or press F to Shine, and they turn into starlight. Three starlight make
+a Moon lantern that keeps them far away, and a workbench can weave a Starlit charm that protects your light.
+
 ## Night 18 — 2026-11-10 — Riverbanks & waymarks
 Soft reddish clay now lies where shallow water meets a beach or meadow — dig it with E (the goal tracker points the way).
 Clay makes stepping stones you can lay across the shallows and hop over, and signposts: put one up and type a name for

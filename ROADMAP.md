@@ -73,7 +73,7 @@ as the world does.
 ## Chapter 6 — The mystery of the Fading
 - [x] Lore fragments found in ruins tell what happened (Night 11 — 12 memories in `G.LORE`, told in order; they set up the Great Sun, the Heart and the Ember Shrines)
 - [x] Ember Shrines: big goals spread across the world that each restore a huge area (Night 15 — four shrines further and further out; four ember bowls each want an offering; the hearth kindles and a wave of colour rolls out 26 tiles; sensed after 3 memories, an ember arrow points the way; the first one teaches the Ember lantern)
-- [ ] Gentle shadow creatures at night that dim your light — repelled by light, never fought
+- [x] Gentle shadow creatures at night that dim your light — repelled by light, never fought (Night 19 — hushlings: on dark nights out in the grey they rise from the dark, hold on and sip your glow (your light shrinks, never goes out); they hover at the edge of lantern light; lead them into a light or Shine (F) and they turn into starlight → the Moon lantern (keeps them 10 steps away) and the Starlit charm)
 - [ ] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing)
 
 ## Chapter 7 — Music & presentation
@@ -115,6 +115,9 @@ What a play-through (all 44 screenshots) taught us:
 - Polish: shores now have a soft, breathing line of foam and a faint wave that rolls in and out, following the curved coast.
 
 ## Notes for the next review (Night 21)
+- Night 19: hushlings (`G.Hush`, `state.hush`). Play a whole night out in the grey with 2+ lanterns: is it too busy? Knobs are all in
+  `G.HUSH` (cap, speed, drain, rest after they're full). The glow ring around the spirit only shows while glow < 1. Check the Shine
+  button on a phone (touch-buttons now has three). `stats.hush.dimmed` counts how often a player ran dry — a good balance signal.
 - `src/world/creatures.js` (~400) and `src/audio/sound.js` (~380) are the next biggest files — fine for now, watch them.
 - Chunk caching for the ground is still the big performance win left (Chapter 8).
 - The phone layout has no virtual joystick yet; tap-to-walk works but a joystick would feel much better.
@@ -130,6 +133,11 @@ What a play-through (all 44 screenshots) taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Hushlings: a lantern-keeper friend who sits up at night and Shines for the village; friends hum to calm hushlings near their homes
+- Hushlings: eased hushlings could become a new kind of firefly that follows you for a night; a "starlight jar" decoration
+- Hushlings: the Great Sun finale could ease every hushling at once in a wave of dawn; memory stones could tell where they came from
+- Hushlings: they gather thicker around the far Ember Shrines before they are kindled (a gentle challenge on the way)
+- Starlight: a star-path floor that glows faintly at night; constellations you "draw" by placing starlight on a hill
 - Clay: a kiln (fire clay into bricks/tiles) → brick paths, tiled cottage roofs, a clay oven for the bakery idea
 - Clay: friends who love clay (a potter kind) and a wish "bring me 4 clay"; pots that friends put flowers in by their doors
 - Signposts: friends could read the name ("Good morning from Otter Ford!"); a village's well could take a sign's name instead of its own

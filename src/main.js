@@ -80,6 +80,14 @@ window.G = window.G || {};
     ui.toast(def.meet, 5);
   };
 
+  // hushlings: small shadows of the Fading that sip your light on dark nights; light eases them (Night 19)
+  const hush = new G.Hush(state, {
+    ui, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color),
+    sound: (name, x) => { if (state.running) G.Sound.play(name, x === undefined ? {} : { pan: panAt(x) }); },
+    fireflies: (x, y, n) => renderer.fireflies(x, y, n),
+  });
+  state.hush = hush;
+
   // lost spirits and the friends who live by your lanterns (saved)
   const folk = new G.Villagers();
   state.villagers = folk;
@@ -244,7 +252,7 @@ window.G = window.G || {};
   }
 
   function afterLoad() {
-    life.clear();
+    life.clear(); hush.clear();
     shrines.kindling = null; shrines.sparks = [];
     travel.trip = null; travel.landed = null; travel.trail = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
@@ -277,6 +285,7 @@ window.G = window.G || {};
     state.world.time = state.time;
 
     travel.update(dt);
+    hush.update(dt);
     if (travel.trip) flying();
     else if (walking(dt)) return;   // the journal or the resting menu just opened
 
@@ -307,6 +316,7 @@ window.G = window.G || {};
     if (input.hit('x')) state.setRemoving();
     if (input.hit('n')) ui.toggleSound();
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; act.gatherNearest(); }
+    if (input.hit('f') || state.wantShine) { state.wantShine = false; hush.shine(); }
 
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
     if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return true; }

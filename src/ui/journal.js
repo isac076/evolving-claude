@@ -136,6 +136,10 @@ G.Journal = class {
       if (met[k]) h += `<div class="j-card"><i style="background:hsl(${c.hues[0]},70%,65%)"></i><b>${c.name}</b><p>${c.meet}</p></div>`;
       else h += `<div class="j-card unknown"><i></i><b>???</b><p>${creatureHint(c)}</p></div>`;
     }
+    const hush = this.state.stats.hush;   // not wildlife: the little shadows of the Fading (Night 19)
+    if (hush && hush.met) h += `<div class="j-card hush"><i style="background:radial-gradient(circle,#2a2150 40%,#7d74c8)"></i><b>Hushling</b>
+      <p>${G.HUSH_SAYS.journal}${hush.eased ? ` You have eased ${hush.eased}.` : ''}</p></div>`;
+    else h += `<div class="j-card unknown"><i></i><b>???</b><p>${G.HUSH_SAYS.journalHint}</p></div>`;
     return h + '</div>';
   }
 
