@@ -88,6 +88,14 @@ window.G = window.G || {};
   });
   state.hush = hush;
 
+  // the Great Sun: the Sun's Hearth, the sunrise and the ending (Night 20)
+  const ending = new G.Ending(state);
+  const sun = new G.SunPlay(state, {
+    ui, map, journal, ending, hush, burst: (x, y, color, n) => renderer.burst(x, y, color, n),
+    floater: (x, y, text, color) => addFloater(x, y, text, color), pan: x => panAt(x),
+  });
+  state.sun = sun;
+
   // lost spirits and the friends who live by your lanterns (saved)
   const folk = new G.Villagers();
   state.villagers = folk;
@@ -254,6 +262,7 @@ window.G = window.G || {};
   function afterLoad() {
     life.clear(); hush.clear();
     shrines.kindling = null; shrines.sparks = [];
+    sun.rising = null; state.world.floorScale = 1; state.world.rebuildLights();
     travel.trip = null; travel.landed = null; travel.trail = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
     signs.close(); signs.refreshList();
@@ -276,7 +285,7 @@ window.G = window.G || {};
   // signposts with names you write, and banners (Night 18)
   const signs = new G.Signs(state, { ui, input, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: addFloater, panAt });
   state.signs = signs;
-  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, signs, floater: addFloater, panAt });
+  const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, sun, garden, village, market, folk, travel, signs, floater: addFloater, panAt });
   const craftItem = r => act.craftItem(r);
 
   // ---------- loop ----------
@@ -286,7 +295,7 @@ window.G = window.G || {};
 
     travel.update(dt);
     hush.update(dt);
-    if (travel.trip) flying();
+    if (travel.trip || sun.rising) flying();   // in the air, or watching the Sun rise
     else if (walking(dt)) return;   // the journal or the resting menu just opened
 
     for (const f of state.floaters) { f.life -= dt; f.y -= 22 * dt; }
@@ -295,7 +304,7 @@ window.G = window.G || {};
     if (state.weather.rain > 0.3) state.stats.rainTime = (state.stats.rainTime || 0) + dt;
 
     state.saveTimer += dt;
-    if (state.saveTimer > 10 && !travel.trip) { state.saveTimer = 0; G.Save.write(state); }
+    if (state.saveTimer > 10 && !travel.trip && !sun.rising) { state.saveTimer = 0; G.Save.write(state); }
     ui.updateClock(state.time, state.world.litCount(), state.weather, folk.list.length);
     ui.update(dt);
     map.update(dt, state.time);
@@ -306,6 +315,7 @@ window.G = window.G || {};
     wishPanel.update(dt);
     ruins.update(dt);
     shrines.update(dt);
+    sun.update(dt);
     hollows.update(dt);
     signs.update(dt);
   }
@@ -388,11 +398,12 @@ window.G = window.G || {};
 
   let prev = performance.now(), frameDt = 0;
   function frame(now) {
-    const paused = settings.isOpen || journal.paused || signs.isOpen;   // writing a sign's name pauses too
+    const paused = settings.isOpen || journal.paused || signs.isOpen || ending.isOpen;   // writing a sign's name (or the ending) pauses too
     const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
     frameDt = dt;
     if (settings.isOpen) { if (input.hit('escape')) settings.toggle(false); }
     else if (journal.paused) journal.keys(input);
+    else if (ending.isOpen) ending.keys(input);
     else if (signs.isOpen) { if (input.hit('escape')) signs.close(); else if (input.hit('enter')) signs.confirm(); }
     G.Sound.duck(paused);
     if (state.world) { G.Seasons.update(state, !state.running); state.weather.update(dt, state); }

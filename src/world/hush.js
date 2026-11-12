@@ -42,7 +42,7 @@ G.Hush = class {
   // how bright the land is for a hushling: lights' colour, a Moon lantern's calm
   warmth(x, y) {
     const w = this.state.world;
-    let f = w.restoreAt(x, y, w.lights);
+    let f = w.restoreAt(x, y, w.lights, true);
     const c = this.calmAt(x, y);
     if (c < 0) f = Math.max(f, 0.9); else if (c < 2) f = Math.max(f, 0.3 + (2 - c) * 0.1);
     return f;
@@ -55,7 +55,7 @@ G.Hush = class {
     const s = this.state, p = s.player, H = G.HUSH, T = G.TILE;
     if (p.glow === undefined) p.glow = 1;
     const flying = s.travel && s.travel.trip, dark = this.dark();
-    const here = s.world.restoreAt(p.x, p.y, s.world.lights);
+    const here = s.world.restoreAt(p.x, p.y, s.world.lights, true);
 
     // your glow comes back by a light, slowly by day, a little out in the grey
     const sipping = this.clinging().length;

@@ -110,7 +110,7 @@ G.ShrinePlay = class {
     h.journal.showCard(site.name, 'An ember wakes', site.def.words, `Ember Shrine ${lit} of ${G.SHRINES.length} kindled`, 'places');
     h.journal.onCardClosed = () => {
       if (teach) h.ui.toast(this.say('unlock'), 7);
-      else if (lit >= G.SHRINES.length) h.ui.toast(this.say('all'), 8);
+      else if (lit >= G.SHRINES.length) { if (!(s.sun && s.sun.sense())) h.ui.toast(this.say('all'), 8); }   // the Sun's Hearth is sensed (Night 20)
       else { const nx = G.Shrines.nextToKindle(s); if (nx) h.ui.toast(`The next ember waits at the ${nx.name}, far to the ${G.Ruins.direction(s.player.tx, s.player.ty, nx.tx, nx.ty)}.`, 6); }
     };
     h.ui.refresh();

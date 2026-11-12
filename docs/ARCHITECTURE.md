@@ -13,6 +13,7 @@ src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noi
 src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/audio/instruments.js G.INSTRUMENTS — the music's instruments (flute, marimba, kalimba, glass, harp, music box, bass, voice, pipe…), G.musicVoice
 src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lantern's chord (added to G.SFX)
+src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
@@ -29,10 +30,12 @@ src/data/travel.js    G.TRAVEL settings (reach, flight time, height, landing spo
 src/data/hollow.js    the Glowcap Hollows (Night 17): G.HOLLOW settings, the `mushwood` ground, spore item, giant mushroom + glowcap objects, Mushroom lamp + Spore patch, the glow snail, music place, road stop, G.HOLLOW_NAMES, G.HOLLOW_SAYS (adds to the other data tables)
 src/data/riverbank.js riverbanks & waymarks (Night 18): G.RIVER settings, clay item + `claybank` object, stepping stones / signpost / banner / clay planter + recipes, G.BANNER_HUES, G.SIGN_WORDS (suggested names), G.RIVER_SAYS
 src/data/hush.js      the hush of night (Night 19): G.HUSH settings, starlight + Starlit charm items, the Moon lantern + recipes, the goal chapter (spliced in before the ruins), G.HUSH_SAYS
+src/data/sun.js       the Great Sun (Night 20): G.SUN settings, G.SUN_STAMP + pieces, the sunflame structure (a road stop), G.SUN_SAYS, G.ENDING words, friends' sun lines, the goal chapter (last)
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
 src/world/shrines.js  G.Shrines — where the four shrines stand (from the seed, ground-only), pieceAt() for tileAt, bowls lit / kindled, known(), nextToKindle()
+src/world/sun.js      G.Sun — where the Sun's Hearth stands (ground-only, past the farthest shrine), pieceAt(), sockets lit, isLit(), known(), guideTarget()
 src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land, none near the start), first() (the one a walk from the start), placeOf() (each hollow's id + name)
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
@@ -48,6 +51,7 @@ src/game/player.js    G.Player — movement and collision (and `glow`, the spiri
 src/game/save.js      G.Save — localStorage save/load
 src/game/ruin_play.js G.RuinPlay — finding ruins, looking at old stones, waking memory stones (rewards, memory card)
 src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, offerings at bowls, the kindling wave, rewards and the card
+src/game/sun_play.js  G.SunPlay (`state.sun`) — sensing, finding, the sockets and altar, the sunrise (dawn, eased hushlings, world.floor easing in) and opening the ending
 src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
@@ -70,6 +74,7 @@ src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along 
 src/render/hollow_sprites.js G.drawHollowGround (moss, tiny toadstools), giant mushroom, glowcaps, Mushroom lamp, Spore patch, their regrow sprites, the glow snail
 src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and from Mushroom lamps, snail halos; drawn after the night layer
 src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost, banner (streams with G.windNow), clay planter, G.drawSignTags (name tags over nearby signposts)
+src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, sockets, the altar (cold / burning), gold flagstones, the sunrise, the risen Sun, shafts of sunlight, the map mark
 src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
@@ -79,8 +84,10 @@ src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, co
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
 src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
 src/ui/market.js      G.Market — the market stall's swap panel
+src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_sun.py    Night 20 chapter test (placement, sockets, sensing, the altar, the sunrise at night, dawn, the ending, world.floor, saving)
 tools/smoke_hush.py   Night 19 chapter test (hushlings come, cling, Shine eases, lantern light eases, Moon lantern calm, never goes out, gone by day)
 tools/smoke_riverbank.py  Night 18 chapter test (clay, stepping stones, naming a sign by typing, banner click, road names)
 tools/smoke_test.py   plays the game in a headless browser, saves screenshots
@@ -339,3 +346,21 @@ That's it — the crafting menu, placing, saving and lighting all pick it up.
   by a light, by day, slowly in the grey. At `minGlow` they are full (`sated()`): they let go and none come for `rest` s. `holes()`
   adds Shine rings / easing hushlings / motes to the night layer (`nightGlows` entries may carry `a`). Drawn by G.HushFX after the spores.
   Stats: `stats.hush = {met, eased, shines, dimmed}` (no version bump). The journal's Creatures page has a Hushling card (not counted as wildlife).
+- **The Great Sun** (Night 20; data in src/data/sun.js, place in src/world/sun.js = G.Sun, play in src/game/sun_play.js = G.SunPlay =
+  `state.sun`, sounds in src/audio/sun_sfx.js): `G.Sun.site(world)` places one `G.SUN_STAMP` (13×13) per world, `G.SUN.dist` tiles out,
+  `turn` radians past the farthest shrine's direction, on land, using `groundType(.., true)` only (memoised in `world.sunSite`). `tileAt`
+  asks `G.Sun.pieceAt` after the shrines: tiles get `tile.sun` (+ `pave`, drawn by `G.drawSunPave`), sockets get `tile.sock` (0..3 = which
+  shrine's ember). Pieces are objects with `sun: true` (`sunpost`, `sunsocket`, `sunaltar`) → `G.SunPlay.use()`; ruins keep `G.SUN.keepRuinsAway`.
+  Socket *i* burns while shrine *i* is kindled (`G.Sun.socketLit`) — nothing saved. Sensed (`stats.sun.sensed`) when the last shrine's card
+  closes (ShrinePlay.finish asks `state.sun.sense()`) or on load with four kindled; then the shrine guide arrow (`G.ShrineFX.guide`, now
+  generic: `G.Shrines.nextToKindle() || G.Sun.guideTarget()`) points to it, the maps mark it (`G.SunFX.mapMark`), the journal lists it.
+  **The sunrise** (`sunPlay.rising = {t, dawned}`; main runs `flying()` instead of `walking()`, no autosave): embers fly socket → altar, a
+  small sun swells; at `G.SUN.dawnAt` `dawn()` jumps a night forward to morning, clears the weather, eases every hushling, builds the fixed
+  `sunflame` structure on the altar (a road stop, `lightHue`) and eases `world.floorScale` 0 → 1 while its light's restore grows to
+  `G.SUN.restore`; at `riseTime` `finish()` opens `G.Ending` (`ending.isOpen` pauses the frame like the journal). **world.floor**:
+  `rebuildLights()` sets it to `G.SUN.floor × floorScale` when a `sun` structure exists, and `restoreAt()` never returns less — so the
+  renderer, minimap, creatures, music and gardens all see a softly coloured world. `restoreAt(x, y, lights, true)` = raw lights only
+  (the hushlings use it). Nights are a little lighter (`G.SUN.night`). G.SunFX: `floor` (carved rays, socket paths), `sky` (after
+  G.ShrineFX.sky: the risen Sun + beam, the rising, the dawn flash + wave, `shafts` of sunlight by day). Friends gain `G.VILLAGER_SAYS.sun`
+  lines. Stats: `stats.sun = {sensed, found, lit, day, hinted, ending}` — no version bump. Goal chapter 'The Great Sun' (last).
+

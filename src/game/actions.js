@@ -5,7 +5,7 @@
 window.G = window.G || {};
 
 G.Actions = class {
-  // h = { state, input, renderer, ui, map, ruins, shrines, garden, village, market, folk, travel, signs, floater(x, y, text, color), panAt(x) }
+  // h = { state, input, renderer, ui, map, ruins, shrines, sun, garden, village, market, folk, travel, signs, floater(x, y, text, color), panAt(x) }
   constructor(h) {
     Object.assign(this, h);
     this.REACH = 2.2 * G.TILE;       // how far the player can gather
@@ -28,6 +28,7 @@ G.Actions = class {
     const state = this.state, w = state.world, obj = w.objectAt(tx, ty);
     if (!obj) return false;
     if (G.OBJECTS[obj].shrine) { this.shrines.use(tx, ty, obj); return true; }   // an Ember Shrine's stones (Night 15)
+    if (G.OBJECTS[obj].sun) { this.sun.use(tx, ty, obj); return true; }         // the Sun's Hearth (Night 20)
     if (G.OBJECTS[obj].read) { this.ruins.wake(tx, ty); return true; }
     if (!G.OBJECTS[obj].drops) { this.ruins.about(tx, ty, obj); return true; }
     const why = G.Crafting.gatherBlocker(state, obj);
@@ -101,13 +102,13 @@ G.Actions = class {
       if (!o) continue;
       const d = this.far(tx, ty);
       if (d > REACH) continue;
-      if (G.OBJECTS[o].bowl || G.OBJECTS[o].hearth) { if (d < sd) { sd = d; shrine = { tx, ty, o }; } continue; }   // a shrine's bowl or hearth comes first
+      if (G.OBJECTS[o].bowl || G.OBJECTS[o].hearth || G.OBJECTS[o].altar || G.OBJECTS[o].socket) { if (d < sd) { sd = d; shrine = { tx, ty, o }; } continue; }   // a shrine's bowl or hearth (or the Sun's altar) comes first
       if (G.OBJECTS[o].read) { stone = { tx, ty }; continue; }    // then a sleeping memory stone
       if (!G.OBJECTS[o].drops) { oldStone = { tx, ty, o }; continue; }   // ruins can't be gathered
       if (G.Crafting.gatherBlocker(state, o)) { locked = { tx, ty }; continue; }   // skip what you can't gather yet
       if (d < bd) { bd = d; best = { tx, ty }; }
     }
-    if (shrine) this.shrines.use(shrine.tx, shrine.ty, shrine.o);
+    if (shrine) (G.OBJECTS[shrine.o].sun ? this.sun : this.shrines).use(shrine.tx, shrine.ty, shrine.o);
     else if (stone) this.ruins.wake(stone.tx, stone.ty);
     else if (best || locked) this.gatherAt((best || locked).tx, (best || locked).ty);
     else if (oldStone) this.gatherAt(oldStone.tx, oldStone.ty);   // a look at an old stone (ruin or shrine)
@@ -140,6 +141,7 @@ G.Actions = class {
     const st = close && state.world.structureAt(tx, ty);
     if (st && G.STRUCTURES[st.type].grow) { this.tendPlant(st); return; }
     if (st && G.STRUCTURES[st.type].ember && st.type !== 'emberlamp') { this.shrines.about(st); return; }
+    if (st && G.STRUCTURES[st.type].sun) { this.sun.about(); return; }
     if (st && G.STRUCTURES[st.type].sign) { this.signs.open(st); return; }        // write a new name (Night 18)
     if (st && G.STRUCTURES[st.type].banner) { this.signs.recolour(st); return; }  // the next colour
     if (st && G.STRUCTURES[st.type].travel && this.travel.canTravel()) { this.map.toggle(true); this.ui.toggleCraft(false); return; }   // Night 16

@@ -71,6 +71,7 @@ window.G = window.G || {};
       if (dl < 0.35) pool = pool.concat(S.night);
       if (phase > 0.72 && phase < 0.95 && dl > 0.3) pool = pool.concat(S.morning);
       if (this.list.length >= 3) pool = pool.concat(S.friends);
+      if (world.floor > 0 && S.sun) pool = pool.concat(S.sun, S.sun);   // the Great Sun burns again (Night 20)
       if (v.state === 'busy') pool.push(`${v.name} ${v.def.visit}. "Isn't it lovely?"`);
       let line = pick(pool);
       if (line === v.lastLine) line = pick(pool);

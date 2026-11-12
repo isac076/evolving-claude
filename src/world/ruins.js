@@ -34,7 +34,7 @@ G.Ruins = {
       const cty = cy * C + 6 + Math.floor(G.hash2(cx, cy * 3 + i, s + 509) * (C - 13));
       if (Math.hypot(ctx - spawn.tx, cty - spawn.ty) < R.awayFromStart) continue;
       if (!def.ground.includes(world.groundType(ctx, cty, true))) continue;
-      if (G.Shrines.near(world, ctx, cty, G.SHRINE.keepRuinsAway)) continue;   // the Ember Shrines keep their ground
+      if (G.Shrines.near(world, ctx, cty, G.SHRINE.keepRuinsAway) || G.Sun.near(world, ctx, cty, G.SUN.keepRuinsAway)) continue;   // the Ember Shrines keep their ground
       const x0 = ctx - Math.floor(w / 2), y0 = cty - Math.floor(h / 2);
       let ok = true;
       for (let y = y0 - 1; y <= y0 + h && ok; y++) for (let x = x0 - 1; x <= x0 + w && ok; x++)

@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 20 — 2026-11-12 — The Great Sun
+The story now has an ending. Far beyond the last Ember Shrine stands the Sun's Hearth, a great golden dais with a cold altar
+and four flame-shaped sockets — every shrine you kindle lights one. Once all four burn, a golden arrow leads you there: press E
+at the altar and the four embers gather, the Great Sun rises, night turns to dawn and colour wakes softly all over the world,
+even far from your lanterns. A warm ending page tells your journey in numbers — then you keep playing in a sunnier world.
+
 ## Night 19 — 2026-11-11 — The hush of night
 On dark nights, out in the grey far from your lanterns, little hushlings rise out of the dark — soft shadows with pale eyes,
 left over from the Fading. They drift after you, hold on, and sip your glow (your light grows small, but never goes out). They

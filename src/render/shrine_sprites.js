@@ -266,20 +266,21 @@ window.G = window.G || {};
         ctx.fillStyle = 'rgba(255,250,230,.9)'; circle(ctx, x, y, 2);
       }
       ctx.globalCompositeOperation = 'source-over';
-      if (play && !state.player.flying) this.guide(ctx, state, camX, camY, W, H, t);
+      if (play && !state.player.flying && !(state.sun && state.sun.rising)) this.guide(ctx, state, camX, camY, W, H, t);
     },
 
     // a soft ember arrow at the edge of the screen pointing to the next shrine to kindle
+    // (then, with all four burning, a golden one to the Sun's Hearth — Night 20)
     guide(ctx, state, camX, camY, W, H, t) {
-      const s = G.Shrines.nextToKindle(state), p = state.player;
+      const s = G.Shrines.nextToKindle(state) || G.Sun.guideTarget(state), p = state.player;
       if (!s) return;
-      const d = Math.hypot(s.tx - p.tx, s.ty - p.ty);
-      if (d < G.SHRINE.guideFrom) return;
+      const d = Math.hypot(s.tx - p.tx, s.ty - p.ty), from = s.from || G.SHRINE.guideFrom;
+      if (d < from) return;
       const T = G.TILE, px = p.x - camX, py = p.y - camY;
       const a = Math.atan2((s.ty + 0.5) * T - p.y, (s.tx + 0.5) * T - p.x), c = Math.cos(a), sn = Math.sin(a);
       // it circles the spirit on a wide oval, clear of the HUD at the screen's edges
       const rx = Math.max(80, W / 2 - 110), ry = Math.max(70, H / 2 - 120), x = px + c * rx, y = py + sn * ry;
-      const fade = G.clamp((d - G.SHRINE.guideFrom) / 8, 0, 1), pulse = 0.5 + 0.5 * Math.sin(t * 2.4);
+      const fade = G.clamp((d - from) / 8, 0, 1), pulse = 0.5 + 0.5 * Math.sin(t * 2.4);
       ctx.save(); ctx.translate(x, y); ctx.rotate(a);
       ctx.globalCompositeOperation = 'lighter';
       const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);

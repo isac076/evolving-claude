@@ -105,12 +105,13 @@ G.Renderer = class {
     G.Seasons.drawPrints(ctx, camX, camY, dt);   // footprints in the snow
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const tile = tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)];
-      if (tile.pave) (tile.shrine ? G.drawShrinePave : G.drawPave)(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // old flagstones
+      if (tile.pave) (tile.sun ? G.drawSunPave : tile.shrine ? G.drawShrinePave : G.drawPave)(ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), tile);   // old flagstones
       const st = world.structureAt(tx, ty);
       if (st && G.STRUCTURES[st.type].floor) G.STRUCTURE_SPRITES[st.type](ctx, tx * T - camX, ty * T - camY, fAt(tx, ty), time, st);
     }
 
     G.ShrineFX.floor(ctx, world, camX, camY, W, H, time);   // the carved rings of an Ember Shrine (Night 15)
+    G.SunFX.floor(ctx, state, camX, camY, W, H, time);      // the carved rays of the Sun's Hearth (Night 20)
 
     // objects, standing structures and the player, row by row (back to front)
     const nightGlows = [];
@@ -185,10 +186,11 @@ G.Renderer = class {
     }
     ctx.globalCompositeOperation = 'source-over';
 
-    this.drawLighting(dark, camX, camY, lights, nightGlows, player, time, wv.fog);
+    this.drawLighting(dark * (world.floor > 0 ? G.SUN.night : 1), camX, camY, lights, nightGlows, player, time, wv.fog);   // softer nights under the Sun
     G.SporeFX.draw(ctx, state, camX, camY, W, H, dt, time, dark);   // glowing spores over the hollows (Night 17)
     G.HushFX.draw(ctx, state, camX, camY, W, H, time, dark);   // hushlings, Shines and starlight (Night 19)
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
+    G.SunFX.sky(ctx, state, camX, camY, W, H, time, dark);      // the Great Sun: sunrise, the risen Sun, shafts of sunlight (Night 20)
     G.TravelFX.draw(ctx, state, camX, camY, W, H, time, dark);   // flying the lantern roads (Night 16)
 
     // soft vignette

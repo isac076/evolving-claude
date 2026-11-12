@@ -101,7 +101,7 @@
       <kbd>Map</kbd><span>tap the round map — beside a lantern, tap another light to fly there</span>
       <kbd>Book</kbd><span>tap the little book for your journal</span>
     </div>
-    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow. Clay lies where shallow water meets the shore — it makes stepping stones and signposts that name your places. On dark nights little hushlings drift out of the grey and sip your light — lead them into a lantern's glow, or Shine (F), and they turn into starlight.</p>
+    <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land — with all four burning, follow the golden arrow to the Sun's Hearth and wake the Great Sun. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow. Clay lies where shallow water meets the shore — it makes stepping stones and signposts that name your places. On dark nights little hushlings drift out of the grey and sip your light — lead them into a lantern's glow, or Shine (F), and they turn into starlight.</p>
 
     <div class="settings-buttons">
       <button id="set-resume" class="main">Keep playing</button>
@@ -128,6 +128,17 @@
   </div>
 </div>
 
+<div id="ending">
+  <div class="ending-card" role="dialog" aria-labelledby="ending-title">
+    <small class="ending-kicker">✦ rekindled ✦</small>
+    <h1 id="ending-title"></h1>
+    <div id="ending-lines"></div>
+    <div id="ending-journey"></div>
+    <p id="ending-close"></p>
+    <button id="ending-go"></button>
+  </div>
+</div>
+
 <div id="title">
   <h1>Lumen</h1>
   <p>The world has faded to grey. You are its last small light.</p>
@@ -147,6 +158,7 @@
 <script src="src/audio/instruments.js"></script>
 <script src="src/audio/music.js"></script>
 <script src="src/audio/hush_sfx.js"></script>
+<script src="src/audio/sun_sfx.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
@@ -163,9 +175,11 @@
 <script src="src/data/hollow.js"></script>
 <script src="src/data/riverbank.js"></script>
 <script src="src/data/hush.js"></script>
+<script src="src/data/sun.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/shrines.js"></script>
+<script src="src/world/sun.js"></script>
 <script src="src/world/hollow.js"></script>
 <script src="src/world/explore.js"></script>
 <script src="src/world/creatures.js"></script>
@@ -182,6 +196,7 @@
 <script src="src/game/crafting.js"></script>
 <script src="src/game/ruin_play.js"></script>
 <script src="src/game/shrine_play.js"></script>
+<script src="src/game/sun_play.js"></script>
 <script src="src/game/soundscape.js"></script>
 <script src="src/game/travel.js"></script>
 <script src="src/game/hollow_play.js"></script>
@@ -203,6 +218,7 @@
 <script src="src/render/spore_fx.js"></script>
 <script src="src/render/riverbank_sprites.js"></script>
 <script src="src/render/hush_sprites.js"></script>
+<script src="src/render/sun_sprites.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>
@@ -211,6 +227,7 @@
 <script src="src/ui/wishes_panel.js"></script>
 <script src="src/ui/journal.js"></script>
 <script src="src/ui/market.js"></script>
+<script src="src/ui/ending.js"></script>
 <script src="src/game/actions.js"></script>
 <script src="src/main.js"></script>
 </body>

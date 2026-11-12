@@ -64,6 +64,7 @@ G.Minimap = class {
       else if (t.obj === 'bloom' && f > 0.3) { h = t.hue; s = 80; l = 68; }
       else if (t.obj && G.OBJECTS[t.obj].ruin) { h = 36; s = 16; l = 74; }   // old stones (Night 11)
       else if (t.pave && t.shrine) { h = 22; s = 40; l = 58; }   // ember flagstones (Night 15)
+      else if (t.pave && t.sun) { h = 44; s = 46; l = 66; }      // sun-gold flagstones (Night 20)
       else if (t.pave) { h = 36; s = 12; l = 60; }
       const S = s * (0.1 + 0.9 * f), L = l * (0.66 + 0.4 * f);
       const [r, g, b] = G.hslToRgb(h, S, Math.min(92, L));
@@ -179,6 +180,7 @@ G.Minimap = class {
         ctx.fillStyle = lit ? '#ffe2b8' : '#e8dccb'; ctx.fillText(site.name, x, y - r * 1.6 - 1);
       }
     }
+    G.SunFX.mapMark(ctx, this.state, toX, toY, big, sx, sy, t);   // the Sun's Hearth (Night 20)
     // lost spirits you have seen (pale, pulsing) and friends at home (their own colour)
     const folk = this.state.villagers;
     if (folk) {

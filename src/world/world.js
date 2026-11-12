@@ -13,6 +13,8 @@ G.World = class {
     this.grown = new Map();       // key -> object type grown from a seed (a garden bloom, a planted tree)
     this.lights = [];             // derived from structures
     this.lightsVersion = 0;       // bumps when lights change (the map recolours)
+    this.floor = 0;               // once the Great Sun burns, all land is at least this coloured (Night 20)
+    this.floorScale = 1;          // 0..1 while the Sun is rising (G.SunPlay eases it in)
     this.time = 0;                // game time in seconds (set by main)
   }
 
@@ -68,6 +70,14 @@ G.World = class {
       t.shrine = shrine.site;
       t.pave = true;
     } else if (shrine) { t.obj = null; t.shrine = shrine.site; }
+    // the Sun's Hearth (world/sun.js, Night 20): golden flagstones, pillars, four sockets and the altar
+    const sun = !shrine && G.Sun.pieceAt(this, tx, ty);
+    if (sun) {
+      t.obj = sun.ch === ' ' ? null : G.SUN_PIECES[sun.ch] || null;
+      t.sun = sun.site;
+      if (sun.ch !== ' ') t.pave = true;
+      if (sun.ch === 'S') t.sock = G.Sun.socketAt(this, tx, ty);   // which shrine's ember it waits for
+    }
     if (this.cache.size > 150000) this.cache.clear();
     this.cache.set(k, t);
     return t;
@@ -173,8 +183,10 @@ G.World = class {
   rebuildLights() {
     this.lightsVersion++;
     this.lights = [];
+    this.floor = 0;
     for (const st of this.structures.values()) {
       const def = G.STRUCTURES[st.type];
+      if (def.sun) this.floor = G.SUN.floor * this.floorScale;
       if (def.restore || def.light) {
         this.lights.push({
           type: st.type, x: (st.tx + 0.5) * G.TILE, y: (st.ty + 0.5) * G.TILE,
@@ -186,8 +198,9 @@ G.World = class {
   }
 
   // How "restored" (colourful) the world is at a pixel position: 0..1
-  restoreAt(px, py, lights) {
-    let f = 0;
+  // (never below `floor` once the Great Sun burns — unless raw: the hushlings only feel real light)
+  restoreAt(px, py, lights, raw) {
+    let f = raw ? 0 : this.floor;
     for (const L of lights) {
       if (!L.restore) continue;
       const d = Math.hypot(px - L.x, py - L.y) / G.TILE;

@@ -84,7 +84,7 @@ G.Journal = class {
   }
 
   page_places() {
-    const vh = this.villages() + this.shrinePlaces() + G.HollowPlay.places(this.state) + (this.state.signs ? this.state.signs.places() : '');
+    const vh = this.villages() + this.sunPlace() + this.shrinePlaces() + G.HollowPlay.places(this.state) + (this.state.signs ? this.state.signs.places() : '');
     return this.roads() + vh + this.ruinPlaces(!!vh);
   }
 
@@ -94,6 +94,18 @@ G.Journal = class {
     if (!tr || !tr.trips) return '';
     const stops = this.state.travel ? this.state.travel.stops().length : 0;
     return `<p class="j-note">✦ Lantern roads: ${stops} lights on the roads · ${tr.trips} flight${tr.trips === 1 ? '' : 's'} · the longest ${tr.far} steps.</p>`;
+  }
+
+  // the Sun's Hearth (Night 20), once it is known: above the shrines
+  sunPlace() {
+    const s = this.state, w = s.world;
+    if (!G.Sun.known(s)) return '';
+    const site = G.Sun.site(w), lit = G.Sun.isLit(w), n = G.Sun.litSockets(w), p = s.player;
+    const d = Math.round(Math.hypot(site.tx - p.tx, site.ty - p.ty));
+    const where = d < 8 ? 'right here' : `about ${d} steps ${G.Ruins.direction(p.tx, p.ty, site.tx, site.ty)}`;
+    return `<div class="j-place${lit ? ' read' : ''}" style="border-left:3px solid rgba(255,214,120,.85)"><b>☀ ${site.name}</b><em>${where}</em>
+      <p>${lit ? 'The Great Sun burns over its hearth again, and colour is awake all over the world.' : 'A great round dais of golden stone with a cold altar at its heart, ringed by four sockets shaped like flames.'}</p>
+      <small>${lit ? `✦ Rekindled on day ${(s.stats.sun && s.stats.sun.day) || '?'}.` : `◇ ${n} of 4 embers burn in its sockets.${n >= 4 ? ' The altar is waiting for you.' : ''}`}</small></div>`;
   }
 
   // the Ember Shrines you know of (Night 15), shown above the ruins

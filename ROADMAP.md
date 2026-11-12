@@ -74,11 +74,11 @@ as the world does.
 - [x] Lore fragments found in ruins tell what happened (Night 11 — 12 memories in `G.LORE`, told in order; they set up the Great Sun, the Heart and the Ember Shrines)
 - [x] Ember Shrines: big goals spread across the world that each restore a huge area (Night 15 — four shrines further and further out; four ember bowls each want an offering; the hearth kindles and a wave of colour rolls out 26 tiles; sensed after 3 memories, an ember arrow points the way; the first one teaches the Ember lantern)
 - [x] Gentle shadow creatures at night that dim your light — repelled by light, never fought (Night 19 — hushlings: on dark nights out in the grey they rise from the dark, hold on and sip your glow (your light shrinks, never goes out); they hover at the edge of lantern light; lead them into a light or Shine (F) and they turn into starlight → the Moon lantern (keeps them 10 steps away) and the Starlit charm)
-- [ ] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing)
+- [x] A final goal: rekindle the Great Sun — and a beautiful ending (that lets you keep playing) (Night 20 — the Sun's Hearth stands beyond the farthest shrine; its four sockets burn for kindled shrines; a golden arrow points the way once all four burn; at the altar the embers gather, the Sun rises, night turns to dawn, every hushling eases and colour wakes softly everywhere (`world.floor`); a warm ending page with your journey in numbers, then "Keep shining")
 
 ## Chapter 7 — Music & presentation
 - [x] Generative music that changes with time of day, biome and restoration (Night 9 — a new tune every piece; grey land gets lonely notes, colour adds bass, melody and sparkle; morning/day/dusk/night/rain/fog moods; the ground picks the instrument; a Music slider)
-- [ ] Richer lighting: light shafts, reflections in water, soft shadows (Night 14: breathing shore foam along the curved coasts)
+- [ ] Richer lighting: light shafts, reflections in water, soft shadows (Night 14: breathing shore foam along the curved coasts; Night 20: soft shafts of sunlight by day once the Great Sun burns)
 - [ ] Animated title screen; smooth transitions
 - [ ] Photo mode (hide UI, slow time)
 
@@ -115,6 +115,10 @@ What a play-through (all 44 screenshots) taught us:
 - Polish: shores now have a soft, breathing line of foam and a faint wave that rolls in and out, following the curved coast.
 
 ## Notes for the next review (Night 21)
+- Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
+  restoreAt() is at least `G.SUN.floor` (0.4) — hushlings use `restoreAt(..., true)` so nights still work. With colour everywhere the
+  Glowcap Hollows' hard straight edges against grass show much more (mushwood has no rounding against grass/forest) — worth fixing.
+  Is 0.4 the right floor? Lanterns must still feel worth building. The shafts of sunlight (`G.SunFX.shafts`) are subtle on purpose.
 - Night 19: hushlings (`G.Hush`, `state.hush`). Play a whole night out in the grey with 2+ lanterns: is it too busy? Knobs are all in
   `G.HUSH` (cap, speed, drain, rest after they're full). The glow ring around the spirit only shows while glow < 1. Check the Shine
   button on a phone (touch-buttons now has three). `stats.hush.dimmed` counts how often a player ran dry — a good balance signal.
@@ -133,6 +137,10 @@ What a play-through (all 44 screenshots) taught us:
 ---
 
 ## Ideas (anyone can add here)
+- After the Sun: an epilogue chapter of goals ("see the Sun rise from every shrine", "bring a friend to the Sun's Hearth"), friends making pilgrimages there
+- After the Sun: the Sun could set and rise with the days (a slow arc over its hearth); a midsummer festival at the Hearth for every village
+- After the Sun: new biomes far beyond the shrines that only wake once the Sun burns (the snowy peaks, the desert)
+- The ending page could show a tiny painted map of your world, and be re-read from the journal
 - Hushlings: a lantern-keeper friend who sits up at night and Shines for the village; friends hum to calm hushlings near their homes
 - Hushlings: eased hushlings could become a new kind of firefly that follows you for a night; a "starlight jar" decoration
 - Hushlings: the Great Sun finale could ease every hushling at once in a wave of dawn; memory stones could tell where they came from
