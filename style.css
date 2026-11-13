@@ -213,6 +213,8 @@ body.map-open #minimap, body.craft-open #minimap, body.market-open #minimap { op
 #settings h3 { margin: 16px 0 6px; font-weight: 400; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
 .set-row { display: flex; align-items: center; gap: 12px; padding: 6px 2px; font-size: 15px; }
 .set-row span { flex: 1; }
+.set-note { display: block; font-size: 11.5px; color: var(--ink-dim); font-style: italic; margin-top: 1px; }
+body.calm #ending::before { animation: none; }
 .set-row em { font-style: normal; width: 38px; text-align: right; color: var(--ink-dim); font-size: 13px; }
 #settings.muted #set-volume-n { color: var(--bad); }
 .set-row input[type=range] { flex: 1.4; accent-color: var(--gold); cursor: pointer; }
@@ -422,9 +424,9 @@ body.big-text #signpanel { zoom: 1.18; }
 }
 @keyframes sun-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
 .ending-card {
-  position: relative; width: min(560px, 100%); box-sizing: border-box; max-height: calc(100vh - 40px); overflow: auto;
+  position: relative; width: min(560px, 100%); box-sizing: border-box; max-height: calc(100vh - 110px); overflow: auto;
   padding: 30px 34px 24px; margin-top: 70px; text-align: center; border-radius: 18px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(92, 70, 52, .96), rgba(30, 24, 48, .95) 75%);
+  background: radial-gradient(ellipse at 50% 0%, rgb(92, 70, 52), rgb(30, 24, 48) 75%);   /* solid: the HUD must not ghost through (Night 21) */
   border: 1px solid rgba(255, 220, 140, .45);
   box-shadow: 0 0 90px rgba(255, 210, 120, .28), 0 12px 50px rgba(0, 0, 0, .5);
   transform: translateY(18px) scale(.97); transition: transform 1.8s ease;
@@ -447,4 +449,5 @@ body.big-text #signpanel { zoom: 1.18; }
 }
 #ending-go:hover { filter: brightness(1.07); }
 body.big-text #ending { zoom: 1.12; }
-@media (max-width: 600px) { #ending-lines p { font-size: 15px; } #ending-title { font-size: 27px; } .ending-card { padding: 22px 18px 18px; margin-top: 50px; } #ending::before { width: 80px; height: 80px; margin-left: -40px; top: 5%; } }
+body.big-text .ending-card { max-height: calc((100vh - 110px) / 1.12); }   /* zoom scales vh too */
+@media (max-width: 600px) { #ending-lines p { font-size: 15px; } #ending-title { font-size: 27px; } .ending-card { padding: 22px 18px 18px; margin-top: 50px; max-height: calc(100vh - 90px); } body.big-text .ending-card { max-height: calc((100vh - 90px) / 1.12); } #ending::before { width: 80px; height: 80px; margin-left: -40px; top: 5%; } }

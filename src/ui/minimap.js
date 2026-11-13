@@ -120,6 +120,7 @@ G.Minimap = class {
   drawMarkers(ctx, ox, oy, sx, sy, s, t, big) {
     const { world, player } = this.state, T = G.TILE;
     const toX = px => sx + (px / T - ox) * s, toY = py => sy + (py / T - oy) * s;
+    if (big) G.MapLabels.begin();
     ctx.globalCompositeOperation = 'lighter';
     for (const L of world.lights) {
       if (!L.restore) continue;
@@ -174,11 +175,7 @@ G.Minimap = class {
       ctx.beginPath(); ctx.moveTo(x, y - r * 1.3); ctx.quadraticCurveTo(x + r, y, x, y + r * 0.8); ctx.quadraticCurveTo(x - r, y, x, y - r * 1.3);
       if (lit) { ctx.fillStyle = `hsl(${site.hue + 15},100%,78%)`; ctx.fill(); }
       else { ctx.strokeStyle = `hsla(${site.hue},90%,72%,.95)`; ctx.lineWidth = 1.3; ctx.stroke(); }
-      if (big) {
-        ctx.font = 'italic 12px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(site.name, x + 1, y - r * 1.6);
-        ctx.fillStyle = lit ? '#ffe2b8' : '#e8dccb'; ctx.fillText(site.name, x, y - r * 1.6 - 1);
-      }
+      if (big) G.MapLabels.add(site.name, x, y - r * 1.6 - 1, { pri: 2, below: r * 3.4 + 10, color: lit ? '#ffe2b8' : '#e8dccb' });
     }
     G.SunFX.mapMark(ctx, this.state, toX, toY, big, sx, sy, t);   // the Sun's Hearth (Night 20)
     // lost spirits you have seen (pale, pulsing) and friends at home (their own colour)
@@ -213,13 +210,10 @@ G.Minimap = class {
       if (!big && Math.hypot(x - sx, y - sy) > 84) continue;
       ctx.fillStyle = '#ffe2b0';
       ctx.beginPath(); ctx.moveTo(x - 3.5, y); ctx.lineTo(x, y - 3.5); ctx.lineTo(x + 3.5, y); ctx.lineTo(x + 3.5, y + 3); ctx.lineTo(x - 3.5, y + 3); ctx.closePath(); ctx.fill();
-      if (big && vil.name) {
-        ctx.font = 'italic 12px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(vil.name, x + 1, y - 7);
-        ctx.fillStyle = '#ffe9c4'; ctx.fillText(vil.name, x, y - 8);
-      }
+      if (big && vil.name) G.MapLabels.add(vil.name, x, y - 8, { pri: 1, below: 23, color: '#ffe9c4' });
     }
     if (this.state.signs) this.state.signs.drawMap(ctx, toX, toY, big, sx, sy);   // named places (Night 18)
+    if (big) G.MapLabels.flush(ctx);   // every name at once, nudged apart (Night 21)
     // the player: a soft pulsing light
     const px = toX(player.x), py = toY(player.y), pulse = 0.5 + 0.5 * Math.sin(t * 3);
     ctx.strokeStyle = `rgba(255,250,235,${0.25 + 0.35 * (1 - pulse)})`;

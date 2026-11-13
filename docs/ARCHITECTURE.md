@@ -79,6 +79,7 @@ src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, s
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
+src/ui/map_labels.js  G.MapLabels — every name on the big map is added here and placed at the end so names never overlap (Night 21)
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
 src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
@@ -87,6 +88,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_review21.py Night 21 review test (wavy hollow edge, smooth colour edge, map names apart, Calm motion, the ending on a phone)
 tools/smoke_sun.py    Night 20 chapter test (placement, sockets, sensing, the altar, the sunrise at night, dawn, the ending, world.floor, saving)
 tools/smoke_hush.py   Night 19 chapter test (hushlings come, cling, Shine eases, lantern light eases, Moon lantern calm, never goes out, gone by day)
 tools/smoke_riverbank.py  Night 18 chapter test (clay, stepping stones, naming a sign by typing, banner click, road names)
@@ -109,7 +111,11 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
   structures, ground creatures and the player row by row (so things lower on screen
   are in front) → flying creatures → weather (G.WeatherFX) → particles → lighting → vignette.
 - **Soft colour edges**: the renderer also computes restoration at every tile
-  corner; `G.drawGround` fills a tile as 4×4 blended squares when its corners differ.
+  corner; when a tile's corners differ `G.drawGround` fills it with one linear gradient along the way the colour rises
+  (a flat fit of the four corners — Night 21; it used to be 4×4 squares, 5× slower).
+- **Wavy land edges** (Night 21): after `roundCorners`, `fringe()` in sprites.js draws 2–3 half-ellipse bumps along every edge
+  between two different land grounds (not water — shores have foam). The bumps come from a hash of the edge itself, so both
+  tiles agree; each bulges into one side (72% into the lower rank) painted with the other side's colour.
 - **Sound**: nothing plays until the first click/key (browser rule) — then
   `G.Sound.unlock()` creates the AudioContext. Play effects with
   `G.Sound.play('name', { pan })`; it silently does nothing when muted.
@@ -181,8 +187,9 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
   nearest thing first (big map → building → pick-up → craft panel) and only then opens the menu.
   "Back to title" saves and reloads the page; "New world" clears the save, sets sessionStorage `lumen-new`
   and reloads, and main starts a fresh world when it sees that flag. Sound prefs (`muted`, `volume`, `world`)
-  live in localStorage `lumen-sound`; comfort prefs (`bigText`, `hints`) in `lumen-prefs` — neither is in the
-  save. Larger text is CSS `zoom` on the HUD and panels (body class `big-text`).
+  live in localStorage `lumen-sound`; comfort prefs (`bigText`, `hints`, `calm`) in `lumen-prefs` — neither is in the
+  save. **Calm motion** (Night 21) sets `G.calm` (default on with `prefers-reduced-motion`): `G.sway` ×0.3, no water shimmer,
+  fewer raindrops / wind leaves / drifting petals in G.WeatherFX, softer shrine-kindling and sunrise flashes, body class `calm`. Larger text is CSS `zoom` on the HUD and panels (body class `big-text`).
 - **Gardens** (`state.garden`, G.Garden): a structure with `grow: '<kind>'` (sprout, sapling) is a planting. It
   carries `g` (growth 0..1) and `wet` (seconds of damp soil). Every 0.25s `update` grows each one by
   `rate()` = colour factor (`G.GARDEN.greySpeed` in the grey → 1 at `colourNeeded`) × `wetSpeed` if damp ÷ the kind's
@@ -296,6 +303,9 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
   minimap doesn't reveal tiles, the shrine guide arrow hides, autosave waits (unload/title land the trip first). `arrive()` sets the
   spirit down, brings followers, `stats.travel = {trips, seen{tileKey}, hinted, far}` (inside stats — no version bump), toast + floater.
   G.TravelFX draws after G.ShrineFX.sky. Goals 'travel' / 'travel3' (chapter "The lantern roads", after the workshop).
+- **Map names** (Night 21): inside `Minimap.drawMarkers` (big map only) shrines, the Sun's Hearth, villages and signposts call
+  `G.MapLabels.add(text, x, y, {pri, below, color, font})`; `flush()` at the end places them by priority, trying spots above /
+  below / beside the mark until one is free. New named marks should do the same.
 - **Pausing overlays**: the Resting menu (`settings.isOpen`) and the journal / memory card (`journal.paused`) both stop
   `update()`; main's frame hands keys to whichever is open.
 - **Smoke tests** are being split by chapter: `tools/smoke_garden.py` has a `run(page, shots, errors)` that

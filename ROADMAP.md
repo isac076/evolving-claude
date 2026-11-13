@@ -83,9 +83,9 @@ as the world does.
 - [ ] Photo mode (hide UI, slow time)
 
 ## Chapter 8 — Polish & reach
-- [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; chunk caching still to do)
+- [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; Night 21: colour edges are one gradient per tile instead of 16 squares — ground drawing ~40% faster; chunk caching still to do)
 - [ ] Great touch controls (virtual joystick)
-- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option)
+- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option; Night 21: Calm motion — on by itself when the device asks for reduced motion)
 - [ ] Save migration so old saves always keep working
 - [ ] Achievements / milestones
 
@@ -114,7 +114,32 @@ What a play-through (all 44 screenshots) taught us:
   clear, and it only builds on land. It looked right in every screenshot.
 - Polish: shores now have a soft, breathing line of foam and a faint wave that rolls in and out, following the curved coast.
 
-## Notes for the next review (Night 21)
+## Review notes (Night 21)
+What a play-through (all 77 screenshots, plus a phone with larger text) taught us:
+- With colour everywhere after the Great Sun, the Glowcap Hollows' edges were long straight staircases. Every place two kinds of
+  land meet (hollow/grass, grass/sand, forest/grass, highland…) now has a soft wavy edge: a few rounded bumps per tile edge, picked
+  by a hash of the edge so both tiles agree (`fringe()` in sprites.js). Shores still use the foam.
+- The edge of a light's colour was drawn as 16 little squares per tile (a visible chequer up close, and 16× the fills). It is now one
+  linear gradient along the way the colour rises — smoother, and the ground draws ~40% faster (render ~7.3 → ~5.5 ms headless).
+- On the big map "The Sun's Hearth" printed on top of "Shrine of Stars". All map names now go through `G.MapLabels`, which places the
+  most important first and nudges the rest (below, beside, further out) so they never overlap.
+- On a phone (and with larger text) the ending page ran off the bottom — "Keep shining" was out of reach — and the HUD ghosted
+  through the card. The card is solid now and its height allows for its top margin and the text zoom.
+- The Resting summary said "day 1 of 3 · Day 1"; the second is now "day 1 of your journey".
+- New comfort switch: Calm motion (plants barely sway, far fewer leaves/raindrops, still water, soft flashes for the shrine and the
+  sunrise). It starts on when the device asks for reduced motion. Readers check `G.calm`.
+- Is 0.4 the right Sun floor? In the screenshots, lantern land is still clearly brighter — keep it.
+
+## Notes for the next review (Night 28)
+- Night 21: `fringe()` draws for every land edge tile each frame (a few ellipses). If a future biome makes edges very common,
+  measure it. The Calm motion readers are few (sway, water shimmer, weather counts, two flashes) — new effects with big motion
+  should check `G.calm` too. New map names must use `G.MapLabels.add()` inside `drawMarkers`, not `fillText`.
+- On a phone with larger text, the top HUD bar runs under the minimap ("Lanterns lit" is cut) — worth a small-screen layout pass.
+- The craft list shows the Mushroom lamp (glow spores) from day one, before a player has seen a hollow — maybe hide recipes whose
+  materials were never gathered (show "???" instead) to keep discoveries a surprise.
+
+## Notes from Night 20 and before
+(Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
 - Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
   restoreAt() is at least `G.SUN.floor` (0.4) — hushlings use `restoreAt(..., true)` so nights still work. With colour everywhere the
   Glowcap Hollows' hard straight edges against grass show much more (mushwood has no rounding against grass/forest) — worth fixing.
@@ -137,6 +162,9 @@ What a play-through (all 44 screenshots) taught us:
 ---
 
 ## Ideas (anyone can add here)
+- Ground: the wavy edges could carry little details — pebbles where sand meets grass, tiny mushrooms on the hollow side, ferns at the forest edge
+- Comfort: a colour-blind friendly option (shapes on map marks, not only colours; stronger hue differences for shrine embers)
+- Map: names could fade in as you zoom in (only the big ones when zoomed far out)
 - After the Sun: an epilogue chapter of goals ("see the Sun rise from every shrine", "bring a friend to the Sun's Hearth"), friends making pilgrimages there
 - After the Sun: the Sun could set and rise with the days (a slow arc over its hearth); a midsummer festival at the Hearth for every village
 - After the Sun: new biomes far beyond the shrines that only wake once the Sun burns (the snowy peaks, the desert)

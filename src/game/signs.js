@@ -137,11 +137,7 @@ G.Signs = class {
       ctx.fillStyle = '#f2d6a6';
       ctx.fillRect(x - 0.6, y - 4, 1.4, 5);
       ctx.beginPath(); ctx.moveTo(x - 3, y - 5); ctx.lineTo(x + 2.5, y - 5); ctx.lineTo(x + 4, y - 3.5); ctx.lineTo(x + 2.5, y - 2); ctx.lineTo(x - 3, y - 2); ctx.closePath(); ctx.fill();
-      if (big) {
-        ctx.font = 'italic 11px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(s.name, x + 1, y + 12);
-        ctx.fillStyle = '#f6e2bc'; ctx.fillText(s.name, x, y + 11);
-      }
+      if (big) G.MapLabels.add(s.name, x, y + 11, { below: -19, font: 'italic 11px Georgia, serif', color: '#f6e2bc' });   // under the post, or above it
     }
   }
 

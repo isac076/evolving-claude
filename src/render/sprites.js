@@ -32,6 +32,7 @@ G.shadow = shadow;
 // set by world/weather.js) bending it downwind and making it shake faster.
 G.sway = function (t, seed, amp) {
   const w = G.windNow || 0, dir = G.windDir || 1;
+  if (G.calm) amp *= 0.3;   // calm motion (Night 21)
   return Math.sin(t + seed) * amp * (1 + w * 1.2) + Math.sin(t * 2.7 + seed * 1.3) * amp * w * 0.7 + dir * w * amp * 2.2;
 };
 
@@ -43,7 +44,7 @@ G.sway = function (t, seed, amp) {
 // d = the ground's colour this season (G.SEASON_NOW.tiles, see world/seasons.js)
 function groundL(tile, d, t, tx, ty) {
   let l = d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
-  if (d.water) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
+  if (d.water && !G.calm) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
   return l;
 }
 
@@ -80,23 +81,67 @@ function roundCorners(ctx, d, x, y, f, t, tx, ty, fc, nb) {
   }
 }
 
+// Soft, wavy edges where two kinds of land meet (Night 21): a few rounded bumps along each
+// shared edge, chosen by a hash of the edge itself so both tiles agree. Each bump bulges into
+// one side (mostly into the lower ground), painted with the other side's colour, plus now and
+// then a tiny loose tuft a little further in. Shores are left to the foam (G.ShoreFX).
+const SIDE = [   // [corner a, corner b, edge x0, y0, along x, y, into x, y, arc start]
+  [0, 1, 0, 0, 1, 0, 0, 1, 0], [1, 3, 1, 0, 0, 1, -1, 0, Math.PI / 2],
+  [2, 3, 0, 1, 1, 0, 0, -1, Math.PI], [0, 2, 0, 0, 0, 1, 1, 0, -Math.PI / 2]];
+function fringe(ctx, d, x, y, f, t, tx, ty, fc, nb) {
+  const T = G.TILE, r = d.rank, tiles = G.SEASON_NOW.tiles;
+  if (d.water) return;
+  for (let s = 0; s < 4; s++) {
+    const n = nb[s], dr = G.TILES[n.type];
+    if (dr.water || dr.rank === r) continue;
+    const [ca, cb, ex, ey, ax, ay, ix, iy, a0] = SIDE[s];
+    // the same key from both sides of the edge: horizontal edges by their lower tile, vertical by their right tile
+    const key = s === 0 ? G.hash2(tx * 2, ty, 77) : s === 2 ? G.hash2(tx * 2, ty + 1, 77) : s === 1 ? G.hash2(tx * 2 + 3, ty, 77) : G.hash2(tx * 2 + 1, ty, 77);
+    const intoLower = dr.rank > r;   // bumps pointing into this tile carry the neighbour's colour
+    const dn = tiles[n.type], fe = fc ? (fc[ca] + fc[cb]) / 2 : f;
+    let fill = null;
+    const bumps = 2 + ((key * 7 | 0) % 3 === 0 ? 1 : 0);
+    for (let b = 0; b < bumps; b++) {
+      const h = G.hash2(b, 0, key * 1e6 | 0), h2 = (h * 13.7) % 1, h3 = (h * 91.3) % 1;
+      const towardLower = h3 < 0.72;          // most bumps bulge into the lower ground
+      if (towardLower !== intoLower) continue;
+      if (!fill) fill = groundFill(dn, groundL(n, dn, t, tx + NB_OFF[s][0], ty + NB_OFF[s][1]), fe);
+      const along = 9 + (b + 0.2 + h * 0.6) * (14 / bumps), rl = 5 + h2 * 3.5, rd = 2.5 + h * 3;
+      const cx = x + ex * T + ax * along, cy = y + ey * T + ay * along;
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, ax ? rl : rd, ax ? rd : rl, 0, a0, a0 + Math.PI);
+      ctx.fill();
+      if (h2 > 0.8 && h3 < 0.5) {   // a loose tuft a little further in
+        const dd = rd + 2.5 + h3 * 2;
+        G.circle(ctx, cx + ix * dd + ax * (h - 0.5) * 4, cy + iy * dd + ay * (h - 0.5) * 4, 1.2 + h * 0.9);
+      }
+    }
+  }
+}
+
 G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
   const T = G.TILE, d = G.SEASON_NOW.tiles[tile.type];
   const l = groundL(tile, d, t, tx, ty);
   if (fc && Math.max(fc[0], fc[1], fc[2], fc[3]) - Math.min(fc[0], fc[1], fc[2], fc[3]) > 0.03) {
-    const N = 4, S = T / N;
-    for (let j = 0; j < N; j++) {
-      const v = (j + 0.5) / N, fl = fc[0] + (fc[2] - fc[0]) * v, fr = fc[1] + (fc[3] - fc[1]) * v;
-      for (let i = 0; i < N; i++) {
-        ctx.fillStyle = groundFill(d, l, fl + (fr - fl) * (i + 0.5) / N);
-        ctx.fillRect(x + i * S, y + j * S, S + 0.5, S + 0.5);
-      }
+    // the edge of a light's colour: one smooth gradient across the tile, along the way the
+    // colour rises (a flat fit of the four corners). Night 21: was 16 little squares — 5× slower.
+    const gx = (fc[1] - fc[0] + fc[3] - fc[2]) / 2, gy = (fc[2] - fc[0] + fc[3] - fc[1]) / 2;
+    const fm = (fc[0] + fc[1] + fc[2] + fc[3]) / 4, gl = Math.hypot(gx, gy);
+    if (gl < 0.01) ctx.fillStyle = groundFill(d, l, fm);
+    else {
+      const ux = gx / gl, uy = gy / gl, hs = T * 0.5 * (Math.abs(ux) + Math.abs(uy)), cx = x + T / 2, cy = y + T / 2;
+      const g = ctx.createLinearGradient(cx - ux * hs, cy - uy * hs, cx + ux * hs, cy + uy * hs), k = gl * hs / T;
+      g.addColorStop(0, groundFill(d, l, G.clamp(fm - k, 0, 1)));
+      g.addColorStop(1, groundFill(d, l, G.clamp(fm + k, 0, 1)));
+      ctx.fillStyle = g;
     }
+    ctx.fillRect(x, y, T, T);
   } else {
     ctx.fillStyle = groundFill(d, l, f);
     ctx.fillRect(x, y, T, T);
   }
-  if (nb) roundCorners(ctx, d, x, y, f, t, tx, ty, fc, nb);
+  if (nb) { roundCorners(ctx, d, x, y, f, t, tx, ty, fc, nb); fringe(ctx, G.TILES[tile.type], x, y, f, t, tx, ty, fc, nb); }
 
   if (d.snow > 0.05) drawSnowCover(ctx, tile, d, x, y, f, t, tx, ty);
   if (tile.type === 'grass' || tile.type === 'forest') {

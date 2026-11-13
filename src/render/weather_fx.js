@@ -76,7 +76,7 @@ G.WeatherFX = class {
 
   drawRain(ctx, state, rain, wind, dir, dt) {
     const { camX, camY, W, H } = this.view, drops = this.drops;
-    const want = Math.floor(rain * W * (H + 650) / 2300);
+    const want = Math.floor(rain * W * (H + 650) / 2300 * (G.calm ? 0.4 : 1));
     while (drops.length < want) drops.push(this.newDrop({}, drops.length > 40));
     if (drops.length > want) drops.length = Math.max(want, drops.length - Math.ceil(dt * 300));
     if (!drops.length) return;
@@ -158,9 +158,9 @@ G.WeatherFX = class {
   // ---------- leaves, petals (and grey fluff in faded land) on the wind ----------
   drawLeaves(ctx, state, wind, dir, dt) {
     const { camX, camY, W, H } = this.view, list = this.leaves, world = state.world, S = G.SEASON_NOW;
-    const want = Math.max(0, Math.floor((wind - 0.3) * 80));
+    const want = Math.max(0, Math.floor((wind - 0.3) * 80 * (G.calm ? 0.25 : 1)));
     // the season's own: autumn leaves and spring blossom drifting down where the land has its colour
-    const drift = S.drift, dwant = drift ? Math.floor(drift.n * (0.7 + wind)) : 0;
+    const drift = S.drift, dwant = drift ? Math.floor(drift.n * (0.7 + wind) * (G.calm ? 0.35 : 1)) : 0;
     if (dwant && Math.random() < dt * 8 && list.filter(l => l.drift).length < dwant) {
       const x = camX + G.rand(-20, W + 20), y = camY + G.rand(-30, H * 0.85);
       if (world.restoreAt(x, y + 60, world.lights) > 0.45)

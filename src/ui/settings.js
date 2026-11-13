@@ -10,7 +10,9 @@ G.Settings = class {
     this.$ = id => document.getElementById(id);
     this.el = this.$('settings');
     this.isOpen = false;
-    this.prefs = { bigText: false, hints: true };
+    // calm motion starts on for people whose device asks for reduced motion
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.prefs = { bigText: false, hints: true, calm: !!reduce };
     try { Object.assign(this.prefs, JSON.parse(localStorage.getItem('lumen-prefs') || '{}')); } catch (e) {}
     this.applyPrefs();
 
@@ -30,6 +32,7 @@ G.Settings = class {
     // comfort
     this.$('set-bigtext').onclick = () => { this.prefs.bigText = !this.prefs.bigText; this.savePrefs(); };
     this.$('set-hints').onclick = () => { this.prefs.hints = !this.prefs.hints; this.savePrefs(); };
+    this.$('set-calm').onclick = () => { this.prefs.calm = !this.prefs.calm; this.savePrefs(); };
 
     // leaving
     this.$('set-title').onclick = () => this.hooks.title();
@@ -85,15 +88,18 @@ G.Settings = class {
   applyPrefs() {
     document.body.classList.toggle('big-text', !!this.prefs.bigText);
     document.body.classList.toggle('no-hints', !this.prefs.hints);
+    // calm motion (Night 21): plants barely sway, fewer leaves and raindrops, still water, soft flashes
+    G.calm = !!this.prefs.calm;
+    document.body.classList.toggle('calm', G.calm);
   }
-  showPrefs() { this.setSwitch('set-bigtext', !!this.prefs.bigText); this.setSwitch('set-hints', !!this.prefs.hints); }
+  showPrefs() { this.setSwitch('set-bigtext', !!this.prefs.bigText); this.setSwitch('set-hints', !!this.prefs.hints); this.setSwitch('set-calm', !!this.prefs.calm); }
 
   // a little line about the world so far
   showSummary() {
     const s = this.state, w = s.world;
     const day = Math.floor(s.time / G.DAY_LENGTH) + 1;
     const lit = w.litCount(), friends = s.villagers ? s.villagers.list.length : 0;
-    const sn = G.SEASON_NOW, bits = [`${sn.def.name}, day ${sn.day} of ${G.SEASON.days}`, `Day ${day}`, `${lit} light${lit === 1 ? '' : 's'} lit`];
+    const sn = G.SEASON_NOW, bits = [`${sn.def.name}, day ${sn.day} of ${G.SEASON.days}`, `day ${day} of your journey`, `${lit} light${lit === 1 ? '' : 's'} lit`];
     if (friends) bits.push(`${friends} friend${friends === 1 ? '' : 's'} at home`);
     const mem = (s.stats.memories || []).length;
     if (mem) bits.push(`${mem} memor${mem === 1 ? 'y' : 'ies'} remembered`);

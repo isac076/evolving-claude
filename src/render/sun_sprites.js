@@ -199,7 +199,7 @@ window.G = window.G || {};
       }
       if (r && r.dawned) {   // the dawn: a flash, then a golden wave rolling out past the edges of the screen
         const k = r.t - G.SUN.dawnAt, fl = Math.max(0, 1 - k / 1.6);
-        if (fl > 0) { ctx.fillStyle = `rgba(255,246,220,${fl * 0.75})`; ctx.fillRect(0, 0, W, H); }
+        if (fl > 0) { ctx.fillStyle = `rgba(255,246,220,${fl * (G.calm ? 0.25 : 0.75)})`; ctx.fillRect(0, 0, W, H); }
         const s = G.Sun.site(w), cx = (s.tx + 0.5) * T - camX, cy = (s.ty + 0.5) * T - camY - 60;
         const u = G.clamp(k / 5, 0, 1), R = 40 + u * Math.hypot(W, H) * 1.1;
         ctx.globalCompositeOperation = 'lighter';
@@ -272,11 +272,7 @@ window.G = window.G || {};
       for (let i = 0; i < 8; i++) { const a = i * 0.785 + t * 0.3; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r * 1.15, y + Math.sin(a) * r * 1.15); ctx.lineTo(x + Math.cos(a) * r * 1.6, y + Math.sin(a) * r * 1.6); ctx.stroke(); }
       ctx.beginPath(); ctx.arc(x, y, r * 0.8, 0, 6.2832);
       if (lit) { ctx.fillStyle = '#ffe9a0'; ctx.fill(); } else ctx.stroke();
-      if (big) {
-        ctx.font = 'italic 12px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(10,12,30,.7)'; ctx.fillText(s.name, x + 1, y - r * 1.9);
-        ctx.fillStyle = '#fff0c6'; ctx.fillText(s.name, x, y - r * 1.9 - 1);
-      }
+      if (big) G.MapLabels.add(s.name, x, y - r * 1.9 - 1, { pri: 3, below: r * 3.8 + 11, color: '#fff0c6' });
     },
   };
 })();

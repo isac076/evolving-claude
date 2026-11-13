@@ -252,7 +252,7 @@ window.G = window.G || {};
           ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.stroke();
         }
         const fl = Math.max(0, 1 - k.t * 1.5);   // a first bright flash
-        if (fl > 0) { ctx.fillStyle = `hsla(${s.hue + 30},100%,85%,${fl * 0.35})`; ctx.fillRect(0, 0, W, H); }
+        if (fl > 0) { ctx.fillStyle = `hsla(${s.hue + 30},100%,85%,${fl * (G.calm ? 0.12 : 0.35)})`; ctx.fillRect(0, 0, W, H); }
       }
       if (play) for (const sp of play.sparks) {   // embers leaping from the bowls into the hearth
         const s = sp.site, hx = (s.tx + 0.5) * T - camX, hy = (s.ty + 0.5) * T - camY - 30;

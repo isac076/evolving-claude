@@ -23,6 +23,7 @@ import smoke_hollow
 import smoke_riverbank
 import smoke_hush
 import smoke_sun
+import smoke_review21
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -347,6 +348,7 @@ def play(page, errors):
         smoke_riverbank.run(page, SHOTS, errors)   # Night 18: clay, stepping stones, signposts, banners
         smoke_hush.run(page, SHOTS, errors)   # Night 19: hushlings, Shine, starlight, the Moon lantern
         smoke_sun.run(page, SHOTS, errors)    # Night 20: the Sun's Hearth, the sunrise, the ending
+        smoke_review21.run(page, SHOTS, errors)   # Night 21: review-night fixes (edges, map names, calm motion)
 
 
 if __name__ == "__main__":

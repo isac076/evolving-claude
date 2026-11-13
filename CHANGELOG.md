@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 21 — 2026-11-13 — Softer edges and a calmer option
+A review night. Where two kinds of land meet — the violet Glowcap Hollows and the meadow, grass and sand, forest and field — the
+border is now soft and wavy instead of a hard staircase, and the edge of a lantern's colour fades smoothly (the game also draws
+faster). Names on the big map no longer pile on top of each other, the ending page fits on a phone, and the Resting menu has a new
+"Calm motion" switch for less swaying, drifting and flashing.
+
 ## Night 20 — 2026-11-12 — The Great Sun
 The story now has an ending. Far beyond the last Ember Shrine stands the Sun's Hearth, a great golden dais with a cold altar
 and four flame-shaped sockets — every shrine you kindle lights one. Once all four burn, a golden arrow leads you there: press E
