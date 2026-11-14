@@ -55,6 +55,9 @@ window.G = window.G || {};
   state.shrines = shrines;
   // the Glowcap Hollows: noticing when you walk into one (Night 17)
   const hollows = new G.HollowPlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
+  // the Snowy Peaks: finding them, and when the northern lights shine (Night 22)
+  const peaks = new G.PeakPlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
+  state.peaks = peaks;
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { if (state.travel && state.travel.trip) state.travel.arrive(); G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -317,6 +320,7 @@ window.G = window.G || {};
     shrines.update(dt);
     sun.update(dt);
     hollows.update(dt);
+    peaks.update(dt);
     signs.update(dt);
   }
 

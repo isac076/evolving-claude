@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 22 — 2026-11-14 — The Snowy Peaks
+A new land to find: the tops of the highest highlands now lie under deep snow all year, and one snowy peak always rises a walk
+from the start (the goal tracker points the way). Snowy firs, glittering ice spires, snowdrifts and little snowbells grow there;
+ice makes a pale-blue Ice lantern and snow makes a Snow spirit with a knitted scarf. Snow foxes pounce in the drifts, snow drifts
+down, your breath puffs in the cold — and on clear nights the northern lights ripple over the peaks.
+
 ## Night 21 — 2026-11-13 — Softer edges and a calmer option
 A review night. Where two kinds of land meet — the violet Glowcap Hollows and the meadow, grass and sand, forest and field — the
 border is now soft and wavy instead of a hard staircase, and the edge of a lantern's colour fades smoothly (the game also draws

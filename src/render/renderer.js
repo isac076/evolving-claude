@@ -154,6 +154,7 @@ G.Renderer = class {
 
     // weather: cloud shadows, grey skies, rain, wind-blown leaves, mist, rainbows
     this.weatherFx.draw(ctx, state, camX, camY, W, H, dt, this.dpr);
+    G.PeakFX.air(ctx, state, camX, camY, W, H, dt, time);   // snow drifting over the peaks, frosty breath (Night 22)
 
     // build preview
     if (state.placing) {
@@ -188,6 +189,7 @@ G.Renderer = class {
 
     this.drawLighting(dark * (world.floor > 0 ? G.SUN.night : 1), camX, camY, lights, nightGlows, player, time, wv.fog);   // softer nights under the Sun
     G.SporeFX.draw(ctx, state, camX, camY, W, H, dt, time, dark);   // glowing spores over the hollows (Night 17)
+    G.PeakFX.sky(ctx, state, camX, camY, W, H, dt, time, dark);   // frost glinting in the air, the northern lights (Night 22)
     G.HushFX.draw(ctx, state, camX, camY, W, H, time, dark);   // hushlings, Shines and starlight (Night 19)
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
     G.SunFX.sky(ctx, state, camX, camY, W, H, time, dark);      // the Great Sun: sunrise, the risen Sun, shafts of sunlight (Night 20)

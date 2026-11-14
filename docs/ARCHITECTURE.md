@@ -13,6 +13,7 @@ src/audio/sound.js    G.Sound — Web Audio engine (buses, reverb, tone/bell/noi
 src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a warm chord that follow day/night + restoration
 src/audio/instruments.js G.INSTRUMENTS — the music's instruments (flute, marimba, kalimba, glass, harp, music box, bass, voice, pipe…), G.musicVoice
 src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lantern's chord (added to G.SFX)
+src/audio/peak_sfx.js the Snowy Peaks' sounds: ice, snowball, snowbell, finding a peak, the northern lights (added to G.SFX)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -31,12 +32,14 @@ src/data/hollow.js    the Glowcap Hollows (Night 17): G.HOLLOW settings, the `mu
 src/data/riverbank.js riverbanks & waymarks (Night 18): G.RIVER settings, clay item + `claybank` object, stepping stones / signpost / banner / clay planter + recipes, G.BANNER_HUES, G.SIGN_WORDS (suggested names), G.RIVER_SAYS
 src/data/hush.js      the hush of night (Night 19): G.HUSH settings, starlight + Starlit charm items, the Moon lantern + recipes, the goal chapter (spliced in before the ruins), G.HUSH_SAYS
 src/data/sun.js       the Great Sun (Night 20): G.SUN settings, G.SUN_STAMP + pieces, the sunflame structure (a road stop), G.SUN_SAYS, G.ENDING words, friends' sun lines, the goal chapter (last)
+src/data/peaks.js     the Snowy Peaks (Night 22): G.PEAKS settings, the `frost` ground, ice + snow items, fir / snowdrift / ice spire / snowbell objects (G.PEAK_OBJECTS = which grows by the tile's roll), Ice lantern + Snow spirit, the snow fox, music place, road stop, G.PEAK_NAMES, the goal chapter (after the riverbanks), G.PEAK_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
 src/world/shrines.js  G.Shrines — where the four shrines stand (from the seed, ground-only), pieceAt() for tileAt, bowls lit / kindled, known(), nextToKindle()
 src/world/sun.js      G.Sun — where the Sun's Hearth stands (ground-only, past the farthest shrine), pieceAt(), sockets lit, isLit(), known(), guideTarget()
 src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land, none near the start), first() (the one a walk from the start), placeOf() (each hollow's id + name)
+src/world/peaks.js    G.Peaks — where the snowy peaks are: lift() (the first peak raises a mountain a walk from the start), at() (highland above the wandering snow line, none near the start), first(), placeOf() (each peak's id + name), around() (how much of the view is snow)
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
@@ -54,6 +57,7 @@ src/game/shrine_play.js G.ShrinePlay (`state.shrines`) — sensing, finding, off
 src/game/sun_play.js  G.SunPlay (`state.sun`) — sensing, finding, the sockets and altar, the sunrise (dawn, eased hushlings, world.floor easing in) and opening the ending
 src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
+src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
@@ -72,6 +76,8 @@ src/render/village_sprites.js the well, market stall, ribbon pole (+ half-built 
 src/render/travel_fx.js G.TravelFX — a flight: road of light ahead, the mote and its tail, shadow, beam over the destination, warm veil, landing ring
 src/render/shore_fx.js G.ShoreFX — breathing foam + a rolling wave line along shores; follows roundCorners' curves (radius 11)
 src/render/hollow_sprites.js G.drawHollowGround (moss, tiny toadstools), giant mushroom, glowcaps, Mushroom lamp, Spore patch, their regrow sprites, the glow snail
+src/render/peak_sprites.js G.drawPeakGround (wind ripples, blue hollows, glints, stones), snowy fir, snowdrift, ice spire, snowbells, Ice lantern, Snow spirit, their regrow sprites, the snow fox
+src/render/peak_fx.js G.PeakFX — air() before the lighting (drifting snow over the peaks, frosty breath), sky() after it (glints of frost by day, the northern lights: vertical gradient strips drawn side by side along wavy curtains)
 src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and from Mushroom lamps, snail halos; drawn after the night layer
 src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost, banner (streams with G.windNow), clay planter, G.drawSignTags (name tags over nearby signposts)
 src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, sockets, the altar (cold / burning), gold flagstones, the sunrise, the risen Sun, shafts of sunlight, the map mark
@@ -88,6 +94,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
 tools/smoke_review21.py Night 21 review test (wavy hollow edge, smooth colour edge, map names apart, Calm motion, the ending on a phone)
 tools/smoke_sun.py    Night 20 chapter test (placement, sockets, sensing, the altar, the sunrise at night, dawn, the ending, world.floor, saving)
 tools/smoke_hush.py   Night 19 chapter test (hushlings come, cling, Shine eases, lantern light eases, Moon lantern calm, never goes out, gone by day)
@@ -113,6 +120,10 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Soft colour edges**: the renderer also computes restoration at every tile
   corner; when a tile's corners differ `G.drawGround` fills it with one linear gradient along the way the colour rises
   (a flat fit of the four corners — Night 21; it used to be 4×4 squares, 5× slower).
+- **Biomes on top of the old ground** (Night 17, 22): `world.groundType(tx, ty)` starts from elevation + moisture; the Glowcap
+  Hollows (`G.Hollow.at`) and the Snowy Peaks (`G.Peaks.lift` + `G.Peaks.at`) are laid over it. `groundType(tx, ty, true)` ("base")
+  leaves them out — the start, ruins, shrines, the Sun's Hearth and the biomes' own "first" spots are placed from the base, so they never move.
+  Snowy grounds set `snowy: true` on their tile (footprints) and their objects come from a roll table (`G.PEAK_OBJECTS`).
 - **Wavy land edges** (Night 21): after `roundCorners`, `fringe()` in sprites.js draws 2–3 half-ellipse bumps along every edge
   between two different land grounds (not water — shores have foam). The bumps come from a hash of the edge itself, so both
   tiles agree; each bulges into one side (72% into the lower rank) painted with the other side's colour.

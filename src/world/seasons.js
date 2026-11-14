@@ -72,7 +72,7 @@ G.Seasons = {
   prints: [],
   step(world, x, y, alt) {
     const tile = world.tileAt(Math.floor(x / G.TILE), Math.floor(y / G.TILE)), d = G.SEASON_NOW.tiles[tile.type];
-    if (d.snow < 0.4 || world.structureAt(Math.floor(x / G.TILE), Math.floor(y / G.TILE))) return;
+    if ((d.snow < 0.4 && !G.TILES[tile.type].snowy) || world.structureAt(Math.floor(x / G.TILE), Math.floor(y / G.TILE))) return;
     this.prints.push({ x: x + (alt ? 3 : -3), y: y + 6, life: 1 });
     if (this.prints.length > 80) this.prints.shift();
   },

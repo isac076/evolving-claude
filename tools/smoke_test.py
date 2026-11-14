@@ -24,6 +24,7 @@ import smoke_riverbank
 import smoke_hush
 import smoke_sun
 import smoke_review21
+import smoke_peaks
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -349,6 +350,7 @@ def play(page, errors):
         smoke_hush.run(page, SHOTS, errors)   # Night 19: hushlings, Shine, starlight, the Moon lantern
         smoke_sun.run(page, SHOTS, errors)    # Night 20: the Sun's Hearth, the sunrise, the ending
         smoke_review21.run(page, SHOTS, errors)   # Night 21: review-night fixes (edges, map names, calm motion)
+        smoke_peaks.run(page, SHOTS, errors)   # Night 22: the snowy peaks, ice lantern, snow spirit, foxes, northern lights
 
 
 if __name__ == "__main__":

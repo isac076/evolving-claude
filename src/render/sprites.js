@@ -43,7 +43,8 @@ G.sway = function (t, seed, amp) {
 // the lightness of a ground tile (its own variation, and water shimmering)
 // d = the ground's colour this season (G.SEASON_NOW.tiles, see world/seasons.js)
 function groundL(tile, d, t, tx, ty) {
-  let l = d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
+  // snowfields (Night 22) only keep the soft patches: a per-tile step shows as a grid on bright snow
+  let l = tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
   if (d.water && !G.calm) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
   return l;
 }
@@ -158,6 +159,8 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
     }
   } else if (tile.type === 'mushwood') {
     G.drawHollowGround(ctx, tile, d, x, y, f, t);   // moss and tiny toadstools (render/hollow_sprites.js)
+  } else if (tile.type === 'frost') {
+    G.drawPeakGround(ctx, tile, d, x, y, f, t, tx, ty);   // wind ripples, blue hollows, glints (render/peak_sprites.js)
   } else if (d.water && tile.v > 0.9) {
     const a = Math.max(0, Math.sin(t * 2 + tile.v * 40)) * 0.5 * (0.3 + 0.7 * f);
     ctx.fillStyle = `rgba(220,240,255,${a})`;

@@ -63,8 +63,9 @@ as the world does.
 ## Chapter 5 — Exploration
 - [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
   - [x] Mushroom forest — the Glowcap Hollows (Night 17: violet mossy ground in damp woods; giant mushrooms and glowcaps that kept their light through the Fading; glow spores → Mushroom lamp (teal, restores 7, a lantern-road stop) and Spore patches that grow glowcaps; glow snails; drifting glowing spores; a music-box tune; one hollow always ~60 steps from the start, named hollows in the journal)
-  - [ ] Snowy peaks · [ ] Desert · [ ] Crystal caverns · [ ] Islands (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at`, its own data file like data/hollow.js)
-- [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four)
+  - [x] Snowy peaks (Night 22: the highest highland lies under snow all year (`frost` ground, rank 6); one peak always rises ~88 steps from the start (`G.Peaks.lift` raises a mountain there); snowy firs, ice spires (ice → Ice lantern, teal-white, restores 7, a road stop), snowdrifts (snow → Snow spirit, a snowman with a scarf), snowbells; snow foxes that pounce; drifting snow, frosty breath, glints of frost by day, footprints; the northern lights on clear nights (brighter where the colour is back); a chime tune; named peaks in the journal; a goal chapter after the riverbanks)
+  - [ ] Desert · [ ] Crystal caverns · [ ] Islands (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at` / `G.Peaks.at`, its own data file like data/hollow.js or data/peaks.js)
+- [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four; Night 22: the peaks too)
 - [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
 - [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
 - [x] Lantern network fast travel (Night 16 — the lantern roads: stand by a light, open the map, click another light; the spirit leaps up as a mote and flies along a curving road of light; lanterns, beacons, ember lanterns, woken memory stones, kindled shrines and the Heart Stone are all stops; followers come along)
@@ -138,6 +139,12 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 - The craft list shows the Mushroom lamp (glow spores) from day one, before a player has seen a hollow — maybe hide recipes whose
   materials were never gathered (show "???" instead) to keep discoveries a surprise.
 
+- Night 22 (the Snowy Peaks): play a whole night on the first peak with several ice spires on screen — every spire and snowbell is a
+  night glow (like glowcaps). The northern lights are ~400 `drawImage` strips a frame while they shine (`G.PeakFX.drawAurora`); if phones
+  struggle, draw fewer, wider columns. Old saves: the world now has snow on the highest highland and a mountain ~88 steps from the start
+  (`G.Peaks.lift`) — anything built there stays, but a save standing exactly there could find a fir where it stood.
+  `groundType(.., true)` (base) still has no peaks, so the start, ruins, shrines and hollows never move.
+
 ## Notes from Night 20 and before
 (Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
 - Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
@@ -162,6 +169,12 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 ---
 
 ## Ideas (anyone can add here)
+- Peaks: a hot spring (steam, friends bathe in it at dusk); a sled you ride downhill on the snowfields; ice skating on frozen tarns
+- Peaks: a mountain-keeper friend kind found only on the peaks (likes ice lanterns and snow spirits, plays the chimes in the band)
+- Peaks: snow spirits could wave at you, and friends could build their own beside their cottages in winter
+- Peaks: an ice shrine or a ruined observatory on a far peak; the northern lights could spell a memory once all memories are woken
+- Peaks: ptarmigans (white birds that blend into the snow) and mountain goats on the highland ring
+- Peaks: the big map could show a faint shimmer of the northern lights over found peaks at night
 - Ground: the wavy edges could carry little details — pebbles where sand meets grass, tiny mushrooms on the hollow side, ferns at the forest edge
 - Comfort: a colour-blind friendly option (shapes on map marks, not only colours; stronger hue differences for shrine embers)
 - Map: names could fade in as you zoom in (only the big ones when zoomed far out)

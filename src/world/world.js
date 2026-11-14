@@ -22,17 +22,22 @@ G.World = class {
   // The ground type at a tile, straight from the seed (no cache, no objects).
   // base = the old ground only, without the Glowcap Hollows (Night 17): the start,
   // the ruins and the hollows themselves are placed from it, so they never move.
+  // The Snowy Peaks (Night 22) are left out of `base` too: the first peak lifts the land a
+  // walk from the start (G.Peaks.lift), and the highest highland lies under snow.
   groundType(tx, ty, base) {
     const s = this.seed;
-    const e = G.fbm(tx * 0.018, ty * 0.018, s, 5);            // elevation
+    let e = this.elevation(tx, ty);
+    if (!base) e += G.Peaks.lift(this, tx, ty);
     if (e < 0.36) return 'deep';
     if (e < 0.42) return 'water';
     if (e < 0.445) return 'sand';
-    if (e > 0.68) return 'stone';
+    if (e > 0.68) return !base && G.Peaks.at(this, tx, ty, e) ? 'frost' : 'stone';
     const m = G.fbm(tx * 0.03 + 100, ty * 0.03, s + 777, 3);  // moisture
     if (!base && m > 0.2 && G.Hollow.at(this, tx, ty, m)) return 'mushwood';
     return m > 0.55 ? 'forest' : 'grass';
   }
+
+  elevation(tx, ty) { return G.fbm(tx * 0.018, ty * 0.018, this.seed, 5); }
 
   tileAt(tx, ty) {
     const k = G.key(tx, ty);
@@ -50,6 +55,7 @@ G.World = class {
     else if (type === 'sand') obj = o < 0.015 ? 'rock' : o > 0.93 ? 'reeds' : null;
     if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
     if (type === 'mushwood') obj = o < 0.035 ? 'tree' : o < 0.15 ? 'bigshroom' : o > 0.956 ? 'glowcap' : null;
+    if (type === 'frost') { for (const [k, ob] of G.PEAK_OBJECTS) if (o < k) { obj = ob; break; } }
     // soft clay where the shallows meet the shore (Night 18)
     const cr = !obj && G.RIVER.clayOn[type];
     if (cr && o >= cr[0] && o < cr[1] && this.besideShallows(tx, ty)) obj = 'claybank';
