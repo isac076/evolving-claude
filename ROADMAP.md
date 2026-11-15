@@ -64,12 +64,12 @@ as the world does.
 - [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
   - [x] Mushroom forest — the Glowcap Hollows (Night 17: violet mossy ground in damp woods; giant mushrooms and glowcaps that kept their light through the Fading; glow spores → Mushroom lamp (teal, restores 7, a lantern-road stop) and Spore patches that grow glowcaps; glow snails; drifting glowing spores; a music-box tune; one hollow always ~60 steps from the start, named hollows in the journal)
   - [x] Snowy peaks (Night 22: the highest highland lies under snow all year (`frost` ground, rank 6); one peak always rises ~88 steps from the start (`G.Peaks.lift` raises a mountain there); snowy firs, ice spires (ice → Ice lantern, teal-white, restores 7, a road stop), snowdrifts (snow → Snow spirit, a snowman with a scarf), snowbells; snow foxes that pounce; drifting snow, frosty breath, glints of frost by day, footprints; the northern lights on clear nights (brighter where the colour is back); a chime tune; named peaks in the journal; a goal chapter after the riverbanks)
-  - [ ] Desert · [ ] Crystal caverns · [ ] Islands (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at` / `G.Peaks.at`, its own data file like data/hollow.js or data/peaks.js)
+  - [ ] Desert · [ ] Crystal caverns · [ ] Islands (Night 23: natural islands can now be reached by boat — a real island biome with its own life is still to come) (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at` / `G.Peaks.at`, its own data file like data/hollow.js or data/peaks.js)
 - [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four; Night 22: the peaks too)
 - [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
 - [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
 - [x] Lantern network fast travel (Night 16 — the lantern roads: stand by a light, open the map, click another light; the spirit leaps up as a mote and flies along a curving road of light; lanterns, beacons, ember lanterns, woken memory stones, kindled shrines and the Heart Stone are all stops; followers come along)
-- [ ] Boats to cross wide seas
+- [x] Boats to cross wide seas (Night 23 — the leaf boat: made at a workbench, walk into any water to sail; a gliding boat with a petal sail, a wake, paddle strokes; lily pads, driftwood and pearl beds on the water; pearls → the Sea lantern (a floating light, a road stop); whales that surface, blow and sing in coloured deep sea; moon jellies glowing at night; a goal chapter "Across the water"; the sea surface lost its per-tile quilt and got drifting wave crests)
 
 ## Chapter 6 — The mystery of the Fading
 - [x] Lore fragments found in ruins tell what happened (Night 11 — 12 memories in `G.LORE`, told in order; they set up the Great Sun, the Heart and the Ember Shrines)
@@ -145,6 +145,13 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
   (`G.Peaks.lift`) — anything built there stays, but a save standing exactly there could find a fir where it stood.
   `groundType(.., true)` (base) still has no peaks, so the start, ruins, shrines and hollows never move.
 
+- Night 23 (Across the water): `Player.blocked()` is the spirit's own collision (water is open with a boat) — anything that moves the
+  player should use it, not `world.isSolid`. Water tiles now carry objects (`G.SEA_OBJECTS`); objects with `afloat` make way for bridges,
+  stepping stones and Sea lanterns (`canBuild`). The sea surface: `groundL` dropped the per-tile shimmer for water (it looked like a quilt
+  once you sail on it) and `drawGround` draws a drifting wave crest on ~30% of water tiles — measure on a phone over open sea. Play a long
+  sail: is `G.SEA.grip` (the glide) too floaty? Do whales show up often enough around one Sea lantern (restore 8, `restore: 0.35`)?
+  Old saves: a save standing on water now loads with the boat only if they own one; without, the spirit can walk out of the water tile.
+
 ## Notes from Night 20 and before
 (Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
 - Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
@@ -169,6 +176,12 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 ---
 
 ## Ideas (anyone can add here)
+- Sea: an island biome (palm-like trees, shells, turtles, a lighthouse ruin with a memory); a lighthouse you build that sweeps a beam at night
+- Sea: a fishing line (catch-and-release: a fish card in the journal), crabs on beaches, seabirds over the coast, otters in the shallows
+- Sea: friends could ride along in the boat (a follower sits in the bow); a "sailor" friend kind found adrift on a raft far out at sea
+- Sea: a dock / jetty floor that boats tie up to; boat upgrades (a lantern on the bow, a bigger sail = faster in the wind)
+- Sea: the whale could follow your boat for a while once met; a whale song phrase in the music when one is near (G.MUSIC_BAND-like)
+- Sea: winter freezes the shallows (walk on ice, no boat); storms make the sea choppier (bigger crests, the boat rocks more)
 - Peaks: a hot spring (steam, friends bathe in it at dusk); a sled you ride downhill on the snowfields; ice skating on frozen tarns
 - Peaks: a mountain-keeper friend kind found only on the peaks (likes ice lanterns and snow spirits, plays the chimes in the band)
 - Peaks: snow spirits could wave at you, and friends could build their own beside their cottages in winter

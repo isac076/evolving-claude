@@ -1,5 +1,6 @@
 // G.Creatures — the little lives that return to restored land: butterflies,
-// songbirds, rabbits, fish, moths and glow snails (kinds are data in data/creatures.js).
+// songbirds, rabbits, fish, moths and glow snails (kinds are data in data/creatures.js;
+// the sea's whales and moon jellies are in world/sea_life.js).
 // They appear around the screen where the land is coloured, behave on their
 // own, shy away from the spirit, and quietly leave again. Nothing is saved.
 // Also owns water ripples (from fish and from walking along the shore).
@@ -41,7 +42,7 @@ G.Creatures = class {
   suits(def, world, x, y) {
     const { tx, ty } = this.tileOf(x, y);
     if (!def.tiles.includes(world.tileAt(tx, ty).type)) return false;
-    if (def.move === 'swim') { if (!this.waterOk(world, x, y)) return false; }
+    if (def.under) { if (!this.waterOk(world, x, y)) return false; }   // fish, whales, moon jellies
     else if (def.move !== 'flutter' && !this.groundOk(world, x, y)) return false;
     return world.restoreAt(x, y, world.lights) >= def.restore;
   }
@@ -70,7 +71,7 @@ G.Creatures = class {
 
     for (const c of this.list) {
       this.step(c, dt, world, day, p);
-      if (state.running && !c.leaving && c.a > 0.6 && Math.hypot(c.x - p.x, c.y - p.y) < 120) this.meet(state, c.kind);
+      if (state.running && !c.leaving && c.a > 0.6 && Math.hypot(c.x - p.x, c.y - p.y) < 120 && !(c.surf < 0.5)) this.meet(state, c.kind);
     }
     this.list = this.list.filter(c => !c.gone);
 
@@ -382,7 +383,7 @@ G.Creatures = class {
       ctx.strokeStyle = `rgba(235,245,255,${(r.life * 0.45 * r.s).toFixed(3)})`;
       ctx.beginPath(); ctx.ellipse(r.x - camX, r.y - camY, r.r, r.r * 0.45, 0, 0, 6.2832); ctx.stroke();
     }
-    for (const c of this.list) if (c.kind === 'fish' && c.state !== 'jump') this.drawOne(ctx, c, camX, camY, t);
+    for (const c of this.list) if (c.def.under && c.state !== 'jump') this.drawOne(ctx, c, camX, camY, t);   // fish, whales, moon jellies
   }
 
   // creatures standing on the ground, bucketed by tile row for depth sorting

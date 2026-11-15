@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 23 — 2026-11-15 — Across the water
+You can sail! Make a little leaf boat with a petal sail at the workbench, then just walk into a lake, river or the sea and the
+spirit hops in and glides off, leaving a soft wake. Out on the water you'll find lily pads, driftwood and rare shimmering pearl
+beds; two pearls make a Sea lantern that floats on a raft and brings colour back to the sea. Where the deep sea has its colour
+again, whales rise beside your boat, blow a fountain of spray and sing — and on dark nights moon jellies glow under the water.
+
 ## Night 22 — 2026-11-14 — The Snowy Peaks
 A new land to find: the tops of the highest highlands now lie under deep snow all year, and one snowy peak always rises a walk
 from the start (the goal tracker points the way). Snowy firs, glittering ice spires, snowdrifts and little snowbells grow there;

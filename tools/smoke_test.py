@@ -25,6 +25,7 @@ import smoke_hush
 import smoke_sun
 import smoke_review21
 import smoke_peaks
+import smoke_sea
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -41,7 +42,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])
         page = browser.new_page(viewport={"width": 1100, "height": 680})
-        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.on("pageerror", lambda e: errors.append(str(e) + " " + str(e.stack)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         try:
             play(page, errors)
@@ -351,6 +352,7 @@ def play(page, errors):
         smoke_sun.run(page, SHOTS, errors)    # Night 20: the Sun's Hearth, the sunrise, the ending
         smoke_review21.run(page, SHOTS, errors)   # Night 21: review-night fixes (edges, map names, calm motion)
         smoke_peaks.run(page, SHOTS, errors)   # Night 22: the snowy peaks, ice lantern, snow spirit, foxes, northern lights
+        smoke_sea.run(page, SHOTS, errors)     # Night 23: the leaf boat, the sea, pearls, the Sea lantern, whales, moon jellies
 
 
 if __name__ == "__main__":

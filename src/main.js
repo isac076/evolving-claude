@@ -58,6 +58,9 @@ window.G = window.G || {};
   // the Snowy Peaks: finding them, and when the northern lights shine (Night 22)
   const peaks = new G.PeakPlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
   state.peaks = peaks;
+  // the leaf boat: sailing lakes and the open sea (Night 23)
+  const sail = new G.Sailing(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color) });
+  state.sail = sail;
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { if (state.travel && state.travel.trip) state.travel.arrive(); G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -263,7 +266,7 @@ window.G = window.G || {};
   }
 
   function afterLoad() {
-    life.clear(); hush.clear();
+    life.clear(); hush.clear(); sail.clear();
     shrines.kindling = null; shrines.sparks = [];
     sun.rising = null; state.world.floorScale = 1; state.world.rebuildLights();
     travel.trip = null; travel.landed = null; travel.trail = [];
@@ -321,6 +324,7 @@ window.G = window.G || {};
     sun.update(dt);
     hollows.update(dt);
     peaks.update(dt);
+    sail.update(dt);
     signs.update(dt);
   }
 
@@ -366,9 +370,10 @@ window.G = window.G || {};
   let stepDist = 0, stepAlt = false;
   function footsteps(moved) {
     stepDist += moved;
-    if (stepDist < 34) return;
+    const p = state.player;
+    if (stepDist < (p.afloat ? 64 : 34)) return;   // paddle strokes come slower than footsteps
     stepDist = 0; stepAlt = !stepAlt;
-    const p = state.player, st = state.world.structureAt(p.tx, p.ty);
+    const st = state.world.structureAt(p.tx, p.ty);
     const kind = (st && G.STRUCTURES[st.type].step) || G.TILES[state.world.tileAt(p.tx, p.ty).type].step;
     if (kind) G.Sound.step(G.SEASON_NOW.tiles[state.world.tileAt(p.tx, p.ty).type].snow > 0.5 && !st ? 'snow' : kind, { alt: stepAlt });
     G.Seasons.step(state.world, p.x, p.y, stepAlt);

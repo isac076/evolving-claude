@@ -56,6 +56,8 @@ G.World = class {
     if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
     if (type === 'mushwood') obj = o < 0.035 ? 'tree' : o < 0.15 ? 'bigshroom' : o > 0.956 ? 'glowcap' : null;
     if (type === 'frost') { for (const [k, ob] of G.PEAK_OBJECTS) if (o < k) { obj = ob; break; } }
+    const sea = G.SEA_OBJECTS[type];   // lily pads, driftwood and pearl beds on the water (Night 23)
+    if (sea) { for (const [k, ob] of sea) if (o < k) { obj = ob; break; } }
     // soft clay where the shallows meet the shore (Night 18)
     const cr = !obj && G.RIVER.clayOn[type];
     if (cr && o >= cr[0] && o < cr[1] && this.besideShallows(tx, ty)) obj = 'claybank';
@@ -143,7 +145,8 @@ G.World = class {
   canBuild(type, tx, ty) {
     const def = G.STRUCTURES[type];
     if (this.structureAt(tx, ty)) return false;
-    if (this.objectAt(tx, ty)) return false;
+    const here = this.objectAt(tx, ty);   // things floating on the water make way for a bridge or a sea lantern
+    if (here && !(G.OBJECTS[here].afloat && def.on !== 'land')) return false;
     if (def.soil) {   // plants need the right ground, and a spot nothing else will grow back on
       const t = this.tileAt(tx, ty), k = G.key(tx, ty);
       if (!def.soil.includes(t.type) || t.obj || this.grown.has(k)) return false;

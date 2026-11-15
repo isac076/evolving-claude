@@ -14,6 +14,7 @@ src/audio/ambience.js G.Ambience — wind, water, birds, crickets, owls and a wa
 src/audio/instruments.js G.INSTRUMENTS — the music's instruments (flute, marimba, kalimba, glass, harp, music box, bass, voice, pipe…), G.musicVoice
 src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lantern's chord (added to G.SFX)
 src/audio/peak_sfx.js the Snowy Peaks' sounds: ice, snowball, snowbell, finding a peak, the northern lights (added to G.SFX)
+src/audio/sea_sfx.js  the sea's sounds: launch, ashore, deepsea, whale, pearl, lily, buoy (added to G.SFX) + the `paddle` footstep
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -33,6 +34,7 @@ src/data/riverbank.js riverbanks & waymarks (Night 18): G.RIVER settings, clay i
 src/data/hush.js      the hush of night (Night 19): G.HUSH settings, starlight + Starlit charm items, the Moon lantern + recipes, the goal chapter (spliced in before the ruins), G.HUSH_SAYS
 src/data/sun.js       the Great Sun (Night 20): G.SUN settings, G.SUN_STAMP + pieces, the sunflame structure (a road stop), G.SUN_SAYS, G.ENDING words, friends' sun lines, the goal chapter (last)
 src/data/peaks.js     the Snowy Peaks (Night 22): G.PEAKS settings, the `frost` ground, ice + snow items, fir / snowdrift / ice spire / snowbell objects (G.PEAK_OBJECTS = which grows by the tile's roll), Ice lantern + Snow spirit, the snow fox, music place, road stop, G.PEAK_NAMES, the goal chapter (after the riverbanks), G.PEAK_SAYS
+src/data/sea.js       across the water (Night 23): G.SEA settings, `step: 'paddle'` on water, the boat (a tool) + pearl items, lily pad / driftwood / pearl bed objects (G.SEA_OBJECTS = which floats by the tile's roll), the Sea lantern (`buoy`) + recipes, the whale + moon jelly creatures, road stop, the goal chapter (after the peaks), G.SEA_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -42,6 +44,7 @@ src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land
 src/world/peaks.js    G.Peaks — where the snowy peaks are: lift() (the first peak raises a mountain a walk from the start), at() (highland above the wandering snow line, none near the start), first(), placeOf() (each peak's id + name), around() (how much of the view is snow)
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
+src/world/sea_life.js the whale and moon jelly moves added to G.Creatures.prototype (+ deepOk, glows() for the night layer)
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/seasons.js  G.Seasons — which season the clock says, blends two seasons into G.SEASON_NOW, season-change hook, footprints in snow
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, save/load
@@ -59,6 +62,7 @@ src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), 
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
+src/game/sailing.js   G.Sailing (`state.sail`) — sets `player.canSail` from the boat, launching / folding ashore, reaching the deep, crossings, the wake, stats.sea; static hint() (nearest deep water)
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -82,6 +86,7 @@ src/render/spore_fx.js G.SporeFX — glowing spores drifting up over hollows and
 src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost, banner (streams with G.windNow), clay planter, G.drawSignTags (name tags over nearby signposts)
 src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, sockets, the altar (cold / burning), gold flagstones, the sunrise, the risen Sun, shafts of sunlight, the map mark
 src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
+src/render/sea_sprites.js lily pads, driftwood, pearl beds (+ regrow), the Sea lantern, G.drawBoat (the leaf boat, behind/in front of the spirit), G.SeaFX.wake, the whale and moon jelly
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -94,6 +99,7 @@ src/ui/market.js      G.Market — the market stall's swap panel
 src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)
 tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
 tools/smoke_review21.py Night 21 review test (wavy hollow edge, smooth colour edge, map names apart, Calm motion, the ending on a phone)
 tools/smoke_sun.py    Night 20 chapter test (placement, sockets, sensing, the altar, the sunrise at night, dawn, the ending, world.floor, saving)
@@ -384,4 +390,18 @@ That's it — the crafting menu, placing, saving and lighting all pick it up.
   (the hushlings use it). Nights are a little lighter (`G.SUN.night`). G.SunFX: `floor` (carved rays, socket paths), `sky` (after
   G.ShrineFX.sky: the risen Sun + beam, the rising, the dawn flash + wave, `shafts` of sunlight by day). Friends gain `G.VILLAGER_SAYS.sun`
   lines. Stats: `stats.sun = {sensed, found, lit, day, hinted, ending}` — no version bump. Goal chapter 'The Great Sun' (last).
+- **Across the water** (Night 23; data in src/data/sea.js, logic in G.Sailing = `state.sail`): owning the `boat` tool sets `player.canSail`
+  each frame. The player no longer asks `world.isSolid` directly but `player.blocked(world, tx, ty)`: with a boat a water tile is open
+  unless a solid structure stands there. `player.afloat` = on a water tile with no floor structure (a bridge) under it; afloat the spirit
+  is faster (`G.SEA.speed`) but turns slowly (`G.SEA.grip`, a glide), leans into turns (`tilt`), and `G.drawPlayer` draws it sitting low in
+  `G.drawBoat` (part 0 behind, part 1 in front). Water tiles have `step: 'paddle'` (footsteps come every 64px afloat). G.Sailing notices the
+  changes of `afloat` (launch: sound, ripples, first-time toast; ashore: the boat folds, and a landing ≥ `G.SEA.far` tiles from where you set
+  off counts as a crossing), reaching deep water, and keeps `wake` puffs that `G.SeaFX.wake` joins into two widening arms (drawn right
+  after the fish). Walking into water without a boat (`player.bumpWater`) says how to cross once in a while (once a workbench exists).
+  `tileAt` picks water objects from `G.SEA_OBJECTS`; objects with `afloat` don't stop `canBuild` for water structures. The Sea lantern
+  (`buoy`, `on: 'water'`) is a light with `lightHue` and a road stop; `Travel.landing` uses `player.blocked`, so a sailor lands on the
+  water beside it. Creatures with `under: true` (fish, whale, jelly) need open water (`suits`) and are drawn by `drawWater`; whales only
+  in deep water (`deepOk`), with states dive → rise → breathe (spout, song) → sink (tail flukes) and a curiosity for nearby boats; jellies
+  add `glows()` to the night layer. Meeting a whale needs it surfaced (`c.surf`). Stats: `stats.sea = {launched, deep, crossed, sailed, far}`
+  (no version bump). Goal chapter 'Across the water' (after the peaks).
 

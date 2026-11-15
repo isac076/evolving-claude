@@ -44,9 +44,9 @@ G.sway = function (t, seed, amp) {
 // d = the ground's colour this season (G.SEASON_NOW.tiles, see world/seasons.js)
 function groundL(tile, d, t, tx, ty) {
   // snowfields (Night 22) only keep the soft patches: a per-tile step shows as a grid on bright snow
-  let l = tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
-  if (d.water && !G.calm) l += Math.sin(t * 1.4 + tx * 0.55 + ty * 0.35) * 1.8;
-  return l;
+  // water (Night 23) keeps only a faint swell: now that you sail on it, a per-tile step showed as a quilt of squares
+  if (d.water) return d.l + (tile.soft - 0.5) * 3 + (G.calm ? 0 : Math.sin(t * 0.9 + (tx + ty) * 0.25) * 0.5);
+  return tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
 }
 
 // The colour of a piece of ground. Under snow, faded land keeps a thinner,
@@ -165,6 +165,12 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
     const a = Math.max(0, Math.sin(t * 2 + tile.v * 40)) * 0.5 * (0.3 + 0.7 * f);
     ctx.fillStyle = `rgba(220,240,255,${a})`;
     ctx.fillRect(x + tile.v * 20, y + 12 + tile.v * 8, 6, 1.5);
+  } else if (d.water && tile.v < 0.32) {   // little wave crests that rise, drift and sink again (Night 23)
+    const ph = G.calm ? 0.5 : (t * 0.3 + tile.v * 7.3) % 1, a = Math.round(Math.sin(ph * Math.PI) * (0.07 + 0.13 * f) * 50) / 50;
+    if (a <= 0) return;
+    const wx = x + 3 + (tile.v * 41 % 1) * 14 + ph * 7, wy = y + 7 + (tile.v * 63 % 1) * 18, w = tile.type === 'deep' ? 10 : 7;
+    ctx.strokeStyle = `rgba(225,242,255,${a.toFixed(3)})`; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.moveTo(wx, wy); ctx.quadraticCurveTo(wx + w / 2, wy - 2.4, wx + w, wy); ctx.stroke();
   } else if (tile.type === 'sand' && tile.v > 0.85) {
     ctx.fillStyle = G.shade(35, 30, 52, f);
     ctx.fillRect(x + tile.v * 24, y + tile.v * 20, 2, 2);
@@ -324,8 +330,12 @@ G.STRUCTURE_SPRITES = {
 
 // ---------- player ----------
 G.drawPlayer = function (ctx, p, sx, sy, t) {
-  const b = Math.sin(p.bob) * 2.5, gr = 13 * (0.7 + 0.3 * (p.glow === undefined ? 1 : p.glow));   // smaller while hushlings sip its glow
-  shadow(ctx, sx, sy + 8, 8, 3, 0.3);
+  const gr = 13 * (0.7 + 0.3 * (p.glow === undefined ? 1 : p.glow));   // smaller while hushlings sip its glow
+  let b = Math.sin(p.bob) * 2.5;
+  if (p.afloat && G.drawBoat) {   // sailing (Night 23): the spirit sits low in its leaf boat and rides the swell
+    G.drawBoat(ctx, p, sx, sy, t, 0);
+    b = G.boatBob(p, t) + 4 + Math.sin(p.bob * 0.5) * 0.6;
+  } else shadow(ctx, sx, sy + 8, 8, 3, 0.3);
   // soft body
   const g = ctx.createRadialGradient(sx, sy - 8 + b, 0, sx, sy - 8 + b, gr);
   g.addColorStop(0, 'rgba(255,250,235,1)'); g.addColorStop(0.5, 'rgba(255,226,160,.9)'); g.addColorStop(1, 'rgba(255,200,120,0)');
@@ -334,4 +344,5 @@ G.drawPlayer = function (ctx, p, sx, sy, t) {
   ctx.fillStyle = '#3b2c4a';
   circle(ctx, sx - 2.5 + p.facing * 1.5, sy - 9 + b, 1.3);
   circle(ctx, sx + 2.5 + p.facing * 1.5, sy - 9 + b, 1.3);
+  if (p.afloat && G.drawBoat) G.drawBoat(ctx, p, sx, sy, t, 1);
 };

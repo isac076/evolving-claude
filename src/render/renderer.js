@@ -102,6 +102,7 @@ G.Renderer = class {
     }
     const life = state.creatures;
     if (life) life.drawWater(ctx, camX, camY, time);
+    G.SeaFX.wake(ctx, state, camX, camY);   // the foam behind the leaf boat (Night 23)
     G.Seasons.drawPrints(ctx, camX, camY, dt);   // footprints in the snow
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const tile = tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)];
@@ -147,7 +148,8 @@ G.Renderer = class {
       if (player.ty === ty && !player.flying) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
     if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
-    if (state.hush) state.hush.holes(nightGlows, camX, camY);   // a Shine, easing hushlings, starlight (Night 19)
+    if (state.hush) state.hush.holes(nightGlows, camX, camY);
+    if (life) life.glows(nightGlows, camX, camY);   // moon jellies glowing under the water (Night 23)   // a Shine, easing hushlings, starlight (Night 19)
     G.drawVillageDecor(ctx, state.village, world, camX, camY, W, H, time, nightGlows);   // bunting over the village green (Night 13)
 
     if (life) life.drawAir(ctx, camX, camY, time);

@@ -63,9 +63,9 @@ G.Travel = class {
 
   // where to set the spirit down beside a light: the first free tile around it
   landing(L) {
-    const world = this.state.world, T = G.TILE, tx = Math.floor(L.x / T), ty = Math.floor(L.y / T);
-    for (const [dx, dy] of G.TRAVEL.land) {
-      if (!world.isSolid(tx + dx, ty + dy)) return { x: (tx + dx + 0.5) * T, y: (ty + dy + 0.5) * T };
+    const world = this.state.world, T = G.TILE, tx = Math.floor(L.x / T), ty = Math.floor(L.y / T), p = this.state.player;
+    for (const [dx, dy] of G.TRAVEL.land) {   // with a leaf boat you may land on the water by a Sea lantern (Night 23)
+      if (!(p && p.blocked ? p.blocked(world, tx + dx, ty + dy) : world.isSolid(tx + dx, ty + dy))) return { x: (tx + dx + 0.5) * T, y: (ty + dy + 0.5) * T };
     }
     return { x: L.x, y: L.y + T };
   }
