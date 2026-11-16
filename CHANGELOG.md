@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 24 — 2026-11-16 — Photo mode and a waking title
+Press P (or the little camera at the top) for photo mode: everything but the world fades away, you can drift the camera around, zoom
+in, hold time still or hurry it to sunset, hide the spirit, and pick a look (Golden hour, Dreamy, Moonlit, Old days) and a frame — the
+Keepsake card even writes where and when on it. Space takes the picture with a soft click; it's kept in a new Album page in the journal
+and can be downloaded. The title screen now wakes up too: the letters light one by one, the grey world blooms into colour, and Continue eases you gently in.
+
 ## Night 23 — 2026-11-15 — Across the water
 You can sail! Make a little leaf boat with a petal sail at the workbench, then just walk into a lake, river or the sea and the
 spirit hops in and glides off, leaving a soft wake. Out on the water you'll find lily pads, driftwood and rare shimmering pearl

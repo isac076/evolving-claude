@@ -176,6 +176,6 @@ G.UI = class {
     this.$('hint').textContent = this.state.placing
       ? 'Click to build · Esc to stop building'
       : this.state.removing ? 'Click a building to pick it up · Esc or X to stop'
-      : 'WASD / arrows or click to move · E gather / talk / water · F shine · C craft · X pick up · M map · Esc rest';
+      : 'WASD / arrows or click to move · E gather / talk / water · F shine · C craft · X pick up · M map · P photo · Esc rest';
   }
 };

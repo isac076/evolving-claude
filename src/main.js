@@ -293,6 +293,13 @@ window.G = window.G || {};
   state.signs = signs;
   const act = new G.Actions({ state, input, renderer, ui, map, ruins, shrines, sun, garden, village, market, folk, travel, signs, floater: addFloater, panAt });
   const craftItem = r => act.craftItem(r);
+  // photo mode (Night 24): P hides the HUD, the camera floats free, time can be held still
+  const photo = new G.Photo(state, {
+    ui, renderer, input,
+    canOpen: () => !travel.trip && !sun.rising && !settings.isOpen && !journal.paused && !signs.isOpen && !ending.isOpen,
+    closeAll: () => { map.toggle(false); ui.toggleCraft(false); market.close(); state.buildRecipe = null; state.placing = null; state.setRemoving(false); },
+  });
+  state.photo = photo;
 
   // ---------- loop ----------
   function update(dt) {
@@ -326,6 +333,7 @@ window.G = window.G || {};
     peaks.update(dt);
     sail.update(dt);
     signs.update(dt);
+    photo.hint();
   }
 
   // on foot: keys, clicks, walking and the camera
@@ -336,6 +344,7 @@ window.G = window.G || {};
     if (input.hit('e', ' ') || state.wantGather) { state.wantGather = false; act.gatherNearest(); }
     if (input.hit('f') || state.wantShine) { state.wantShine = false; hush.shine(); }
 
+    if (input.hit('p')) { photo.toggle(true); if (photo.isOpen) return true; }
     if (input.hit('m')) { map.toggle(); if (map.isOpen) ui.toggleCraft(false); }
     if (input.hit('j')) { map.toggle(false); ui.toggleCraft(false); journal.toggle(true); return true; }
     // Esc closes the nearest thing first; with nothing open it is time to rest
@@ -380,24 +389,27 @@ window.G = window.G || {};
   }
 
   // followers' threads of light and everyone's speech bubbles, above the night
-  function drawFolk() {
-    const ctx = renderer.ctx, camX = Math.round(state.cam.x - renderer.W / 2), camY = Math.round(state.cam.y - renderer.H / 2);
-    G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
-    G.MusicFX.draw(ctx, G.Music.notes, camX, camY, renderer.W, renderer.H);
-    G.drawSkyLanterns(ctx, village.lanterns, camX, camY, renderer.W, renderer.H, state.time);
+  // (clean = photo mode: no bubbles or heart marks in the picture)
+  function drawFolk(clean) {
+    renderer.viewTransform();
+    const ctx = renderer.ctx, W = renderer.vw, H = renderer.vh, camX = Math.round(state.cam.x - W / 2), camY = Math.round(state.cam.y - H / 2);
+    if (!state.player.hidden) G.drawFollowThreads(ctx, state.player, folk.followers, camX, camY, state.time);
+    G.MusicFX.draw(ctx, G.Music.notes, camX, camY, W, H);
+    G.drawSkyLanterns(ctx, village.lanterns, camX, camY, W, H, state.time);
+    if (clean) return;
     for (const v of folk.list) {
       if (folk.indoors(v)) continue;
       G.drawHeartFx(ctx, v, v.x - camX, v.y - camY, frameDt);
       G.drawWishMark(ctx, v, v.x - camX, v.y - camY, state.time, wishes.canGrant(v, state));
     }
-    for (const v of folk.all()) if (v.say) G.drawSpeech(ctx, v, v.x - camX, v.y - camY, renderer.W, renderer.H);
+    for (const v of folk.all()) if (v.say) G.drawSpeech(ctx, v, v.x - camX, v.y - camY, W, H);
   }
 
   function drawFloaters() {
     const ctx = renderer.ctx;
     ctx.font = '600 13px Georgia, serif'; ctx.textAlign = 'center';
     for (const f of state.floaters) {
-      const x = f.x - state.cam.x + renderer.W / 2, y = f.y - state.cam.y + renderer.H / 2;
+      const x = f.x - state.cam.x + renderer.vw / 2, y = f.y - state.cam.y + renderer.vh / 2;
       ctx.globalAlpha = Math.min(1, f.life);
       ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillText(f.text, x + 1, y + 1);
       ctx.fillStyle = f.color; ctx.fillText(f.text, x, y);
@@ -409,26 +421,33 @@ window.G = window.G || {};
   function frame(now) {
     const paused = settings.isOpen || journal.paused || signs.isOpen || ending.isOpen;   // writing a sign's name (or the ending) pauses too
     const realDt = Math.min(0.1, (now - prev) / 1000), dt = paused ? 0 : Math.min(0.05, realDt); prev = now;
-    frameDt = dt;
+    const snap = photo.isOpen, wdt = snap ? dt * photo.speed : dt;   // photo mode can hold the world still or hurry it (Night 24)
+    frameDt = wdt;
     if (settings.isOpen) { if (input.hit('escape')) settings.toggle(false); }
     else if (journal.paused) journal.keys(input);
     else if (ending.isOpen) ending.keys(input);
     else if (signs.isOpen) { if (input.hit('escape')) signs.close(); else if (input.hit('enter')) signs.confirm(); }
+    else if (snap) photo.keys(input, realDt);
     G.Sound.duck(paused);
-    if (state.world) { G.Seasons.update(state, !state.running); state.weather.update(dt, state); }
+    renderer.easeZoom(realDt);
+    if (state.world) { G.Seasons.update(state, !state.running); state.weather.update(wdt, state); }
     if (state.running) {
-      if (!paused) update(dt);
-      renderer.render(state, dt);
-      drawFolk();
-      G.drawSignTags(renderer.ctx, signs.list(), state.player, Math.round(state.cam.x - renderer.W / 2), Math.round(state.cam.y - renderer.H / 2), renderer.W, renderer.H, state.time);
-      drawFloaters();
+      if (snap) photo.step(wdt);
+      else if (!paused) update(dt);
+      renderer.render(state, wdt);
+      drawFolk(snap);
+      if (!snap) {
+        G.drawSignTags(renderer.ctx, signs.list(), state.player, Math.round(state.cam.x - renderer.vw / 2), Math.round(state.cam.y - renderer.vh / 2), renderer.vw, renderer.vh, state.time);
+        drawFloaters();
+      }
+      photo.draw(renderer);
     } else {
-      renderer.render(state, dt);   // title screen: world drifts behind the menu
-      state.time += dt; state.cam.x += dt * 12;
-      if (state.world) state.world.time = state.time;
+      renderer.render(state, dt);   // title screen: the world drifts behind the words
+      title.frame(dt);
+      title.drawMotes(realDt);
     }
-    life.update(dt, state, renderer.W, renderer.H);
-    folk.update(dt, state, renderer.W, renderer.H);
+    life.update(wdt, state, renderer.vw, renderer.vh);
+    folk.update(wdt, state, renderer.vw, renderer.vh);
     sounds.ambience(dt);
     sounds.music(realDt);
     input.endFrame();
@@ -439,7 +458,8 @@ window.G = window.G || {};
   const saved = G.Save.read();
   const btnContinue = document.getElementById('btn-continue');
   if (!saved) btnContinue.style.display = 'none';
-  btnContinue.onclick = () => loadGame(saved);
+  const title = new G.Title(state, renderer);   // the animated title and the way into the world (Night 24)
+  btnContinue.onclick = () => title.leave(() => loadGame(saved));
   const btnNew = document.getElementById('btn-new');
   btnNew.onclick = () => {
     if (saved && !btnNew.classList.contains('sure')) {   // ask once more, right on the button
@@ -447,8 +467,7 @@ window.G = window.G || {};
       setTimeout(() => { btnNew.classList.remove('sure'); btnNew.textContent = 'New world'; }, 4000);
       return;
     }
-    G.Save.clear();
-    newGame(Math.floor(Math.random() * 1e9));
+    title.leave(() => { G.Save.clear(); newGame(Math.floor(Math.random() * 1e9)); });
   };
   window.addEventListener('beforeunload', () => { if (state.running) { if (travel.trip) travel.arrive(); G.Save.write(state); } });
 
@@ -458,8 +477,9 @@ window.G = window.G || {};
   else { const sp = state.world.findSpawn(); state.world.build('heart', sp.tx, sp.ty); }
   state.player = new G.Player(-9999, -9999);
   const l0 = state.world.lights[0] || { x: 0, y: 0 };
-  state.cam.x = l0.x - 200; state.cam.y = l0.y;
-  state.time = G.DAY_LENGTH * 0.2;
+  state.cam.x = l0.x - 200; state.cam.y = l0.y - renderer.vh * 0.14;
+  state.time = saved ? Math.floor((saved.time || 0) / G.DAY_LENGTH) * G.DAY_LENGTH + G.DAY_LENGTH * 0.2 : G.DAY_LENGTH * 0.2;   // your own season, in the afternoon
+  title.start(saved, folk.list.length);
 
   // allow tests/tools to start instantly: index.html?autostart
   if (location.search.includes('autostart')) newGame(12345);

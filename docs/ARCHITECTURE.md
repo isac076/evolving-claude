@@ -15,6 +15,7 @@ src/audio/instruments.js G.INSTRUMENTS — the music's instruments (flute, marim
 src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lantern's chord (added to G.SFX)
 src/audio/peak_sfx.js the Snowy Peaks' sounds: ice, snowball, snowbell, finding a peak, the northern lights (added to G.SFX)
 src/audio/sea_sfx.js  the sea's sounds: launch, ashore, deepsea, whale, pearl, lily, buoy (added to G.SFX) + the `paddle` footstep
+src/audio/photo_sfx.js photo mode and the title: lens, shutter, arrive (added to G.SFX)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -35,6 +36,7 @@ src/data/hush.js      the hush of night (Night 19): G.HUSH settings, starlight +
 src/data/sun.js       the Great Sun (Night 20): G.SUN settings, G.SUN_STAMP + pieces, the sunflame structure (a road stop), G.SUN_SAYS, G.ENDING words, friends' sun lines, the goal chapter (last)
 src/data/peaks.js     the Snowy Peaks (Night 22): G.PEAKS settings, the `frost` ground, ice + snow items, fir / snowdrift / ice spire / snowbell objects (G.PEAK_OBJECTS = which grows by the tile's roll), Ice lantern + Snow spirit, the snow fox, music place, road stop, G.PEAK_NAMES, the goal chapter (after the riverbanks), G.PEAK_SAYS
 src/data/sea.js       across the water (Night 23): G.SEA settings, `step: 'paddle'` on water, the boat (a tool) + pearl items, lily pad / driftwood / pearl bed objects (G.SEA_OBJECTS = which floats by the tile's roll), the Sea lantern (`buoy`) + recipes, the whale + moon jelly creatures, road stop, the goal chapter (after the peaks), G.SEA_SAYS
+src/data/photo.js     photo mode + the title (Night 24): G.PHOTO settings (reach, zoom, speeds, album size), G.PHOTO_FILTERS, G.PHOTO_FRAMES, G.PHOTO_GROUNDS (caption names), G.PHOTO_SAYS, G.TITLE (bloom, tour, motes, arrival), G.TITLE_LINES
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -63,6 +65,7 @@ src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (na
 src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/sailing.js   G.Sailing (`state.sail`) — sets `player.canSail` from the boat, launching / folding ashore, reaching the deep, crossings, the wake, stats.sea; static hint() (nearest deep water)
+src/game/photo.js     G.Photo (`state.photo`) — photo mode: toggle (P / camera button), keys + drag pan (within G.PHOTO.reach), zoom, speed, hide spirit, caption() (where/when), draw() the look + shoot(); static album()/keep()/remove() over localStorage 'lumen-album'; hint() once on a lovely evening
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
@@ -87,6 +90,7 @@ src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost,
 src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, sockets, the altar (cold / burning), gold flagstones, the sunrise, the risen Sun, shafts of sunlight, the map mark
 src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
 src/render/sea_sprites.js lily pads, driftwood, pearl beds (+ regrow), the Sea lantern, G.drawBoat (the leaf boat, behind/in front of the spirit), G.SeaFX.wake, the whale and moon jelly
+src/render/photo_fx.js G.PhotoFX — filter() (blend-mode washes, a cheap bloom from a 1/7 copy, film grain) and frame() (soft edge, cinema bars, keepsake card with caption)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
@@ -97,8 +101,10 @@ src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal t
 src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
 src/ui/market.js      G.Market — the market stall's swap panel
 src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
+src/ui/title.js       G.Title — the title screen: letters split for the CSS light-up, grey→colour bloom (body.title-grey/.title-bloom), the camera tour between lights, rising motes, leave() (veil) and arrive() (zoom ease-out, sparks)
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
+tools/smoke_photo.py  Night 24 test (photo mode opens/hides HUD, still time, camera reach, every filter×frame draws, zoom, shutter → album, hide spirit, closes, album page + let go, phone bar, title letters/summary/arrival)
 tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)
 tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
 tools/smoke_review21.py Night 21 review test (wavy hollow edge, smooth colour edge, map names apart, Calm motion, the ending on a phone)
@@ -118,6 +124,13 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Restoration**: structures with `restore` bring colour back within that many
   tiles. `world.restoreAt(x, y)` returns 0 (grey) … 1 (full colour), and every
   sprite takes this as `f` and uses `G.shade(h, s, l, f)` for its colours.
+- **Zoom** (Night 24): `renderer.zoom` scales the whole view (photo mode, the arrival from the title). `renderer.vw/vh` are the view
+  size in world pixels (`W/zoom`), `viewTransform()` sets the canvas to the zoomed transform; `render()` and everything drawn after it in
+  world space (main's drawFolk, floaters, sign tags) use them. Screen-space overlays (photo filters/frames, title motes) set `dpr` themselves.
+  Ease with `zoomTo(goal, rate)` — main calls `easeZoom(realDt)` every frame.
+- **Photo mode** (Night 24): while `state.photo.isOpen`, main skips `update()` and only advances the clock (`photo.step`) at `dt * photo.speed`;
+  weather, creatures, friends and particles get the same scaled dt. `player.hidden` hides the spirit, its light and its follow threads.
+  The picture you keep is the game canvas itself after `photo.draw()` lays the filter and frame on it.
 - **Lighting**: `G.daylight(time)` gives 0 (night) … 1 (day). At night the
   renderer darkens the screen and cuts holes for light sources (`light` in data).
 - **Drawing order**: ground → shore foam (G.ShoreFX, water tiles with land beside them) → fish + ripples → floor structures → objects/standing

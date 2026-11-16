@@ -18,7 +18,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 #hud { position: fixed; inset: 0; pointer-events: none; }
-body:not(.playing) #hud { display: none; }
+#hud { transition: opacity .9s ease, visibility 0s; }
+body:not(.playing) #hud, body.photo #hud { opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s .35s; }
 #status { position: absolute; top: 14px; left: 14px; padding: 8px 14px; display: flex; gap: 16px; font-size: 14px; letter-spacing: .03em; }
 #restored { color: var(--gold); }
 #friends { color: #f6c6d8; margin-left: -6px; }
@@ -116,9 +117,31 @@ body.removing #game { cursor: pointer; }
   transition: opacity .8s;
 }
 #title.hidden { opacity: 0; pointer-events: none; }
-#title h1 { font-weight: 400; font-size: clamp(48px, 12vw, 104px); margin: 0 0 10px; letter-spacing: .14em; color: #fff3d6; text-shadow: 0 0 40px rgba(255, 210, 120, .7); }
+#title h1 { font-weight: 400; font-size: clamp(48px, 12vw, 104px); margin: 0 0 10px; letter-spacing: .14em; color: #fff3d6; text-shadow: 0 0 40px rgba(255, 210, 120, .7);
+  transition: letter-spacing .9s ease, transform .9s ease, opacity .7s ease; animation: title-breathe 7s ease-in-out 3.2s infinite; }
 #title p { margin: 4px 0; color: var(--ink-dim); font-size: 17px; }
 .title-buttons { margin-top: 26px; display: flex; gap: 12px; }
+/* the title wakes letter by letter (Night 24) */
+#title h1 span { display: inline-block; animation: title-letter 1.5s cubic-bezier(.2,.7,.3,1) both; animation-delay: calc(.35s + var(--i) * .17s); }
+@keyframes title-letter {
+  0% { opacity: 0; transform: translateY(10px) scale(.92); filter: blur(10px); text-shadow: none; }
+  45% { opacity: 1; text-shadow: 0 0 60px rgba(255, 226, 150, 1), 0 0 18px rgba(255, 240, 200, .9); }
+  100% { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes title-breathe { 0%, 100% { text-shadow: 0 0 40px rgba(255, 210, 120, .7); } 50% { text-shadow: 0 0 56px rgba(255, 214, 130, .95), 0 0 12px rgba(255, 236, 190, .4); } }
+#title .t-line, #title .title-buttons, #title-summary { animation: title-rise 1.2s ease both; }
+#title .t-line:nth-of-type(1) { animation-delay: 1.3s; }
+#title .t-line:nth-of-type(2) { animation-delay: 1.6s; }
+#title .title-buttons { animation-delay: 2s; }
+#title-summary { animation-delay: 2.4s; margin-top: 18px !important; font-size: 13px !important; letter-spacing: .08em; font-style: italic; color: rgba(255, 226, 160, .6) !important; }
+@keyframes title-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#title.leaving h1 { letter-spacing: .32em; transform: translateY(-16px); opacity: 0; }
+#title.leaving { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+body.calm #title h1, body.calm #title h1 span, body.calm #title .t-line, body.calm #title .title-buttons, body.calm #title-summary { animation-duration: .01s; animation-delay: 0s; animation-iteration-count: 1; }
+body.title-grey #game { filter: grayscale(1) brightness(.7); }
+body.title-grey.title-bloom #game { filter: grayscale(0) brightness(1); transition: filter 3.6s ease; }
+#veil { position: fixed; inset: 0; background: #0b0d20; opacity: 0; pointer-events: none; transition: opacity 1.3s ease; z-index: 30; }
+#veil.on { opacity: .94; transition: opacity .45s ease; }
 .title-buttons button {
   padding: 11px 26px; border-radius: 999px; background: rgba(255, 215, 122, .12);
   border: 1px solid rgba(255, 215, 122, .45); font-size: 16px; letter-spacing: .04em;
@@ -451,3 +474,68 @@ body.big-text #signpanel { zoom: 1.18; }
 body.big-text #ending { zoom: 1.12; }
 body.big-text .ending-card { max-height: calc((100vh - 110px) / 1.12); }   /* zoom scales vh too */
 @media (max-width: 600px) { #ending-lines p { font-size: 15px; } #ending-title { font-size: 27px; } .ending-card { padding: 22px 18px 18px; margin-top: 50px; max-height: calc(100vh - 90px); } body.big-text .ending-card { max-height: calc((100vh - 90px) / 1.12); } #ending::before { width: 80px; height: 80px; margin-left: -40px; top: 5%; } }
+
+/* ---------- photo mode (Night 24) ---------- */
+#btn-photo { pointer-events: auto; background: none; border: 0; padding: 0 2px; margin: -4px -2px -4px -6px; display: flex; opacity: .8; }
+#btn-photo:hover { opacity: 1; }
+#btn-photo path, #btn-photo circle { fill: none; stroke: var(--gold); stroke-width: 1.7; stroke-linejoin: round; }
+#photobar { position: fixed; inset: 0; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .35s, visibility 0s .35s; }
+body.photo #photobar { opacity: 1; visibility: visible; transition: opacity .5s .15s, visibility 0s; }
+.ph-row { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); width: max-content; transition: opacity .6s; display: flex; align-items: stretch; gap: 4px; padding: 5px; pointer-events: auto; max-width: calc(100vw - 28px); flex-wrap: wrap; justify-content: center; }
+.ph-row > button, .ph-zoom { background: rgba(255, 255, 255, .04); border: 1px solid transparent; border-radius: 9px; padding: 5px 11px; display: flex; flex-direction: column; align-items: flex-start; min-width: 74px; }
+.ph-row > button:hover { border-color: var(--edge); background: rgba(255, 255, 255, .09); }
+.ph-row small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); }
+.ph-row kbd { font: inherit; opacity: .6; }
+.ph-row b { font-weight: 400; font-size: 14px; color: var(--gold); white-space: nowrap; }
+.ph-zoom { flex-direction: row; align-items: center; gap: 6px; min-width: 0; }
+.ph-zoom button { background: none; border: 1px solid var(--edge); border-radius: 50%; width: 26px; height: 26px; padding: 0; line-height: 1; }
+.ph-zoom em { font-style: normal; font-size: 13px; min-width: 40px; text-align: center; color: var(--ink-dim); }
+#ph-done { justify-content: center; align-items: center; color: var(--ink); background: rgba(255, 215, 122, .12); border-color: rgba(255, 215, 122, .4); }
+#ph-help { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); margin: 0; padding: 7px 14px; border-radius: 999px; background: rgba(10, 10, 26, .5);
+  font-size: 13px; color: var(--ink-dim); white-space: nowrap; max-width: calc(100vw - 40px); overflow: hidden; text-overflow: ellipsis; animation: ph-help 7s ease forwards; }
+body:not(.photo) #ph-help { animation: none; }
+@keyframes ph-help { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+#ph-shutter { transition: opacity .6s; position: absolute; right: 22px; top: 50%; transform: translateY(-50%); width: 66px; height: 66px; border-radius: 50%; pointer-events: auto;
+  background: rgba(10, 10, 26, .35); border: 3px solid rgba(255, 243, 214, .9); padding: 0; box-shadow: 0 0 18px rgba(255, 210, 120, .35); }
+#ph-shutter i { display: block; margin: 5px; height: calc(100% - 10px); border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff8e6, #ffd77a 70%); transition: transform .12s; }
+#ph-shutter:hover i { transform: scale(.94); }
+#ph-shutter:active i { transform: scale(.82); }
+#photo-flash { position: fixed; inset: 0; background: #fffaf0; opacity: 0; pointer-events: none; z-index: 20; }
+#photo-flash.go { animation: ph-flash .7s ease-out; }
+body.calm #photo-flash.go { animation-duration: .3s; }
+@keyframes ph-flash { 0% { opacity: .85; } 100% { opacity: 0; } }
+#photo-kept { position: fixed; right: 14px; bottom: 84px; width: min(250px, calc(100vw - 28px)); padding: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 21;
+  opacity: 0; transform: translateY(16px) rotate(2deg); pointer-events: none; transition: opacity .4s, transform .5s cubic-bezier(.2,.8,.3,1.2); }
+#photo-kept.show { opacity: 1; transform: rotate(-1.5deg); pointer-events: auto; }
+#photo-kept img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 4px; border: 4px solid #f4ecdc; box-sizing: border-box; display: block; }
+#photo-kept img[src=""] { display: none; }
+#photo-kept > div { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.pk-btns { display: flex; justify-content: space-between; align-items: center; }
+#pk-download { color: var(--gold); text-decoration: none; border: 1px solid rgba(255, 215, 122, .45); border-radius: 999px; padding: 3px 12px; cursor: pointer; }
+#pk-download:not([href]) { opacity: .5; }
+#pk-close { background: none; border: 0; font-size: 18px; line-height: 1; }
+@media (max-width: 640px) {
+  .ph-row > button, .ph-zoom { min-width: 0; padding: 4px 8px; }
+  .ph-row small kbd { display: none; }
+  .ph-row { bottom: 10px; }
+  #ph-shutter { right: 50%; top: auto; bottom: 128px; transform: translateX(50%); }
+  #ph-help { white-space: normal; text-align: center; border-radius: 12px; }
+}
+@media (hover: none), (pointer: coarse) { .ph-row small kbd { display: none; } }
+body.ph-idle .ph-row, body.ph-idle #ph-shutter { opacity: .15; }
+/* the journal's album */
+.j-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.j-photo { background: #f4ecdc; border: 0; border-radius: 3px; padding: 6px 6px 8px; display: flex; flex-direction: column; text-align: left; color: #5a4026; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+.j-photo:nth-child(odd) { transform: rotate(-1deg); } .j-photo:nth-child(even) { transform: rotate(1deg); }
+.j-photo:hover { transform: none; box-shadow: 0 4px 16px rgba(255, 210, 120, .3); }
+.j-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; margin-bottom: 5px; }
+.j-photo b { font-weight: 400; font-style: italic; font-size: 13px; }
+.j-photo em { font-style: normal; font-size: 11px; color: rgba(90, 64, 38, .7); }
+.j-photo-big { display: flex; flex-direction: column; gap: 3px; }
+.j-photo-big img { width: 100%; max-height: 56vh; object-fit: contain; background: #f4ecdc; border: 6px solid #f4ecdc; box-sizing: border-box; border-radius: 3px; margin-bottom: 6px; }
+.j-photo-big b { font-weight: 400; font-style: italic; color: var(--gold); font-size: 16px; }
+.j-photo-big em { font-style: normal; font-size: 12px; color: var(--ink-dim); }
+.j-photo-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.j-photo-btns button, .j-photo-btns a { background: rgba(255, 215, 122, .08); border: 1px solid var(--edge); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--ink); text-decoration: none; }
+.j-photo-btns a { color: var(--gold); }
+.j-photo-btns button.sure { border-color: var(--bad); color: var(--bad); }

@@ -17,7 +17,7 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="panel" id="status"><span id="season"></span><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button><button id="btn-journal" aria-label="Journal (J)" title="Journal (J)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 5.5C6.5 4.2 9.5 4.3 12 6c2.5-1.7 5.5-1.8 8-.5V19c-2.5-1.3-5.5-1.2-8 .5-2.5-1.7-5.5-1.8-8-.5z M12 6v13.5"/></svg></button><button id="btn-settings" aria-label="Rest and settings (Esc)" title="Rest and settings (Esc)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 1 0 7.6 13.2A7 7 0 0 1 12 3.2z"/></svg></button></div>
+  <div class="panel" id="status"><span id="season"></span><span id="clock">Day 1</span><span id="weather"></span><span id="restored">Lanterns lit: 0</span><span id="friends"></span><button id="btn-sound" aria-label="Sound"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="slash" d="M16 9l6 6M22 9l-6 6"/></svg></button><button id="btn-photo" aria-label="Photo mode (P)" title="Photo mode (P)"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 8.5h3.2l1.6-2.3h6.4l1.6 2.3H20v10H4z"/><circle cx="12" cy="13.2" r="3.3"/></svg></button><button id="btn-journal" aria-label="Journal (J)" title="Journal (J)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 5.5C6.5 4.2 9.5 4.3 12 6c2.5-1.7 5.5-1.8 8-.5V19c-2.5-1.3-5.5-1.2-8 .5-2.5-1.7-5.5-1.8-8-.5z M12 6v13.5"/></svg></button><button id="btn-settings" aria-label="Rest and settings (Esc)" title="Rest and settings (Esc)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 1 0 7.6 13.2A7 7 0 0 1 12 3.2z"/></svg></button></div>
   <div class="panel" id="goals"></div>
   <div class="panel" id="wishes"></div>
   <canvas id="minimap" title="Map (M)"></canvas>
@@ -90,7 +90,8 @@
       <kbd>X</kbd><span>pick a building back up</span>
       <kbd>Click</kbd><span>a signpost to name the place · a banner to change its colour</span>
       <kbd>M</kbd><span>the map — beside a lantern, click another light to fly there</span>
-      <kbd>J</kbd><span>your journal: memories, places, creatures, friends</span>
+      <kbd>J</kbd><span>your journal: memories, places, creatures, friends, photos</span>
+      <kbd>P</kbd><span>photo mode — frame the moment, pick a filter, Space to keep it</span>
       <kbd>N</kbd><span>sound on / off</span>
       <kbd>Esc</kbd><span>rest here (this menu)</span>
     </div>
@@ -101,6 +102,7 @@
       <kbd>Craft</kbd><span>lanterns, paths, and picking things up</span>
       <kbd>Map</kbd><span>tap the round map — beside a lantern, tap another light to fly there</span>
       <kbd>Book</kbd><span>tap the little book for your journal</span>
+      <kbd>Camera</kbd><span>tap the little camera for photo mode</span>
     </div>
     <p class="settings-note">Lanterns bring the colour back. Lost spirits follow your light — lead them into the colour and they make a home. A heart over a friend means they have a wish: talk to them to hear it. Cottages built close together grow into a village with a well, a market and festivals. Old ruins hide memory stones — wake them to learn why the world faded. Far out in the grey stand four Ember Shrines: offer their bowls what they ask, and a wave of colour rolls across the land — with all four burning, follow the golden arrow to the Sun's Hearth and wake the Great Sun. Your lights are joined by old roads of light: stand by one, open the map and pick another to fly there. The seasons turn every few days: blossom, summer, falling leaves and snow. Clay lies where shallow water meets the shore — it makes stepping stones and signposts that name your places. On dark nights little hushlings drift out of the grey and sip your light — lead them into a lantern's glow, or Shine (F), and they turn into starlight.</p>
 
@@ -115,7 +117,7 @@
 <div id="journal">
   <div class="panel journal-frame" role="dialog" aria-labelledby="journal-h">
     <div class="journal-head"><h2 id="journal-h">Journal</h2><button id="journal-close" aria-label="Close">×</button></div>
-    <div class="journal-tabs"><button data-tab="memories">Memories</button><button data-tab="places">Places</button><button data-tab="creatures">Creatures</button><button data-tab="friends">Friends</button></div>
+    <div class="journal-tabs"><button data-tab="memories">Memories</button><button data-tab="places">Places</button><button data-tab="creatures">Creatures</button><button data-tab="friends">Friends</button><button data-tab="album">Album</button></div>
     <div id="journal-page"></div>
   </div>
 </div>
@@ -140,15 +142,32 @@
   </div>
 </div>
 
+<div id="photobar" role="toolbar" aria-label="Photo mode">
+  <p id="ph-help"></p>
+  <div class="panel ph-row">
+    <button id="ph-filter"><small>Filter <kbd>F</kbd></small><b>Natural</b></button>
+    <button id="ph-frame"><small>Frame <kbd>R</kbd></small><b>None</b></button>
+    <button id="ph-time"><small>Time <kbd>T</kbd></small><b>Slow</b></button>
+    <button id="ph-spirit"><small>Spirit <kbd>H</kbd></small><b>Shown</b></button>
+    <span class="ph-zoom"><button id="ph-out" aria-label="Zoom out">−</button><em id="ph-zoom">100%</em><button id="ph-in" aria-label="Zoom in">+</button></span>
+    <button id="ph-done">Done</button>
+  </div>
+  <button id="ph-shutter" aria-label="Take the photo (Space)"><i></i></button>
+</div>
+<div id="photo-flash"></div>
+<div class="panel" id="photo-kept"><img id="pk-img" alt=""><div><span id="pk-text"></span><span class="pk-btns"><a id="pk-download">Download</a><button id="pk-close" aria-label="Close">×</button></span></div></div>
+
 <div id="title">
   <h1>Lumen</h1>
-  <p>The world has faded to grey. You are its last small light.</p>
-  <p>Gather, craft and build — and bring the colour back, one lantern at a time.</p>
+  <p class="t-line">The world has faded to grey. You are its last small light.</p>
+  <p class="t-line">Gather, craft and build — and bring the colour back, one lantern at a time.</p>
   <div class="title-buttons">
     <button id="btn-continue">Continue</button>
     <button id="btn-new">New world</button>
   </div>
+  <p id="title-summary"></p>
 </div>
+<div id="veil"></div>
 
 <!-- Scripts load in order. New files must be added here. -->
 <script src="src/core/rng.js"></script>
@@ -162,6 +181,7 @@
 <script src="src/audio/sun_sfx.js"></script>
 <script src="src/audio/peak_sfx.js"></script>
 <script src="src/audio/sea_sfx.js"></script>
+<script src="src/audio/photo_sfx.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
@@ -181,6 +201,7 @@
 <script src="src/data/sun.js"></script>
 <script src="src/data/peaks.js"></script>
 <script src="src/data/sea.js"></script>
+<script src="src/data/photo.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/shrines.js"></script>
@@ -210,6 +231,7 @@
 <script src="src/game/peak_play.js"></script>
 <script src="src/game/signs.js"></script>
 <script src="src/game/sailing.js"></script>
+<script src="src/game/photo.js"></script>
 <script src="src/render/sprites.js"></script>
 <script src="src/render/workshop_sprites.js"></script>
 <script src="src/render/garden_sprites.js"></script>
@@ -231,6 +253,7 @@
 <script src="src/render/hush_sprites.js"></script>
 <script src="src/render/sun_sprites.js"></script>
 <script src="src/render/sea_sprites.js"></script>
+<script src="src/render/photo_fx.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/ui/ui.js"></script>
 <script src="src/ui/minimap.js"></script>
@@ -238,6 +261,7 @@
 <script src="src/ui/goals.js"></script>
 <script src="src/ui/settings.js"></script>
 <script src="src/ui/wishes_panel.js"></script>
+<script src="src/ui/title.js"></script>
 <script src="src/ui/journal.js"></script>
 <script src="src/ui/market.js"></script>
 <script src="src/ui/ending.js"></script>

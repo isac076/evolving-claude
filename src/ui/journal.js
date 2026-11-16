@@ -1,7 +1,8 @@
 // G.Journal — your discoveries journal (J, or the book by the moon button), and
 // the card that opens when a memory stone wakes (Night 11). The world pauses
 // while either is open. Pages: Memories (the story of the Fading, in order),
-// Places (ruins you've found), Creatures (who you've met) and Friends.
+// Places (ruins you've found), Creatures (who you've met), Friends and the
+// Album (photos from photo mode, Night 24).
 window.G = window.G || {};
 
 (function () {
@@ -17,6 +18,7 @@ G.Journal = class {
     this.el.addEventListener('pointerdown', e => { if (e.target === this.el) this.toggle(false); });
     for (const b of this.el.querySelectorAll('.journal-tabs button')) b.onclick = () => { this.show(b.dataset.tab); G.Sound.play('page'); };
     this.card.addEventListener('pointerdown', () => this.closeCard());
+    this.$('journal-page').addEventListener('click', e => this.albumClick(e));
     this.$('memory-journal').onclick = e => { e.stopPropagation(); this.closeCard(); this.toggle(true, this.cardTab || 'memories'); };
   }
 
@@ -42,12 +44,13 @@ G.Journal = class {
       return;
     }
     if (input.hit('escape', 'j')) { this.toggle(false); return; }
-    const tabs = ['memories', 'places', 'creatures', 'friends'], i = tabs.indexOf(this.tab);
-    if (input.hit('arrowright', 'd')) { this.show(tabs[(i + 1) % tabs.length]); G.Sound.play('page'); }
-    if (input.hit('arrowleft', 'a')) { this.show(tabs[(i + 3) % tabs.length]); G.Sound.play('page'); }
+    const tabs = ['memories', 'places', 'creatures', 'friends', 'album'], i = tabs.indexOf(this.tab), n = tabs.length;
+    if (input.hit('arrowright', 'd')) { this.show(tabs[(i + 1) % n]); G.Sound.play('page'); }
+    if (input.hit('arrowleft', 'a')) { this.show(tabs[(i + n - 1) % n]); G.Sound.play('page'); }
   }
 
   show(tab) {
+    if (tab !== 'album') this.bigPhoto = undefined;
     this.tab = tab;
     for (const b of this.el.querySelectorAll('.journal-tabs button')) b.classList.toggle('on', b.dataset.tab === tab);
     const page = this.$('journal-page');
@@ -169,6 +172,30 @@ G.Journal = class {
     return h + '</div>';
   }
 
+  // photos kept from photo mode (Night 24), newest first; one can be opened bigger
+  page_album() {
+    const list = G.Photo.album();
+    if (!list.length) return `<p class="j-note">${G.PHOTO_SAYS.emptyAlbum}</p>`;
+    const big = this.bigPhoto !== undefined && list[this.bigPhoto];
+    if (big) {
+      const name = 'lumen-' + big.place.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.jpg';
+      return `<div class="j-photo-big"><img src="${big.src}" alt="${esc(big.place)}"><b>${esc(big.place)}</b><em>${esc(big.when)}</em>
+        <div class="j-photo-btns"><button data-album="back">← All photos</button><a href="${big.src}" download="${name}">Download</a><button data-album="drop">Let it go</button></div></div>`;
+    }
+    let h = `<p class="j-note">${G.PHOTO_SAYS.albumNote(list.length)}</p><div class="j-album">`;
+    list.forEach((p, i) => { h += `<button class="j-photo" data-photo="${i}"><img src="${p.src}" alt="${esc(p.place)}"><b>${esc(p.place)}</b><em>${esc(p.when)}</em></button>`; });
+    return h + '</div>';
+  }
+  albumClick(e) {
+    const ph = e.target.closest('[data-photo]'), act = e.target.closest('[data-album]');
+    if (ph) { this.bigPhoto = +ph.dataset.photo; G.Sound.play('page'); this.show('album'); }
+    else if (act && act.dataset.album === 'back') { this.bigPhoto = undefined; G.Sound.play('page'); this.show('album'); }
+    else if (act && act.dataset.album === 'drop') {
+      if (!act.classList.contains('sure')) { act.classList.add('sure'); act.textContent = 'Really let it go?'; return; }
+      G.Photo.remove(this.bigPhoto); this.bigPhoto = undefined; G.Sound.play('close'); this.show('album');
+    }
+  }
+
   memories() { return this.state.stats.memories || []; }
 
   // ---------- the memory card ----------
@@ -207,6 +234,7 @@ function roman(n) {
   for (const [k, v] of r) while (n >= v) { s += k; n -= v; }
   return s;
 }
+function esc(s) { return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 function creatureHint(c) {
   if (c.rainy) return 'Comes out only in the rain.';

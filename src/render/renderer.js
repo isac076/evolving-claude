@@ -15,6 +15,7 @@ G.Renderer = class {
     this.light = document.createElement('canvas');
     this.lctx = this.light.getContext('2d');
     this.particles = [];
+    this.zoom = 1; this.zoomGoal = 1; this.zoomRate = 0.02;   // photo mode and the way in from the title zoom the view (Night 24)
     this.weatherFx = new G.WeatherFX();
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -31,6 +32,18 @@ G.Renderer = class {
     this.canvas.style.width = this.W + 'px'; this.canvas.style.height = this.H + 'px';
   }
 
+  // the view in world pixels (smaller than the screen when zoomed in)
+  get vw() { return this.W / this.zoom; }
+  get vh() { return this.H / this.zoom; }
+  viewTransform() { const k = this.dpr * this.zoom; this.ctx.setTransform(k, 0, 0, k, 0, 0); }
+  // ease the zoom towards `goal`; rate = what is left after one second (small = quick)
+  zoomTo(goal, rate = 0.02) { this.zoomGoal = goal; this.zoomRate = rate; }
+  easeZoom(realDt) {
+    if (this.zoom === this.zoomGoal) return;
+    this.zoom += (this.zoomGoal - this.zoom) * (1 - Math.pow(this.zoomRate, realDt));
+    if (Math.abs(this.zoom - this.zoomGoal) < 0.002) this.zoom = this.zoomGoal;
+  }
+
   burst(x, y, color, n = 12) {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * 6.283, sp = G.rand(20, 90);
@@ -40,8 +53,8 @@ G.Renderer = class {
 
   render(state, dt) {
     const { world, player, cam, time } = state;
-    const ctx = this.ctx, T = G.TILE, W = this.W, H = this.H;
-    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    const ctx = this.ctx, T = G.TILE, W = this.vw, H = this.vh;
+    this.viewTransform();
     const camX = Math.round(cam.x - W / 2), camY = Math.round(cam.y - H / 2);
     const tx0 = Math.floor(camX / T) - 1, ty0 = Math.floor(camY / T) - 1;
     const tx1 = Math.ceil((camX + W) / T) + 1, ty1 = Math.ceil((camY + H) / T) + 2;
@@ -145,7 +158,7 @@ G.Renderer = class {
       }
       const people = folk && folk.get(ty);
       if (people) for (const v of people) G.drawVillager(ctx, v, v.x - camX, v.y - camY, time);
-      if (player.ty === ty && !player.flying) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
+      if (player.ty === ty && !player.flying && !player.hidden) G.drawPlayer(ctx, player, player.x - camX, player.y - camY, time);
     }
     if (state.villagers) state.villagers.glows(nightGlows, camX, camY);
     if (state.hush) state.hush.holes(nightGlows, camX, camY);
@@ -155,7 +168,7 @@ G.Renderer = class {
     if (life) life.drawAir(ctx, camX, camY, time);
 
     // weather: cloud shadows, grey skies, rain, wind-blown leaves, mist, rainbows
-    this.weatherFx.draw(ctx, state, camX, camY, W, H, dt, this.dpr);
+    this.weatherFx.draw(ctx, state, camX, camY, W, H, dt, this.dpr * this.zoom);
     G.PeakFX.air(ctx, state, camX, camY, W, H, dt, time);   // snow drifting over the peaks, frosty breath (Night 22)
 
     // build preview
@@ -212,7 +225,7 @@ G.Renderer = class {
   updateParticles(dt, dark, camX, camY, lights, world) {
     // fireflies drift around restored places at dusk and night
     if (dark > 0.3 && this.particles.length < 140 && Math.random() < dark * 0.5 * G.SEASON_NOW.fireflies) {   // most in summer, none in winter
-      const x = camX + Math.random() * this.W, y = camY + Math.random() * this.H;
+      const x = camX + Math.random() * this.vw, y = camY + Math.random() * this.vh;
       if (world.restoreAt(x, y, lights) > 0.5) {
         this.particles.push({ x, y, vx: G.rand(-8, 8), vy: G.rand(-8, 8), life: 1, decay: G.rand(0.08, 0.2),
           color: 'rgba(255,240,150,A)', size: G.rand(1.2, 2.2), grav: 0, firefly: true, ph: Math.random() * 6 });
@@ -228,7 +241,7 @@ G.Renderer = class {
   }
 
   drawLighting(dark, camX, camY, lights, nightGlows, player, time, fog = 0) {
-    const ctx = this.ctx, W = this.W, H = this.H;
+    const ctx = this.ctx, W = this.vw, H = this.vh, ls = this.ls * this.zoom;
     // warm/cool tint through the day (golden at dusk, blue at night)
     const daylight = 1 - dark;
     const dusk = Math.max(0, 1 - Math.abs(daylight - 0.45) / 0.3);
@@ -236,7 +249,7 @@ G.Renderer = class {
     if (dark < 0.02) return;
 
     const l = this.lctx;
-    l.setTransform(this.ls, 0, 0, this.ls, 0, 0);
+    l.setTransform(ls, 0, 0, ls, 0, 0);
     l.globalCompositeOperation = 'source-over';
     l.clearRect(0, 0, W, H);
     l.fillStyle = `rgba(6,8,28,${(dark * 0.84).toFixed(3)})`;
@@ -250,10 +263,10 @@ G.Renderer = class {
     const pg = player.glow === undefined ? 1 : player.glow;   // hushlings sip the spirit's light (Night 19)
     const pr = (120 + Math.sin(time * 3) * 3) * (0.4 + 0.6 * pg);
     const pz = player.z || 0;   // up in the sky on the lantern roads (Night 16)
-    hole(player.x - camX, player.y - camY - 8 - pz, pr, 0.95);
+    if (!player.hidden) hole(player.x - camX, player.y - camY - 8 - pz, pr, 0.95);   // hidden for a photo (Night 24)
     for (const L of lights) if (L.light) hole(L.x - camX, L.y - camY - 14, L.light);
     for (const g of nightGlows) hole(g.x, g.y, g.r, g.a === undefined ? 0.8 : g.a);
-    ctx.drawImage(this.light, 0, 0, this.light.width / this.ls, this.light.height / this.ls);
+    ctx.drawImage(this.light, 0, 0, this.light.width / ls, this.light.height / ls);
 
     // warm glow on top (lights bloom wider in the mist)
     ctx.globalCompositeOperation = 'lighter';
@@ -263,7 +276,7 @@ G.Renderer = class {
       g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     };
-    glow(player.x - camX, player.y - camY - 8 - pz, 50 * fb * (0.5 + 0.5 * pg), `rgba(255,210,140,${0.25 * dark})`);
+    if (!player.hidden) glow(player.x - camX, player.y - camY - 8 - pz, 50 * fb * (0.5 + 0.5 * pg), `rgba(255,210,140,${0.25 * dark})`);
     for (const L of lights) if (L.light) {
       if (L.hue !== undefined) glow(L.x - camX, L.y - camY - 24, L.light * 0.4 * fb, `hsla(${L.hue},100%,62%,${0.34 * dark})`);
       else if (L.type === 'beacon') glow(L.x - camX, L.y - camY - 34, L.light * 0.4 * fb, `rgba(140,215,255,${0.32 * dark})`);

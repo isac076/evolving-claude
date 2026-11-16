@@ -80,8 +80,8 @@ as the world does.
 ## Chapter 7 — Music & presentation
 - [x] Generative music that changes with time of day, biome and restoration (Night 9 — a new tune every piece; grey land gets lonely notes, colour adds bass, melody and sparkle; morning/day/dusk/night/rain/fog moods; the ground picks the instrument; a Music slider)
 - [ ] Richer lighting: light shafts, reflections in water, soft shadows (Night 14: breathing shore foam along the curved coasts; Night 20: soft shafts of sunlight by day once the Great Sun burns)
-- [ ] Animated title screen; smooth transitions
-- [ ] Photo mode (hide UI, slow time)
+- [x] Animated title screen; smooth transitions (Night 24 — "Lumen" lights up letter by letter, the world behind blooms from grey into colour, warm motes rise, the camera drifts from one of your lights to the next while the day turns, a line about your world (day, season, lanterns, friends); Continue / New world dim the screen, set you down and the view eases out around the spirit while the HUD fades in)
+- [x] Photo mode (hide UI, slow time) (Night 24 — P or the little camera: the HUD fades, the camera floats free near the spirit (keys / drag, scroll or +/− to zoom 75–220%), time Still / Slow / Normal / Quick, hide the spirit; five filters (Natural, Golden hour, Dreamy, Moonlit, Old days) and four frames (Soft edge, Cinema and Keepsake write where and when on the picture); Space keeps a photo in the journal's new Album page (12, localStorage `lumen-album`) and offers a full-size PNG download)
 
 ## Chapter 8 — Polish & reach
 - [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; Night 21: colour edges are one gradient per tile instead of 16 squares — ground drawing ~40% faster; chunk caching still to do)
@@ -152,6 +152,13 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
   sail: is `G.SEA.grip` (the glide) too floaty? Do whales show up often enough around one Sea lantern (restore 8, `restore: 0.35`)?
   Old saves: a save standing on water now loads with the boat only if they own one; without, the spirit can walk out of the water tile.
 
+- Night 24 (photo mode + the title): the renderer can now zoom (`renderer.zoom`, eased with `zoomTo`/`easeZoom`; `vw`/`vh` are the view in world
+  pixels and `viewTransform()` sets the canvas for anything drawn after `render` — use these, not `W`/`H`, for world-space drawing). Photo mode
+  runs only `photo.step` (the clock) — gameplay `update()` is skipped, so hushlings, travel and goals freeze while you frame a picture; the world's
+  pace for weather, creatures and friends is `dt * photo.speed`. Check on a real phone: the photo bar wraps to two rows and covers the Cinema /
+  Keepsake captions until it fades (2.2 s idle) — maybe a tap-to-hide. The title's grey→colour bloom is a CSS filter on the canvas (removed after
+  ~4.5 s). The album keeps 12 JPEGs (~40–60 KB each) — if a browser is short on storage, `G.Photo.keep` lets the oldest go.
+
 ## Notes from Night 20 and before
 (Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
 - Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
@@ -176,6 +183,12 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 ---
 
 ## Ideas (anyone can add here)
+- Photo mode: a photo goal chapter ("photograph a whale", "the northern lights", "a festival") with a little card in the album for each
+- Photo mode: friends notice the camera and wave or strike a pose; creatures you photograph get a photo on their journal card
+- Photo mode: depth-of-field (blur the far rows), a tilt-shift look, stickers / a hand-drawn heart on the Keepsake card; choose the caption text
+- Photo mode: hang a favourite photo in a cottage (a picture-frame decoration that shows the album image in the world)
+- Title: the ending's "journey in numbers" could be one tap away on the title for finished worlds; a different title tour at night (lanterns only)
+- Smooth transitions: the same veil + ease could be used for the lantern-road landing and for the Resting menu's "Back to title"
 - Sea: an island biome (palm-like trees, shells, turtles, a lighthouse ruin with a memory); a lighthouse you build that sweeps a beam at night
 - Sea: a fishing line (catch-and-release: a fish card in the journal), crabs on beaches, seabirds over the coast, otters in the shallows
 - Sea: friends could ride along in the boat (a follower sits in the bow); a "sailor" friend kind found adrift on a raft far out at sea

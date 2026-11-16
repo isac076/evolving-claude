@@ -26,6 +26,7 @@ import smoke_sun
 import smoke_review21
 import smoke_peaks
 import smoke_sea
+import smoke_photo
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -353,6 +354,7 @@ def play(page, errors):
         smoke_review21.run(page, SHOTS, errors)   # Night 21: review-night fixes (edges, map names, calm motion)
         smoke_peaks.run(page, SHOTS, errors)   # Night 22: the snowy peaks, ice lantern, snow spirit, foxes, northern lights
         smoke_sea.run(page, SHOTS, errors)     # Night 23: the leaf boat, the sea, pearls, the Sea lantern, whales, moon jellies
+        smoke_photo.run(page, SHOTS, errors)   # Night 24: photo mode, the album, the animated title
 
 
 if __name__ == "__main__":
