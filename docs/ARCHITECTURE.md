@@ -16,6 +16,7 @@ src/audio/hush_sfx.js the hushlings' sighs, Shine, starlight and the Moon lanter
 src/audio/peak_sfx.js the Snowy Peaks' sounds: ice, snowball, snowbell, finding a peak, the northern lights (added to G.SFX)
 src/audio/sea_sfx.js  the sea's sounds: launch, ashore, deepsea, whale, pearl, lily, buoy (added to G.SFX) + the `paddle` footstep
 src/audio/photo_sfx.js photo mode and the title: lens, shutter, arrive (added to G.SFX)
+src/audio/dune_sfx.js  the Amber Dunes' sounds: sunstone, sand, cactus, finding the dunes, the oasis, a falling star, a gecko (added to G.SFX) + G.INSTRUMENTS.oud (the dunes' tune)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -37,6 +38,7 @@ src/data/sun.js       the Great Sun (Night 20): G.SUN settings, G.SUN_STAMP + pi
 src/data/peaks.js     the Snowy Peaks (Night 22): G.PEAKS settings, the `frost` ground, ice + snow items, fir / snowdrift / ice spire / snowbell objects (G.PEAK_OBJECTS = which grows by the tile's roll), Ice lantern + Snow spirit, the snow fox, music place, road stop, G.PEAK_NAMES, the goal chapter (after the riverbanks), G.PEAK_SAYS
 src/data/sea.js       across the water (Night 23): G.SEA settings, `step: 'paddle'` on water, the boat (a tool) + pearl items, lily pad / driftwood / pearl bed objects (G.SEA_OBJECTS = which floats by the tile's roll), the Sea lantern (`buoy`) + recipes, the whale + moon jelly creatures, road stop, the goal chapter (after the peaks), G.SEA_SAYS
 src/data/photo.js     photo mode + the title (Night 24): G.PHOTO settings (reach, zoom, speeds, album size), G.PHOTO_FILTERS, G.PHOTO_FRAMES, G.PHOTO_GROUNDS (caption names), G.PHOTO_SAYS, G.TITLE (bloom, tour, motes, arrival), G.TITLE_LINES
+src/data/dunes.js     the Amber Dunes (Night 25): G.DUNES settings, the `dune` ground, sunstone + sand items, cactus / dune grass / sand heap / sunstones / palm objects (G.DUNE_OBJECTS, G.OASIS_OBJECTS by the tile's roll), Amber lantern + Sand castle, the gecko + tortoise, music place, road stop, G.DUNE_NAMES, the goal chapter (after the sea), G.DUNE_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -44,9 +46,11 @@ src/world/shrines.js  G.Shrines — where the four shrines stand (from the seed,
 src/world/sun.js      G.Sun — where the Sun's Hearth stands (ground-only, past the farthest shrine), pieceAt(), sockets lit, isLit(), known(), guideTarget()
 src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land, none near the start), first() (the one a walk from the start), placeOf() (each hollow's id + name)
 src/world/peaks.js    G.Peaks — where the snowy peaks are: lift() (the first peak raises a mountain a walk from the start), at() (highland above the wandering snow line, none near the start), first(), placeOf() (each peak's id + name), around() (how much of the view is snow)
+src/world/dunes.js    G.Dunes — where the dunes are: score()/at() (heat noise + dryness over the base ground, none near the start), first() (the dunes a walk from the start), oasisNear() / pool() (an oasis in the first dunes and maybe one per `oasis.cell`), placeOf(), around()
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/sea_life.js the whale and moon jelly moves added to G.Creatures.prototype (+ deepOk, glows() for the night layer)
+src/world/dune_life.js the sand gecko's 'dart' move added to G.Creatures.prototype (sit, push-ups, quick straight dashes, zig-zag away when startled)
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/seasons.js  G.Seasons — which season the clock says, blends two seasons into G.SEASON_NOW, season-change hook, footprints in snow
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, save/load
@@ -63,6 +67,7 @@ src/game/sun_play.js  G.SunPlay (`state.sun`) — sensing, finding, the sockets 
 src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), here(), nameOf(), go() a flight, update() moves the mote + camera, arrive()
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
+src/game/dune_play.js G.DunePlay (`state.dunes`) — notices the dunes (name caption, oud phrase) and the oasis, `near`, `sky` (how clear the night over the dunes is), sends falling stars (stats.dunes.stars); static hint(), oasisHint() and places()
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/sailing.js   G.Sailing (`state.sail`) — sets `player.canSail` from the boat, launching / folding ashore, reaching the deep, crossings, the wake, stats.sea; static hint() (nearest deep water)
 src/game/photo.js     G.Photo (`state.photo`) — photo mode: toggle (P / camera button), keys + drag pan (within G.PHOTO.reach), zoom, speed, hide spirit, caption() (where/when), draw() the look + shoot(); static album()/keep()/remove() over localStorage 'lumen-album'; hint() once on a lovely evening
@@ -90,6 +95,8 @@ src/render/riverbank_sprites.js clay bank (+ regrow), stepping stones, signpost,
 src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, sockets, the altar (cold / burning), gold flagstones, the sunrise, the risen Sun, shafts of sunlight, the map mark
 src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
 src/render/sea_sprites.js lily pads, driftwood, pearl beds (+ regrow), the Sea lantern, G.drawBoat (the leaf boat, behind/in front of the spirit), G.SeaFX.wake, the whale and moon jelly
+src/render/dune_sprites.js G.drawDuneGround (wind ripples copied from an 8×9-tile atlas, pebbles, quartz glints), cactus, dune grass, sand heap, sunstones, palm, Amber lantern, Sand castle, their regrow sprites, the gecko and the tortoise
+src/render/dune_fx.js  G.DuneFX — air() before the lighting (blowing sand, tumbleweeds), sky() after it (the starry desert sky, falling stars from shoot())
 src/render/photo_fx.js G.PhotoFX — filter() (blend-mode washes, a cheap bloom from a 1/7 copy, film grain) and frame() (soft edge, cinema bars, keepsake card with caption)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
@@ -105,6 +112,7 @@ src/ui/title.js       G.Title — the title screen: letters split for the CSS li
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_photo.py  Night 24 test (photo mode opens/hides HUD, still time, camera reach, every filter×frame draws, zoom, shutter → album, hide spirit, closes, album page + let go, phone bar, title letters/summary/arrival)
+tools/smoke_dunes.py  Night 25 chapter test (the start left alone, the first dunes + oasis + palms, hint, finding, sunstones + sand, Amber lantern, Sand castle, geckos dart, a falling star, map, journal)
 tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)
 tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
 tools/smoke_review21.py Night 21 review test (wavy hollow edge, smooth colour edge, map names apart, Calm motion, the ending on a phone)
@@ -139,10 +147,11 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Soft colour edges**: the renderer also computes restoration at every tile
   corner; when a tile's corners differ `G.drawGround` fills it with one linear gradient along the way the colour rises
   (a flat fit of the four corners — Night 21; it used to be 4×4 squares, 5× slower).
-- **Biomes on top of the old ground** (Night 17, 22): `world.groundType(tx, ty)` starts from elevation + moisture; the Glowcap
+- **Biomes on top of the old ground** (Night 17, 22, 25): `world.groundType(tx, ty)` starts from elevation + moisture; the Glowcap
   Hollows (`G.Hollow.at`) and the Snowy Peaks (`G.Peaks.lift` + `G.Peaks.at`) are laid over it. `groundType(tx, ty, true)` ("base")
   leaves them out — the start, ruins, shrines, the Sun's Hearth and the biomes' own "first" spots are placed from the base, so they never move.
   Snowy grounds set `snowy: true` on their tile (footprints) and their objects come from a roll table (`G.PEAK_OBJECTS`).
+  The Amber Dunes (Night 25, `G.Dunes.at`) take dry grass/forest; inside them an oasis pool turns back into `water` (`G.Dunes.pool`).
 - **Wavy land edges** (Night 21): after `roundCorners`, `fringe()` in sprites.js draws 2–3 half-ellipse bumps along every edge
   between two different land grounds (not water — shores have foam). The bumps come from a hash of the edge itself, so both
   tiles agree; each bulges into one side (72% into the lower rank) painted with the other side's colour.

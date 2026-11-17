@@ -58,6 +58,9 @@ window.G = window.G || {};
   // the Snowy Peaks: finding them, and when the northern lights shine (Night 22)
   const peaks = new G.PeakPlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
   state.peaks = peaks;
+  // the Amber Dunes: finding them and their oasis, falling stars on clear nights (Night 25)
+  const dunes = new G.DunePlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
+  state.dunes = dunes;
   // the leaf boat: sailing lakes and the open sea (Night 23)
   const sail = new G.Sailing(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color) });
   state.sail = sail;
@@ -331,6 +334,7 @@ window.G = window.G || {};
     sun.update(dt);
     hollows.update(dt);
     peaks.update(dt);
+    dunes.update(dt);
     sail.update(dt);
     signs.update(dt);
     photo.hint();

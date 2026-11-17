@@ -24,6 +24,7 @@ G.World = class {
   // the ruins and the hollows themselves are placed from it, so they never move.
   // The Snowy Peaks (Night 22) are left out of `base` too: the first peak lifts the land a
   // walk from the start (G.Peaks.lift), and the highest highland lies under snow.
+  // The Amber Dunes (Night 25) are left out of `base` as well.
   groundType(tx, ty, base) {
     const s = this.seed;
     let e = this.elevation(tx, ty);
@@ -34,6 +35,8 @@ G.World = class {
     if (e > 0.68) return !base && G.Peaks.at(this, tx, ty, e) ? 'frost' : 'stone';
     const m = G.fbm(tx * 0.03 + 100, ty * 0.03, s + 777, 3);  // moisture
     if (!base && m > 0.2 && G.Hollow.at(this, tx, ty, m)) return 'mushwood';
+    // the Amber Dunes (Night 25): warm, dry land piled into dunes, with an oasis pool in the heart of the big ones
+    if (!base && m < 0.62 && G.Dunes.at(this, tx, ty, m)) return G.Dunes.pool(this, tx, ty) ? 'water' : 'dune';
     return m > 0.55 ? 'forest' : 'grass';
   }
 
@@ -56,6 +59,10 @@ G.World = class {
     if (type === 'grass' && !obj && o > 0.966) obj = 'reeds';
     if (type === 'mushwood') obj = o < 0.035 ? 'tree' : o < 0.15 ? 'bigshroom' : o > 0.956 ? 'glowcap' : null;
     if (type === 'frost') { for (const [k, ob] of G.PEAK_OBJECTS) if (o < k) { obj = ob; break; } }
+    if (type === 'dune') {   // cacti, sunstones and soft sand — palms and grass around an oasis (Night 25)
+      const table = G.Dunes.oasisNear(this, tx, ty) ? G.OASIS_OBJECTS : G.DUNE_OBJECTS;
+      for (const [k, ob] of table) if (o < k) { obj = ob; break; }
+    }
     const sea = G.SEA_OBJECTS[type];   // lily pads, driftwood and pearl beds on the water (Night 23)
     if (sea) { for (const [k, ob] of sea) if (o < k) { obj = ob; break; } }
     // soft clay where the shallows meet the shore (Night 18)

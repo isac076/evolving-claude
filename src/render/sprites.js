@@ -46,6 +46,7 @@ function groundL(tile, d, t, tx, ty) {
   // snowfields (Night 22) only keep the soft patches: a per-tile step shows as a grid on bright snow
   // water (Night 23) keeps only a faint swell: now that you sail on it, a per-tile step showed as a quilt of squares
   if (d.water) return d.l + (tile.soft - 0.5) * 3 + (G.calm ? 0 : Math.sin(t * 0.9 + (tx + ty) * 0.25) * 0.5);
+  if (tile.type === 'dune') return d.l + (tile.soft - 0.5) * 6;   // dunes (Night 25): soft patches only, the ripples carry the detail
   return tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
 }
 
@@ -161,6 +162,8 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
     G.drawHollowGround(ctx, tile, d, x, y, f, t);   // moss and tiny toadstools (render/hollow_sprites.js)
   } else if (tile.type === 'frost') {
     G.drawPeakGround(ctx, tile, d, x, y, f, t, tx, ty);   // wind ripples, blue hollows, glints (render/peak_sprites.js)
+  } else if (tile.type === 'dune') {
+    G.drawDuneGround(ctx, tile, d, x, y, f, t, tx, ty);   // wind ripples, sunlit crests, pebbles (render/dune_sprites.js)
   } else if (d.water && tile.v > 0.9) {
     const a = Math.max(0, Math.sin(t * 2 + tile.v * 40)) * 0.5 * (0.3 + 0.7 * f);
     ctx.fillStyle = `rgba(220,240,255,${a})`;

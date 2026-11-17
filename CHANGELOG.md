@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 25 — 2026-11-17 — The Amber Dunes
+A warm new land: dry meadows now pile up into golden, wind-rippled dunes, and one dune field always lies a walk from the start (the
+goal tracker points the way) with a cool oasis ringed by palms in its heart. Cacti flower, sunstones glow in the sand at night — they make
+an amber-glass Amber lantern — and soft sand builds a little Sand castle with a flag. Sand geckos dart and do push-ups, old tortoises plod,
+tumbleweeds bounce by, an oud plays the dunes' tune, and on clear nights the sky fills with stars and falling stars streak overhead.
+
 ## Night 24 — 2026-11-16 — Photo mode and a waking title
 Press P (or the little camera at the top) for photo mode: everything but the world fades away, you can drift the camera around, zoom
 in, hold time still or hurry it to sunset, hide the spirit, and pick a look (Golden hour, Dreamy, Moonlit, Old days) and a frame — the
