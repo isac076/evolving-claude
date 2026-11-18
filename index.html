@@ -23,6 +23,7 @@
   <canvas id="minimap" title="Map (M)"></canvas>
   <div id="toast"></div>
   <div id="music-caption"></div>
+  <div id="star-banner" aria-live="polite"></div>
   <div id="place-caption"><b id="place-name"></b><span id="place-sub"></span></div>
   <div id="bottom">
     <div class="panel" id="inventory"></div>
@@ -90,7 +91,7 @@
       <kbd>X</kbd><span>pick a building back up</span>
       <kbd>Click</kbd><span>a signpost to name the place · a banner to change its colour</span>
       <kbd>M</kbd><span>the map — beside a lantern, click another light to fly there</span>
-      <kbd>J</kbd><span>your journal: memories, places, creatures, friends, photos</span>
+      <kbd>J</kbd><span>your journal: memories, places, creatures, friends, photos and your star chart</span>
       <kbd>P</kbd><span>photo mode — frame the moment, pick a filter, Space to keep it</span>
       <kbd>N</kbd><span>sound on / off</span>
       <kbd>Esc</kbd><span>rest here (this menu)</span>
@@ -117,7 +118,7 @@
 <div id="journal">
   <div class="panel journal-frame" role="dialog" aria-labelledby="journal-h">
     <div class="journal-head"><h2 id="journal-h">Journal</h2><button id="journal-close" aria-label="Close">×</button></div>
-    <div class="journal-tabs"><button data-tab="memories">Memories</button><button data-tab="places">Places</button><button data-tab="creatures">Creatures</button><button data-tab="friends">Friends</button><button data-tab="album">Album</button></div>
+    <div class="journal-tabs"><button data-tab="memories">Memories</button><button data-tab="places">Places</button><button data-tab="creatures">Creatures</button><button data-tab="friends">Friends</button><button data-tab="album">Album</button><button data-tab="stars">Stars</button></div>
     <div id="journal-page"></div>
   </div>
 </div>
@@ -183,6 +184,7 @@
 <script src="src/audio/sea_sfx.js"></script>
 <script src="src/audio/photo_sfx.js"></script>
 <script src="src/audio/dune_sfx.js"></script>
+<script src="src/audio/star_sfx.js"></script>
 <script src="src/data/content.js"></script>
 <script src="src/data/goals.js"></script>
 <script src="src/data/creatures.js"></script>
@@ -204,6 +206,7 @@
 <script src="src/data/sea.js"></script>
 <script src="src/data/photo.js"></script>
 <script src="src/data/dunes.js"></script>
+<script src="src/data/stars.js"></script>
 <script src="src/world/world.js"></script>
 <script src="src/world/ruins.js"></script>
 <script src="src/world/shrines.js"></script>
@@ -234,6 +237,7 @@
 <script src="src/game/hollow_play.js"></script>
 <script src="src/game/peak_play.js"></script>
 <script src="src/game/dune_play.js"></script>
+<script src="src/game/stars.js"></script>
 <script src="src/game/signs.js"></script>
 <script src="src/game/sailing.js"></script>
 <script src="src/game/photo.js"></script>
@@ -259,6 +263,7 @@
 <script src="src/render/sun_sprites.js"></script>
 <script src="src/render/sea_sprites.js"></script>
 <script src="src/render/dune_sprites.js"></script>
+<script src="src/render/star_sprites.js"></script>
 <script src="src/render/dune_fx.js"></script>
 <script src="src/render/photo_fx.js"></script>
 <script src="src/render/renderer.js"></script>
@@ -270,6 +275,7 @@
 <script src="src/ui/wishes_panel.js"></script>
 <script src="src/ui/title.js"></script>
 <script src="src/ui/journal.js"></script>
+<script src="src/ui/star_chart.js"></script>
 <script src="src/ui/market.js"></script>
 <script src="src/ui/ending.js"></script>
 <script src="src/game/actions.js"></script>

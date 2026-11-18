@@ -2,7 +2,8 @@
 // the card that opens when a memory stone wakes (Night 11). The world pauses
 // while either is open. Pages: Memories (the story of the Fading, in order),
 // Places (ruins you've found), Creatures (who you've met), Friends and the
-// Album (photos from photo mode, Night 24).
+// Album (photos from photo mode, Night 24) and the Stars (your Star Chart, Night 26:
+// drawn by G.StarChartView in ui/star_chart.js).
 window.G = window.G || {};
 
 (function () {
@@ -13,6 +14,7 @@ G.Journal = class {
     this.el = this.$('journal'); this.card = this.$('memory');
     this.isOpen = false; this.cardOpen = false; this.cardT = 0;   // cardT = when the card opened (ms)
     this.tab = 'memories';
+    this.stars = new G.StarChartView(state);
     this.$('btn-journal').onclick = () => this.toggle();
     this.$('journal-close').onclick = () => this.toggle(false);
     this.el.addEventListener('pointerdown', e => { if (e.target === this.el) this.toggle(false); });
@@ -44,7 +46,7 @@ G.Journal = class {
       return;
     }
     if (input.hit('escape', 'j')) { this.toggle(false); return; }
-    const tabs = ['memories', 'places', 'creatures', 'friends', 'album'], i = tabs.indexOf(this.tab), n = tabs.length;
+    const tabs = ['memories', 'places', 'creatures', 'friends', 'album', 'stars'], i = tabs.indexOf(this.tab), n = tabs.length;
     if (input.hit('arrowright', 'd')) { this.show(tabs[(i + 1) % n]); G.Sound.play('page'); }
     if (input.hit('arrowleft', 'a')) { this.show(tabs[(i + n - 1) % n]); G.Sound.play('page'); }
   }
@@ -56,6 +58,7 @@ G.Journal = class {
     const page = this.$('journal-page');
     page.innerHTML = this['page_' + tab]();
     page.scrollTop = 0;
+    if (tab === 'stars') this.stars.mount();
   }
 
   // ---------- pages ----------
@@ -195,6 +198,8 @@ G.Journal = class {
       G.Photo.remove(this.bigPhoto); this.bigPhoto = undefined; G.Sound.play('close'); this.show('album');
     }
   }
+
+  page_stars() { return this.stars.html(); }
 
   memories() { return this.state.stats.memories || []; }
 

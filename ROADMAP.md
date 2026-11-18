@@ -89,7 +89,7 @@ as the world does.
 - [ ] Great touch controls (virtual joystick)
 - [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option; Night 21: Calm motion — on by itself when the device asks for reduced motion)
 - [ ] Save migration so old saves always keep working
-- [ ] Achievements / milestones
+- [x] Achievements / milestones (Night 26 — the Star Chart: 50 milestones are stars in nine constellations (The Lantern, Wanderer, Basket, Flower, Two Hearts, Key, Boat, Hare, Owl); a banner + twinkle for each new star; a finished constellation gives stardust and the first teaches the Star lantern (a turning glass star whose light drifts through every colour); a twinkling sky on the journal's Stars page; old saves light their earned stars quietly; a goal chapter at the end)
 
 ## Review notes (Night 7)
 What a play-through taught us:
@@ -166,6 +166,12 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
   finer water edges. Moon jellies and fish also come to the oasis (it is plain `water`). Old saves: dry land ~40+ steps from the start may now be dunes
   (or an oasis pool) — anything built there stays, but a save standing on a new pool tile can walk out of it like any water tile.
   `groundType(.., true)` has no dunes, so the start, ruins, shrines, the hollow and the peak never move.
+
+- Night 26 (the Star Chart): `G.StarChart.look()` runs every second over ~50 `value()` functions — cheap, but a new star must not
+  scan the whole world (use counters in stats, not loops over tiles). The 'hamlet' star reads `state.village.list`, which fills a moment
+  after loading — an old save that had a hamlet gets that one star with a banner instead of quietly. Banners queue one after another
+  (4.2 s each) — if a player earns many at once (e.g. right after the Great Sun) they play for a while; maybe merge 3+ into one
+  "N new stars" banner. Check the Stars page on a phone: the sky is 3×3 small figures; tapping picks one. The journal now has 6 tabs.
 
 ## Notes from Night 20 and before
 (Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
@@ -322,3 +328,5 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 - Wishes: a friend's wish could point at a far place ("bring me a crystal from the highlands") and mark it on the map
 - A village square: once 3 cottages stand near each other, a well appears and friends gather there in the evening
 - Friendship hearts could be shown on a friends page in the journal (with favourite things and how many wishes came true)
+- Star Chart ideas (Night 26): a few completed constellations could shine faintly over the world on clear nights; a "next star" hint line
+  in the goal tracker once all goals are done; hidden stars (???) for secrets like finding the oasis at night or sailing under the northern lights.

@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 26 — 2026-11-18 — The Star Chart
+Your journey now fills a sky. Fifty deeds — lighting lanterns, planting seeds, making friends, sailing the sea, seeing a rainbow —
+each light a star, and a little banner with a twinkle tells you when one does. The stars make nine constellations on a new Stars
+page in the journal (J); finish one and it shines in full, gives you stardust, and teaches the Star lantern: a glass star on a
+slender post that slowly turns and glows through every colour of the sky.
+
 ## Night 25 — 2026-11-17 — The Amber Dunes
 A warm new land: dry meadows now pile up into golden, wind-rippled dunes, and one dune field always lies a walk from the start (the
 goal tracker points the way) with a cool oasis ringed by palms in its heart. Cacti flower, sunstones glow in the sand at night — they make

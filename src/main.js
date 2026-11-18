@@ -64,6 +64,9 @@ window.G = window.G || {};
   // the leaf boat: sailing lakes and the open sea (Night 23)
   const sail = new G.Sailing(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color) });
   state.sail = sail;
+  // the Star Chart: milestones lit as stars in constellations (Night 26)
+  const chart = new G.StarChart(state, { ui, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color) });
+  state.chart = chart;
   // the resting menu (Esc): pauses the world; can lead back to the title or to a new world
   const settings = new G.Settings(state, ui, {
     title() { if (state.travel && state.travel.trip) state.travel.arrive(); G.Save.write(state); state.running = false; location.href = location.pathname; },
@@ -275,6 +278,7 @@ window.G = window.G || {};
     travel.trip = null; travel.landed = null; travel.trail = [];
     G.Seasons.reset(); G.Seasons.update(state, true);
     signs.close(); signs.refreshList();
+    chart.reset();
     state.stats.met = state.stats.met || {};
     state.world.time = state.time;
     state.cam.x = state.player.x; state.cam.y = state.player.y;
@@ -336,6 +340,7 @@ window.G = window.G || {};
     peaks.update(dt);
     dunes.update(dt);
     sail.update(dt);
+    chart.update(dt);
     signs.update(dt);
     photo.hint();
   }

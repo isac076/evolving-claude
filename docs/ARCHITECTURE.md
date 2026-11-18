@@ -17,6 +17,7 @@ src/audio/peak_sfx.js the Snowy Peaks' sounds: ice, snowball, snowbell, finding 
 src/audio/sea_sfx.js  the sea's sounds: launch, ashore, deepsea, whale, pearl, lily, buoy (added to G.SFX) + the `paddle` footstep
 src/audio/photo_sfx.js photo mode and the title: lens, shutter, arrive (added to G.SFX)
 src/audio/dune_sfx.js  the Amber Dunes' sounds: sunstone, sand, cactus, finding the dunes, the oasis, a falling star, a gecko (added to G.SFX) + G.INSTRUMENTS.oud (the dunes' tune)
+src/audio/star_sfx.js  the Star Chart's sounds: star (a twinkle that climbs with your star count), constellation (a slow shimmering chord), starlantern (added to G.SFX)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -39,6 +40,7 @@ src/data/peaks.js     the Snowy Peaks (Night 22): G.PEAKS settings, the `frost` 
 src/data/sea.js       across the water (Night 23): G.SEA settings, `step: 'paddle'` on water, the boat (a tool) + pearl items, lily pad / driftwood / pearl bed objects (G.SEA_OBJECTS = which floats by the tile's roll), the Sea lantern (`buoy`) + recipes, the whale + moon jelly creatures, road stop, the goal chapter (after the peaks), G.SEA_SAYS
 src/data/photo.js     photo mode + the title (Night 24): G.PHOTO settings (reach, zoom, speeds, album size), G.PHOTO_FILTERS, G.PHOTO_FRAMES, G.PHOTO_GROUNDS (caption names), G.PHOTO_SAYS, G.TITLE (bloom, tour, motes, arrival), G.TITLE_LINES
 src/data/dunes.js     the Amber Dunes (Night 25): G.DUNES settings, the `dune` ground, sunstone + sand items, cactus / dune grass / sand heap / sunstones / palm objects (G.DUNE_OBJECTS, G.OASIS_OBJECTS by the tile's roll), Amber lantern + Sand castle, the gecko + tortoise, music place, road stop, G.DUNE_NAMES, the goal chapter (after the sea), G.DUNE_SAYS
+src/data/stars.js     the Star Chart (Night 26): G.CONSTELLATIONS (9 constellations; each star = a milestone with id, name, text, at [x, y] in its box, value(state) / need), the stardust item, the Star lantern (structure, unlock recipe, road stop), G.STAR_CHART settings, G.STARS_SAYS, the goal chapter (at the very end)
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -68,6 +70,7 @@ src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), 
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
 src/game/dune_play.js G.DunePlay (`state.dunes`) — notices the dunes (name caption, oud phrase) and the oasis, `near`, `sky` (how clear the night over the dunes is), sends falling stars (stats.dunes.stars); static hint(), oasisHint() and places()
+src/game/stars.js     G.StarChart (`state.chart`) — once a second lights stars whose deeds are done (stats.chart = {starId: day}), queues the banner (#star-banner) + chime, completes constellations (stats.chartDone; stardust gift; the first teaches the Star lantern); reset() lights an old save's stars quietly; keeps Star lanterns' glow hue drifting (G.starHue)
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/sailing.js   G.Sailing (`state.sail`) — sets `player.canSail` from the boat, launching / folding ashore, reaching the deep, crossings, the wake, stats.sea; static hint() (nearest deep water)
 src/game/photo.js     G.Photo (`state.photo`) — photo mode: toggle (P / camera button), keys + drag pan (within G.PHOTO.reach), zoom, speed, hide spirit, caption() (where/when), draw() the look + shoot(); static album()/keep()/remove() over localStorage 'lumen-album'; hint() once on a lovely evening
@@ -97,6 +100,7 @@ src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, s
 src/render/sea_sprites.js lily pads, driftwood, pearl beds (+ regrow), the Sea lantern, G.drawBoat (the leaf boat, behind/in front of the spirit), G.SeaFX.wake, the whale and moon jelly
 src/render/dune_sprites.js G.drawDuneGround (wind ripples copied from an 8×9-tile atlas, pebbles, quartz glints), cactus, dune grass, sand heap, sunstones, palm, Amber lantern, Sand castle, their regrow sprites, the gecko and the tortoise
 src/render/dune_fx.js  G.DuneFX — air() before the lighting (blowing sand, tumbleweeds), sky() after it (the starry desert sky, falling stars from shoot())
+src/render/star_sprites.js the Star lantern (a silver post with a turning glass star whose colour drifts) + G.starHue(t, tx, ty)
 src/render/photo_fx.js G.PhotoFX — filter() (blend-mode washes, a cheap bloom from a 1/7 copy, film grain) and frame() (soft edge, cinema bars, keepsake card with caption)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
 src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
@@ -105,13 +109,15 @@ src/ui/map_labels.js  G.MapLabels — every name on the big map is added here an
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
 src/ui/settings.js    G.Settings — the "Resting" menu (Esc): pause, volume, comfort options, title / new world
 src/ui/wishes_panel.js G.WishPanel — the friends' wishes list under the goal tracker (above it on phones)
-src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends pages, and the memory card; pauses the world
+src/ui/journal.js     G.Journal — the journal (J): Memories / Places / Creatures / Friends / Album / Stars pages, and the memory card; pauses the world
+src/ui/star_chart.js  G.StarChartView — the journal's Stars page: html() (count note, canvas, the chosen constellation's star list with progress), mount() (draws the twinkling sky in a rAF loop while the journal is open; click a constellation to read it)
 src/ui/market.js      G.Market — the market stall's swap panel
 src/ui/ending.js      G.Ending — the ending page after the Great Sun rises (lines fade in, your journey, "Keep shining"); pauses the world
 src/ui/title.js       G.Title — the title screen: letters split for the CSS light-up, grey→colour bloom (body.title-grey/.title-bloom), the camera tour between lights, rising motes, leave() (veil) and arrive() (zoom ease-out, sparks)
 src/main.js           game state, wiring the systems' hooks (toasts, floaters), main loop, title screen
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_photo.py  Night 24 test (photo mode opens/hides HUD, still time, camera reach, every filter×frame draws, zoom, shutter → album, hide spirit, closes, album page + let go, phone bar, title letters/summary/arrival)
+tools/smoke_stars.py  Night 26 test (constellation data is sound, an old save lights its stars quietly, stars light with a banner, a finished constellation gives stardust + teaches the Star lantern + its own banner, the Stars page draws and switches, a Star lantern's drifting light)
 tools/smoke_dunes.py  Night 25 chapter test (the start left alone, the first dunes + oasis + palms, hint, finding, sunstones + sand, Amber lantern, Sand castle, geckos dart, a falling star, map, journal)
 tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)
 tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
@@ -147,6 +153,9 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Soft colour edges**: the renderer also computes restoration at every tile
   corner; when a tile's corners differ `G.drawGround` fills it with one linear gradient along the way the colour rises
   (a flat fit of the four corners — Night 21; it used to be 4×4 squares, 5× slower).
+- **Milestones are stars** (Night 26): a new milestone is one entry in a constellation's `stars` in data/stars.js — it needs
+  only a `value(state)` that reads what the game already counts (stats, world.count, explored.count) and a `need`. Star ids are
+  saved (`stats.chart`), so never rename one. Keep each constellation's `at` points inside 0..1 and its `lines` between them.
 - **Biomes on top of the old ground** (Night 17, 22, 25): `world.groundType(tx, ty)` starts from elevation + moisture; the Glowcap
   Hollows (`G.Hollow.at`) and the Snowy Peaks (`G.Peaks.lift` + `G.Peaks.at`) are laid over it. `groundType(tx, ty, true)` ("base")
   leaves them out — the start, ruins, shrines, the Sun's Hearth and the biomes' own "first" spots are placed from the base, so they never move.
