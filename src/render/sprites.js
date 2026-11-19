@@ -46,7 +46,8 @@ function groundL(tile, d, t, tx, ty) {
   // snowfields (Night 22) only keep the soft patches: a per-tile step shows as a grid on bright snow
   // water (Night 23) keeps only a faint swell: now that you sail on it, a per-tile step showed as a quilt of squares
   if (d.water) return d.l + (tile.soft - 0.5) * 3 + (G.calm ? 0 : Math.sin(t * 0.9 + (tx + ty) * 0.25) * 0.5);
-  if (tile.type === 'dune') return d.l + (tile.soft - 0.5) * 6;   // dunes (Night 25): soft patches only, the ripples carry the detail
+  if (tile.type === 'dune' || tile.type === 'strand') return d.l + (tile.soft - 0.5) * 6;   // dunes (Night 25): soft patches only, the ripples carry the detail
+  // (Night 27: the pale coral sand too — a per-tile step showed as a chequer on it)
   return tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
 }
 
@@ -92,10 +93,10 @@ const SIDE = [   // [corner a, corner b, edge x0, y0, along x, y, into x, y, arc
   [2, 3, 0, 1, 1, 0, 0, -1, Math.PI], [0, 2, 0, 0, 0, 1, 1, 0, -Math.PI / 2]];
 function fringe(ctx, d, x, y, f, t, tx, ty, fc, nb) {
   const T = G.TILE, r = d.rank, tiles = G.SEASON_NOW.tiles;
-  if (d.water) return;
+  // water only gets wavy edges where an island's lagoon meets the sea (Night 27: its reef edge)
   for (let s = 0; s < 4; s++) {
     const n = nb[s], dr = G.TILES[n.type];
-    if (dr.water || dr.rank === r) continue;
+    if (dr.rank === r || (d.water ? !dr.water || !(d.reef || dr.reef) : dr.water)) continue;
     const [ca, cb, ex, ey, ax, ay, ix, iy, a0] = SIDE[s];
     // the same key from both sides of the edge: horizontal edges by their lower tile, vertical by their right tile
     const key = s === 0 ? G.hash2(tx * 2, ty, 77) : s === 2 ? G.hash2(tx * 2, ty + 1, 77) : s === 1 ? G.hash2(tx * 2 + 3, ty, 77) : G.hash2(tx * 2 + 1, ty, 77);
@@ -164,6 +165,8 @@ G.drawGround = function (ctx, tile, x, y, f, t, tx, ty, fc, nb) {
     G.drawPeakGround(ctx, tile, d, x, y, f, t, tx, ty);   // wind ripples, blue hollows, glints (render/peak_sprites.js)
   } else if (tile.type === 'dune') {
     G.drawDuneGround(ctx, tile, d, x, y, f, t, tx, ty);   // wind ripples, sunlit crests, pebbles (render/dune_sprites.js)
+  } else if (tile.type === 'lagoon' || tile.type === 'strand' || tile.type === 'isle') {
+    G.drawIsleGround(ctx, tile, d, x, y, f, t, tx, ty);   // sunlit lagoon floor, bits of shell, leafy tufts (render/isle_sprites.js)
   } else if (d.water && tile.v > 0.9) {
     const a = Math.max(0, Math.sin(t * 2 + tile.v * 40)) * 0.5 * (0.3 + 0.7 * f);
     ctx.fillStyle = `rgba(220,240,255,${a})`;

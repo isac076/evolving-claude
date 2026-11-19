@@ -18,6 +18,7 @@ src/audio/sea_sfx.js  the sea's sounds: launch, ashore, deepsea, whale, pearl, l
 src/audio/photo_sfx.js photo mode and the title: lens, shutter, arrive (added to G.SFX)
 src/audio/dune_sfx.js  the Amber Dunes' sounds: sunstone, sand, cactus, finding the dunes, the oasis, a falling star, a gecko (added to G.SFX) + G.INSTRUMENTS.oud (the dunes' tune)
 src/audio/star_sfx.js  the Star Chart's sounds: star (a twinkle that climbs with your star count), constellation (a slow shimmering chord), starlantern (added to G.SFX)
+src/audio/isle_sfx.js  the Far Isles' sounds: shell, tidepool, coral, finding an island, the glowing tide, a shell chime, crab, turtle, parrot (added to G.SFX) + G.INSTRUMENTS.steeldrum (the isles' tune)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
 src/data/content.js   ALL content: tiles, items, objects, structures, recipes
@@ -41,6 +42,7 @@ src/data/sea.js       across the water (Night 23): G.SEA settings, `step: 'paddl
 src/data/photo.js     photo mode + the title (Night 24): G.PHOTO settings (reach, zoom, speeds, album size), G.PHOTO_FILTERS, G.PHOTO_FRAMES, G.PHOTO_GROUNDS (caption names), G.PHOTO_SAYS, G.TITLE (bloom, tour, motes, arrival), G.TITLE_LINES
 src/data/dunes.js     the Amber Dunes (Night 25): G.DUNES settings, the `dune` ground, sunstone + sand items, cactus / dune grass / sand heap / sunstones / palm objects (G.DUNE_OBJECTS, G.OASIS_OBJECTS by the tile's roll), Amber lantern + Sand castle, the gecko + tortoise, music place, road stop, G.DUNE_NAMES, the goal chapter (after the sea), G.DUNE_SAYS
 src/data/stars.js     the Star Chart (Night 26): G.CONSTELLATIONS (9 constellations; each star = a milestone with id, name, text, at [x, y] in its box, value(state) / need), the stardust item, the Star lantern (structure, unlock recipe, road stop), G.STAR_CHART settings, G.STARS_SAYS, the goal chapter (at the very end)
+src/data/isles.js     the Far Isles (Night 27): G.ISLES settings, the `lagoon` (water, `reef`), `strand` and `isle` grounds, shell + coral items, seashell / tide pool / hibiscus / fern / coral objects (G.ISLE_OBJECTS by ground, G.SEA_OBJECTS.lagoon), Shell lantern + Shell chime + recipes, hermit crab / sea turtle / parrot, the goal chapter (after the dunes), G.ISLE_NAMES, G.ISLE_SAYS
 src/data/music.js     G.MUSIC settings, G.CHORDS, G.MUSIC_MOODS, G.MUSIC_PLACES (ground → instrument), rhythms, G.MUSIC_BAND (friend kind → part)
 src/world/world.js    G.World — terrain generation, what's where, gathering, building, restoration
 src/world/ruins.js    G.Ruins — where ruins stand (one per G.RUIN.cell, from the seed), pieceAt() for tileAt, isRead(), direction()
@@ -49,10 +51,12 @@ src/world/sun.js      G.Sun — where the Sun's Hearth stands (ground-only, past
 src/world/hollow.js   G.Hollow — where hollows are: at() (noise over damp land, none near the start), first() (the one a walk from the start), placeOf() (each hollow's id + name)
 src/world/peaks.js    G.Peaks — where the snowy peaks are: lift() (the first peak raises a mountain a walk from the start), at() (highland above the wandering snow line, none near the start), first(), placeOf() (each peak's id + name), around() (how much of the view is snow)
 src/world/dunes.js    G.Dunes — where the dunes are: score()/at() (heat noise + dryness over the base ground, none near the start), first() (the dunes a walk from the start), oasisNear() / pool() (an oasis in the first dunes and maybe one per `oasis.cell`), placeOf(), around()
+src/world/isles.js    G.Isles — where the Far Isles are: fits() (deep sea, open water all round), first() (the nearest open sea ring by ring from the start), inCell() (one island per G.ISLES.cell, memoised), at()/ground() (isle / strand / lagoon by a wobbly radius), placeOf(), around()
 src/world/explore.js  G.Explored — which tiles the player has seen (per-chunk masks, saved as base64)
 src/world/creatures.js G.Creatures — spawns/updates/draws wildlife around the screen + water ripples
 src/world/sea_life.js the whale and moon jelly moves added to G.Creatures.prototype (+ deepOk, glows() for the night layer)
 src/world/dune_life.js the sand gecko's 'dart' move added to G.Creatures.prototype (sit, push-ups, quick straight dashes, zig-zag away when startled)
+src/world/isle_life.js the hermit crab's 'scuttle' (sideways runs, a waving claw, hides in its shell) and the sea turtle's 'glide' (slow strokes, rises to breathe: c.surf) added to G.Creatures.prototype
 src/world/weather.js  G.Weather — the current weather, smooth blending between kinds, wind gusts, rainbows, rain regrowth
 src/world/seasons.js  G.Seasons — which season the clock says, blends two seasons into G.SEASON_NOW, season-change hook, footprints in snow
 src/world/villagers.js G.Villagers — lost spirits (seeded spots), followers, settled friends' days, save/load
@@ -70,6 +74,7 @@ src/game/travel.js    G.Travel (`state.travel`) — the lantern roads: stops(), 
 src/game/hollow_play.js G.HollowPlay — notices when you walk into a hollow (name caption, music box), stats.hollow; static hint() for the goal tracker and places() for the journal
 src/game/peak_play.js G.PeakPlay (`state.peaks`) — notices when you step onto a peak (name caption, chime), `near` (how snowy the land around is), `sky` (how strongly the northern lights shine), stats.peaks; static hint() and places()
 src/game/dune_play.js G.DunePlay (`state.dunes`) — notices the dunes (name caption, oud phrase) and the oasis, `near`, `sky` (how clear the night over the dunes is), sends falling stars (stats.dunes.stars); static hint(), oasisHint() and places()
+src/game/isle_play.js G.IslePlay (`state.isles`) — notices islands (name caption, steel-drum phrase, stats.isles), `near`, `tide` (how strongly the tide glows), the first glowing tide, shell chimes ringing in the wind / as you pass; static hint() (mentions the boat) and places() for the journal
 src/game/stars.js     G.StarChart (`state.chart`) — once a second lights stars whose deeds are done (stats.chart = {starId: day}), queues the banner (#star-banner) + chime, completes constellations (stats.chartDone; stardust gift; the first teaches the Star lantern); reset() lights an old save's stars quietly; keeps Star lanterns' glow hue drifting (G.starHue)
 src/game/signs.js     G.Signs (`state.signs`) — signpost names (stats.signs), the naming panel, read(), banner recolour (stats.banners), near() for road names, drawMap(), journal places(), static clayHint()
 src/game/sailing.js   G.Sailing (`state.sail`) — sets `player.canSail` from the boat, launching / folding ashore, reaching the deep, crossings, the wake, stats.sea; static hint() (nearest deep water)
@@ -99,7 +104,9 @@ src/render/sun_sprites.js G.SunFX + the Sun's Hearth sprites — pillars, socket
 src/render/hush_sprites.js G.HushFX — hushlings, their threads, Shine rings, starlight, the glow ring (after the night layer); the Moon lantern sprite
 src/render/sea_sprites.js lily pads, driftwood, pearl beds (+ regrow), the Sea lantern, G.drawBoat (the leaf boat, behind/in front of the spirit), G.SeaFX.wake, the whale and moon jelly
 src/render/dune_sprites.js G.drawDuneGround (wind ripples copied from an 8×9-tile atlas, pebbles, quartz glints), cactus, dune grass, sand heap, sunstones, palm, Amber lantern, Sand castle, their regrow sprites, the gecko and the tortoise
+src/render/isle_sprites.js G.drawIsleGround (lagoon caustics + sandy shoals, shell bits on the strand, leafy tufts), seashells, tide pool, hibiscus, fern, coral, Shell lantern, Shell chime (swings with G.windNow), their regrow sprites, the hermit crab, sea turtle and parrot
 src/render/dune_fx.js  G.DuneFX — air() before the lighting (blowing sand, tumbleweeds), sky() after it (the starry desert sky, falling stars from shoot())
+src/render/isle_fx.js  G.IsleFX.sky() — after the lighting: the glowing tide (puff sprites + sparks along every lagoon/strand edge, rising and falling with the waves), twinkles in the lagoon, the boat's glowing wake
 src/render/star_sprites.js the Star lantern (a silver post with a turning glass star whose colour drifts) + G.starHue(t, tx, ty)
 src/render/photo_fx.js G.PhotoFX — filter() (blend-mode washes, a cheap bloom from a 1/7 copy, film grain) and frame() (soft edge, cinema bars, keepsake card with caption)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
@@ -118,6 +125,7 @@ src/main.js           game state, wiring the systems' hooks (toasts, floaters), 
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_photo.py  Night 24 test (photo mode opens/hides HUD, still time, camera reach, every filter×frame draws, zoom, shutter → album, hide spirit, closes, album page + let go, phone bar, title letters/summary/arrival)
 tools/smoke_stars.py  Night 26 test (constellation data is sound, an old save lights its stars quietly, stars light with a banner, a finished constellation gives stardust + teaches the Star lantern + its own banner, the Stars page draws and switches, a Star lantern's drifting light)
+tools/smoke_isles.py  Night 27 chapter test (the start and old land left alone, the first island + its parts, other islands, hint + boat, finding, shells / tide pool / coral, Shell lantern + chime, crabs drawn + scuttle (and geckos drawn), a turtle met at the surface, the glowing tide, map, journal)
 tools/smoke_dunes.py  Night 25 chapter test (the start left alone, the first dunes + oasis + palms, hint, finding, sunstones + sand, Amber lantern, Sand castle, geckos dart, a falling star, map, journal)
 tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)
 tools/smoke_peaks.py  Night 22 chapter test (the start left alone, the first peak, hint, finding, ice + snow, Ice lantern, Snow spirit, foxes, footprints, the northern lights, journal)
@@ -161,6 +169,9 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
   leaves them out — the start, ruins, shrines, the Sun's Hearth and the biomes' own "first" spots are placed from the base, so they never move.
   Snowy grounds set `snowy: true` on their tile (footprints) and their objects come from a roll table (`G.PEAK_OBJECTS`).
   The Amber Dunes (Night 25, `G.Dunes.at`) take dry grass/forest; inside them an oasis pool turns back into `water` (`G.Dunes.pool`).
+  The Far Isles (Night 27, `G.Isles.at`) are the only biome laid over the **sea**: base `deep`/`water` with open water all round
+  becomes `lagoon` (a water tile, so boats, fish and Sea lanterns work there), `strand` and `isle`. Objects on island grounds come from
+  `G.ISLE_OBJECTS[type]` (land) or `G.SEA_OBJECTS.lagoon` (afloat), read in `tileAt` like the sea's.
 - **Wavy land edges** (Night 21): after `roundCorners`, `fringe()` in sprites.js draws 2–3 half-ellipse bumps along every edge
   between two different land grounds (not water — shores have foam). The bumps come from a hash of the edge itself, so both
   tiles agree; each bulges into one side (72% into the lower rank) painted with the other side's colour.
@@ -180,6 +191,8 @@ tools/smoke_weather.py, tools/smoke_villagers.py, tools/smoke_garden.py, tools/s
 - **Goals**: `G.GOALS` in data, done in order; finished ids go in
   `state.goalsDone` (saved). Progress functions read `state.stats.got[item]`
   (items ever gathered), `world.count(type)`, `stats.mapOpened`, `explored.count`.
+- **Walking creatures are drawn in rows**: `G.Creatures.groundRows()` lists the moves that walk on the ground ('hop', 'crawl', 'dart',
+  'scuttle', a landed bird) — a new walking move must be added there or it is never drawn (Night 27 found the geckos missing).
 - **Creatures** (`state.creatures`, not saved): every 0.2s `trySpawn` samples a
   random point on screen per kind; if it suits (tile type, restoration, time of day)
   and the kind is under its cap (scaled by how much of the view suits it), a group

@@ -222,9 +222,10 @@ G.Actions = class {
 };
 
 // said the first time you gather / build these (Night 18)
-G.Actions.FIRST_GATHER = { claybank: G.RIVER_SAYS.clayFirst, pearlbed: G.SEA_SAYS.pearlFirst, lilypad: G.SEA_SAYS.lilyFirst };
+G.Actions.FIRST_GATHER = { claybank: G.RIVER_SAYS.clayFirst, pearlbed: G.SEA_SAYS.pearlFirst, lilypad: G.SEA_SAYS.lilyFirst,
+  coral: G.ISLE_SAYS.coralFirst, seashell: G.ISLE_SAYS.shellFirst };
 G.Actions.FIRST_BUILT = { stepstones: G.RIVER_SAYS.stepFirst, banner: G.RIVER_SAYS.bannerFirst, moonlantern: G.HUSH_SAYS.moonFirst,
-  buoy: G.SEA_SAYS.buoyFirst };
+  buoy: G.SEA_SAYS.buoyFirst, shelllantern: G.ISLE_SAYS.lanternFirst };
 
 // a word when you build something special: [text, seconds]
 G.Actions.BUILT_SAYS = {

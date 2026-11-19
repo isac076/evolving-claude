@@ -143,6 +143,7 @@ G.Photo = class {
     if (!place && ground === 'mushwood') place = G.Hollow.placeOf(w, tx, ty).name;
     if (!place && ground === 'frost') place = G.Peaks.placeOf(w, tx, ty).name;
     if (!place && ground === 'dune') place = G.Dunes.placeOf(w, tx, ty).name;
+    if (!place && (ground === 'isle' || ground === 'strand' || ground === 'lagoon')) place = G.Isles.placeOf(w, tx, ty).name;
     if (!place) place = G.PHOTO_GROUNDS[ground] || 'Somewhere in Lumen';
     const day = Math.floor(s.time / G.DAY_LENGTH) + 1, sn = G.SEASON_NOW;
     const phase = (s.time % G.DAY_LENGTH) / G.DAY_LENGTH;

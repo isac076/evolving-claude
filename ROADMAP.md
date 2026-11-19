@@ -61,12 +61,13 @@ as the world does.
 - [x] A village that visibly grows over time (Night 13 — cottages within 9 steps form a named hamlet; friends build a well (waters gardens), then a market stall (daily swaps), then a ribbon pole; friends meet at the well at dusk; festivals with dancing, bunting and sky lanterns on each season's last evening)
 
 ## Chapter 5 — Exploration
-- [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands
+- [ ] New biomes: snowy peaks, desert, mushroom forest, crystal caverns, islands (only the caverns left)
   - [x] Mushroom forest — the Glowcap Hollows (Night 17: violet mossy ground in damp woods; giant mushrooms and glowcaps that kept their light through the Fading; glow spores → Mushroom lamp (teal, restores 7, a lantern-road stop) and Spore patches that grow glowcaps; glow snails; drifting glowing spores; a music-box tune; one hollow always ~60 steps from the start, named hollows in the journal)
   - [x] Snowy peaks (Night 22: the highest highland lies under snow all year (`frost` ground, rank 6); one peak always rises ~88 steps from the start (`G.Peaks.lift` raises a mountain there); snowy firs, ice spires (ice → Ice lantern, teal-white, restores 7, a road stop), snowdrifts (snow → Snow spirit, a snowman with a scarf), snowbells; snow foxes that pounce; drifting snow, frosty breath, glints of frost by day, footprints; the northern lights on clear nights (brighter where the colour is back); a chime tune; named peaks in the journal; a goal chapter after the riverbanks)
   - [x] Desert — the Amber Dunes (Night 25: warm dry land (`dune` ground, rank 3.5) where a wide heat noise + dryness is high; one dune field always ~76 steps from the start (`G.Dunes.first`, the driest direction, away from the first hollow and peak) with an oasis pool ringed by palms in its heart (other deep dune fields may have one too, one chance per `oasis.cell`); cacti that flower, dune grass, soft sand heaps (sand), sunstones that glow at night (sunstone → Amber lantern, amber, restores 7, a road stop; sand → Sand castle with a petal flag); sand geckos that dart and do push-ups (new `dart` move) and dune tortoises (the snail's `crawl`); blowing sand and tumbleweeds; a starry sky and falling stars on clear nights; an oud tune; named dunes + the oasis in the journal; a goal chapter after the sea)
-  - [ ] Crystal caverns · [ ] Islands (Night 23: natural islands can now be reached by boat — a real island biome with its own life is still to come) (each: a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at` / `G.Peaks.at`, its own data file like data/hollow.js or data/peaks.js)
-- [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four; Night 22: the peaks too; Night 25: the dunes too)
+  - [x] Islands — the Far Isles (Night 27: islands rise only out of open sea (`G.Isles.at`, one per 60-tile cell, middle well inside it), one always within a sail of the start (`G.Isles.first`, nearest open sea ring by ring); three grounds: a turquoise `lagoon` (water, `reef: true` → wavy edge against the sea), pale coral sand `strand`, a green `isle` heart; palms, hibiscus, ferns, seashells, tide pools, coral that glows at night; Shell lantern (rose, restores 7, a road stop) + Shell chime (clinks in the wind and when you pass); hermit crabs (`scuttle`), sea turtles that rise to breathe (`glide`), parrots; the glowing tide on dark nights (+ a glowing wake); a steel-drum tune; named isles in the journal; a goal chapter after the dunes)
+  - [ ] Crystal caverns (a `G.TILES` entry overlaid in `world.groundType` like `G.Hollow.at` / `G.Peaks.at`, its own data file like data/hollow.js or data/peaks.js — maybe the first underground place: a cave mouth in the highlands that leads to a dark, glittering second layer)
+- [ ] Each biome has its own materials, plants, creatures and restoration look (Night 17: the hollows have all four; Night 22: the peaks too; Night 25: the dunes too; Night 27: the isles too)
 - [x] Ruins and points of interest scattered through the world (Night 11 — stone circles, fallen gates, dry fountains, sleeping keepers, halls of lanterns; each hides a memory stone that lights up the land when woken)
 - [x] Discoveries journal / collection book (Night 11 — J: Memories, Places, Creatures, Friends)
 - [x] Lantern network fast travel (Night 16 — the lantern roads: stand by a light, open the map, click another light; the spirit leaps up as a mote and flies along a curving road of light; lanterns, beacons, ember lanterns, woken memory stones, kindled shrines and the Heart Stone are all stops; followers come along)
@@ -173,6 +174,15 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
   (4.2 s each) — if a player earns many at once (e.g. right after the Great Sun) they play for a while; maybe merge 3+ into one
   "N new stars" banner. Check the Stars page on a phone: the sky is 3×3 small figures; tapping picks one. The journal now has 6 tabs.
 
+- Night 27 (the Far Isles): islands are laid over **sea** only (`G.Isles.at` runs in `groundType` for every non-base tile but returns at once on
+  land unless the first island had to be forced). Islands need open sea all round (`G.ISLES.clear`), so a world with little sea has few —
+  count them on a few seeds; `cell` 60 / `r` 4–7.5 are the knobs. The glowing tide (`G.IsleFX.sky`) walks every visible tile at night
+  near an island (one `tileAt` + 4 neighbours each) and draws 3 puff sprites per shore edge — measure on a phone. `fringe()` now also
+  runs for water tiles, but only draws where a `reef` water (the lagoon) meets other water. Night 27 also fixed: sand geckos (Night 25)
+  were never drawn — `groundRows()` didn't know the 'dart' move; any new walking move must be listed there. Old saves: a buoy or bridge
+  out at sea may now stand inside a new island's lagoon or on its sand — it stays, but looks odd on sand. The Star Chart has no isles star
+  yet (adding a star to a finished constellation un-finishes it — maybe a tenth constellation, "The Turtle").
+
 ## Notes from Night 20 and before
 (Night 21 handled: the ending on a phone, the hollows' straight edges, the Sun floor question. The rest still stands.)
 - Night 20: the Great Sun. Play the whole finale on a phone (the ending page scrolls; check `zoom` with larger text). After the Sun, every
@@ -203,7 +213,11 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 - Photo mode: hang a favourite photo in a cottage (a picture-frame decoration that shows the album image in the world)
 - Title: the ending's "journey in numbers" could be one tap away on the title for finished worlds; a different title tour at night (lanterns only)
 - Smooth transitions: the same veil + ease could be used for the lantern-road landing and for the Resting menu's "Back to title"
-- Sea: an island biome (palm-like trees, shells, turtles, a lighthouse ruin with a memory); a lighthouse you build that sweeps a beam at night
+- Sea: a lighthouse ruin on a far isle with a memory; a lighthouse you build that sweeps a beam at night (the island biome came on Night 27)
+- Isles: turtle nests — on summer nights baby turtles hatch on the coral sand and scurry to the glowing tide; a hammock between two palms
+- Isles: a castaway friend kind found on a far island (likes shells and chimes, plays the steel drum in the band); messages in bottles
+- Isles: snorkelling — sail slowly over the lagoon and the view tints turquoise, showing more coral and fish below
+- Isles: a star for each found island in a tenth constellation ("The Turtle"); shell paths (a floor) that sparkle after rain
 - Sea: a fishing line (catch-and-release: a fish card in the journal), crabs on beaches, seabirds over the coast, otters in the shallows
 - Sea: friends could ride along in the boat (a follower sits in the bow); a "sailor" friend kind found adrift on a raft far out at sea
 - Sea: a dock / jetty floor that boats tie up to; boat upgrades (a lantern on the bow, a bigger sail = faster in the wind)

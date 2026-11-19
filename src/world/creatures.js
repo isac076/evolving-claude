@@ -390,7 +390,8 @@ G.Creatures = class {
   groundRows() {
     const rows = new Map();
     for (const c of this.list) {
-      const ground = c.def.move === 'hop' || c.def.move === 'crawl' || (c.def.move === 'bird' && (c.state === 'peck' || c.state === 'hop'));
+      // everything that walks on the ground (Night 27: the gecko's 'dart' was missing here, so geckos were never drawn)
+      const m = c.def.move, ground = m === 'hop' || m === 'crawl' || m === 'dart' || m === 'scuttle' || (m === 'bird' && (c.state === 'peck' || c.state === 'hop'));
       if (!ground) continue;
       const ty = Math.floor(c.y / G.TILE);
       if (!rows.has(ty)) rows.set(ty, []);

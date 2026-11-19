@@ -61,6 +61,9 @@ window.G = window.G || {};
   // the Amber Dunes: finding them and their oasis, falling stars on clear nights (Night 25)
   const dunes = new G.DunePlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
   state.dunes = dunes;
+  // the Far Isles: finding them, the glowing tide, shell chimes in the wind (Night 27)
+  const isles = new G.IslePlay(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n) });
+  state.isles = isles;
   // the leaf boat: sailing lakes and the open sea (Night 23)
   const sail = new G.Sailing(state, { ui, map, burst: (x, y, color, n) => renderer.burst(x, y, color, n), floater: (x, y, text, color) => addFloater(x, y, text, color) });
   state.sail = sail;
@@ -339,6 +342,7 @@ window.G = window.G || {};
     hollows.update(dt);
     peaks.update(dt);
     dunes.update(dt);
+    isles.update(dt);
     sail.update(dt);
     chart.update(dt);
     signs.update(dt);

@@ -24,11 +24,15 @@ G.World = class {
   // the ruins and the hollows themselves are placed from it, so they never move.
   // The Snowy Peaks (Night 22) are left out of `base` too: the first peak lifts the land a
   // walk from the start (G.Peaks.lift), and the highest highland lies under snow.
-  // The Amber Dunes (Night 25) are left out of `base` as well.
+  // The Amber Dunes (Night 25) are left out of `base` as well, and so are the Far Isles (Night 27).
   groundType(tx, ty, base) {
     const s = this.seed;
     let e = this.elevation(tx, ty);
     if (!base) e += G.Peaks.lift(this, tx, ty);
+    if (!base) {   // the Far Isles rise out of the open sea (Night 27)
+      const isle = G.Isles.at(this, tx, ty, e);
+      if (isle) return isle;
+    }
     if (e < 0.36) return 'deep';
     if (e < 0.42) return 'water';
     if (e < 0.445) return 'sand';
@@ -63,7 +67,8 @@ G.World = class {
       const table = G.Dunes.oasisNear(this, tx, ty) ? G.OASIS_OBJECTS : G.DUNE_OBJECTS;
       for (const [k, ob] of table) if (o < k) { obj = ob; break; }
     }
-    const sea = G.SEA_OBJECTS[type];   // lily pads, driftwood and pearl beds on the water (Night 23)
+    // lily pads, driftwood and pearl beds on the water (Night 23); palms, shells and coral on the isles (Night 27)
+    const sea = G.SEA_OBJECTS[type] || G.ISLE_OBJECTS[type];
     if (sea) { for (const [k, ob] of sea) if (o < k) { obj = ob; break; } }
     // soft clay where the shallows meet the shore (Night 18)
     const cr = !obj && G.RIVER.clayOn[type];

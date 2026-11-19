@@ -90,7 +90,7 @@ G.Journal = class {
   }
 
   page_places() {
-    const vh = this.villages() + this.sunPlace() + this.shrinePlaces() + G.HollowPlay.places(this.state) + G.PeakPlay.places(this.state) + G.DunePlay.places(this.state) + (this.state.signs ? this.state.signs.places() : '');
+    const vh = this.villages() + this.sunPlace() + this.shrinePlaces() + G.HollowPlay.places(this.state) + G.PeakPlay.places(this.state) + G.DunePlay.places(this.state) + G.IslePlay.places(this.state) + (this.state.signs ? this.state.signs.places() : '');
     return this.roads() + vh + this.ruinPlaces(!!vh);
   }
 

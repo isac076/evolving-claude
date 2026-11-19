@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 27 — 2026-11-19 — The Far Isles
+Little islands now rise out of the open sea, and one always waits within a sail of the start (the goal tracker points the way). Each is a
+ring of pale coral sand around palms and red hibiscus, in a bright turquoise lagoon: pick up seashells, peek into tide pools, and gather
+glowing coral from your boat to make a rose-lit Shell lantern and a Shell chime that clinks in the breeze. Hermit crabs scuttle sideways,
+parrots chatter, sea turtles rise to breathe beside you, a steel drum plays — and on dark nights every wave on the shore glows blue.
+
 ## Night 26 — 2026-11-18 — The Star Chart
 Your journey now fills a sky. Fifty deeds — lighting lanterns, planting seeds, making friends, sailing the sea, seeing a rainbow —
 each light a star, and a little banner with a twinkle tells you when one does. The stars make nine constellations on a new Stars

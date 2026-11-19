@@ -207,6 +207,7 @@ G.Renderer = class {
     G.SporeFX.draw(ctx, state, camX, camY, W, H, dt, time, dark);   // glowing spores over the hollows (Night 17)
     G.PeakFX.sky(ctx, state, camX, camY, W, H, dt, time, dark);   // frost glinting in the air, the northern lights (Night 22)
     G.DuneFX.sky(ctx, state, camX, camY, W, H, dt, time, dark);   // the starry desert sky and falling stars (Night 25)
+    G.IsleFX.sky(ctx, state, camX, camY, W, H, dt, time, dark);   // the glowing tide around the Far Isles (Night 27)
     G.HushFX.draw(ctx, state, camX, camY, W, H, time, dark);   // hushlings, Shines and starlight (Night 19)
     G.ShrineFX.sky(ctx, state, camX, camY, W, H, time, dark);   // shrine beams, the kindling wave, the guide arrow
     G.SunFX.sky(ctx, state, camX, camY, W, H, time, dark);      // the Great Sun: sunrise, the risen Sun, shafts of sunlight (Night 20)

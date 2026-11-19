@@ -29,6 +29,7 @@ import smoke_sea
 import smoke_photo
 import smoke_dunes
 import smoke_stars
+import smoke_isles
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -359,6 +360,7 @@ def play(page, errors):
         smoke_dunes.run(page, SHOTS, errors)   # Night 25: the amber dunes, the oasis, Amber lantern, sand castle, geckos, falling stars
         smoke_photo.run(page, SHOTS, errors)   # Night 24: photo mode, the album, the animated title
         smoke_stars.run(page, SHOTS, errors)   # Night 26: the star chart, its banners, the Stars page, the Star lantern
+        smoke_isles.run(page, SHOTS, errors)   # Night 27: the far isles, shells, coral, Shell lantern + chime, crabs, turtles, the glowing tide
 
 
 if __name__ == "__main__":
