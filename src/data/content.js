@@ -101,6 +101,12 @@ G.STRUCTURES = {
 // makes an item (a tool). at: 'workbench' = only while standing near a workbench.
 // garden: true = listed in the Garden group of the craft panel.
 // unlock = hidden until a friend teaches it to you (state.stats.unlocked, see data/wishes.js).
+// Materials every recipe may show from day one; a recipe needing anything else stays a secret in the
+// craft list until you have found it (Night 28)
+// how many materials the inventory bar shows before the rest fold behind "+ N more" (Night 28)
+G.UI_BAG = { desk: 8, phone: 5 };
+G.CRAFT_KNOWN = ['wood', 'stone', 'petal', 'fibre', 'crystal', 'seed', 'acorn'];
+
 G.RECIPES = [
   { id: 'lantern', cost: { wood: 3, stone: 2, petal: 2 }, builds: 'lantern',
     desc: 'Brings colour and light back to the land around it.' },

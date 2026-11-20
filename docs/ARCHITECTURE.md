@@ -21,7 +21,7 @@ src/audio/star_sfx.js  the Star Chart's sounds: star (a twinkle that climbs with
 src/audio/isle_sfx.js  the Far Isles' sounds: shell, tidepool, coral, finding an island, the glowing tide, a shell chime, crab, turtle, parrot (added to G.SFX) + G.INSTRUMENTS.steeldrum (the isles' tune)
 src/audio/sun_sfx.js  the Great Sun's sounds: embers gathering (sungather) and the sunrise (added to G.SFX)
 src/audio/music.js    G.Music — the composer: writes tunes, picks mood/instrument, layers by restoration, the friends' band, floating notes
-src/data/content.js   ALL content: tiles, items, objects, structures, recipes
+src/data/content.js   ALL content: tiles, items, objects, structures, recipes; G.CRAFT_KNOWN (materials every recipe may show from day one), G.UI_BAG (how many materials the bar shows)
 src/data/goals.js     G.GOALS — the first-steps tutorial goals (text, target, progress, reward)
 src/data/creatures.js G.CREATURES — wildlife kinds: where/when they appear, how shy, behaviour type
 src/data/weather.js   G.WEATHER — kinds of weather: how rainy/windy/foggy/cloudy, how long, what may follow (+ snowy words)
@@ -82,7 +82,7 @@ src/game/photo.js     G.Photo (`state.photo`) — photo mode: toggle (P / camera
 src/game/soundscape.js G.Soundscape — feeds G.Music and G.Ambience each frame (moved out of main.js on Night 13)
 src/game/actions.js  G.Actions — the player's hands: gatherNearest (E), gatherAt, click(), updateBuild, updateRemove, craftItem, water/tend plants, useVillage
 src/game/crafting.js  G.Crafting — workbench reach, tools (bonus drops, needs), recipe blockers, picking buildings up
-src/render/sprites.js how each tile / object / structure / the player is drawn
+src/render/sprites.js how each tile / object / structure / the player is drawn; G.mottleGround (Night 28: soft light and shade over every land tile, one world-anchored pattern fill a frame)
 src/render/workshop_sprites.js reeds, crystal, workbench, beacon, fence, flower bed, bench (adds to the tables above)
 src/render/garden_sprites.js sprout + sapling stages, moonflower, G.REGROW_SPRITES (stumps, things growing back)
 src/render/creature_sprites.js G.CREATURE_SPRITES — how each creature is drawn
@@ -110,7 +110,7 @@ src/render/isle_fx.js  G.IsleFX.sky() — after the lighting: the glowing tide (
 src/render/star_sprites.js the Star lantern (a silver post with a turning glass star whose colour drifts) + G.starHue(t, tx, ty)
 src/render/photo_fx.js G.PhotoFX — filter() (blend-mode washes, a cheap bloom from a 1/7 copy, film grain) and frame() (soft edge, cinema bars, keepsake card with caption)
 src/render/renderer.js G.Renderer — draws a frame: ground, objects, particles, lighting
-src/ui/ui.js          G.UI — inventory bar, crafting panel, messages, clock
+src/ui/ui.js          G.UI (also `G.ui`) — inventory bar (folds behind "+ N more", G.UI_BAG), crafting panel (secret recipes until their materials are found, G.CRAFT_KNOWN; "new" tags), messages (`laterNote` waits for a free moment), clock
 src/ui/minimap.js     G.Minimap — corner minimap + big map (M); cached 1px-per-tile chunk images
 src/ui/map_labels.js  G.MapLabels — every name on the big map is added here and placed at the end so names never overlap (Night 21)
 src/ui/goals.js       G.Goals — the goal tracker panel: shows progress, celebrates, gives rewards
@@ -125,6 +125,7 @@ src/main.js           game state, wiring the systems' hooks (toasts, floaters), 
 tools/check.sh        syntax check + headless play test (run before committing)
 tools/smoke_photo.py  Night 24 test (photo mode opens/hides HUD, still time, camera reach, every filter×frame draws, zoom, shutter → album, hide spirit, closes, album page + let go, phone bar, title letters/summary/arrival)
 tools/smoke_stars.py  Night 26 test (constellation data is sound, an old save lights its stars quietly, stars light with a banner, a finished constellation gives stardust + teaches the Star lantern + its own banner, the Stars page draws and switches, a Star lantern's drifting light)
+tools/smoke_review28.py Night 28 review test (no chequer between meadow tiles + the land's light-and-shade sweep stays off water, secret recipes + "more to discover" + the new tag/note, the folding bag, the phone HUD with larger text)
 tools/smoke_isles.py  Night 27 chapter test (the start and old land left alone, the first island + its parts, other islands, hint + boat, finding, shells / tide pool / coral, Shell lantern + chime, crabs drawn + scuttle (and geckos drawn), a turtle met at the surface, the glowing tide, map, journal)
 tools/smoke_dunes.py  Night 25 chapter test (the start left alone, the first dunes + oasis + palms, hint, finding, sunstones + sand, Amber lantern, Sand castle, geckos dart, a falling star, map, journal)
 tools/smoke_sea.py    Night 23 chapter test (water blocks without a boat, sailing + wake, the deep, a pearl, Sea lantern, a whale surfacing, moon jellies, a crossing, bridges over lily pads)

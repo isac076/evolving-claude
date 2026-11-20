@@ -48,8 +48,56 @@ function groundL(tile, d, t, tx, ty) {
   if (d.water) return d.l + (tile.soft - 0.5) * 3 + (G.calm ? 0 : Math.sin(t * 0.9 + (tx + ty) * 0.25) * 0.5);
   if (tile.type === 'dune' || tile.type === 'strand') return d.l + (tile.soft - 0.5) * 6;   // dunes (Night 25): soft patches only, the ripples carry the detail
   // (Night 27: the pale coral sand too — a per-tile step showed as a chequer on it)
-  return tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.v - 0.5) * 2.4 + (tile.soft - 0.5) * 7;
+  // Night 28: the other land lost its per-tile step too (a chequer on every meadow); only the slow, wide patches stay,
+  // and G.mottleGround lays soft light and shade over the land in one smooth sweep instead
+  return tile.type === 'frost' ? d.l + (tile.soft - 0.5) * 3.5 : d.l + (tile.soft - 0.5) * 3;
 }
+
+// Soft light and shade over all land (Night 28): one tileable texture of blurry blobs, anchored to the
+// world and turned a little so its repeat doesn't line up with the tiles, filled once a frame through a
+// path of every land tile in view. Replaces the per-tile lightness step that showed as a chequer.
+const MOTTLE = { size: 384, blobs: 46, turn: 0.31 };
+let mottleCv = null;
+const mottlePats = new WeakMap();
+function makeMottle() {
+  const S = MOTTLE.size, cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const c = cv.getContext('2d');
+  let seed = 4111;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < MOTTLE.blobs; i++) {
+    const x = rnd() * S, y = rnd() * S, small = i % 3 === 0, r = small ? 10 + rnd() * 16 : 34 + rnd() * 60;
+    const light = rnd() < 0.5, a = (small ? 0.045 : 0.065) + rnd() * 0.04;
+    const col = light ? '255,250,225' : '8,22,14';
+    for (let ox = -S; ox <= S; ox += S) for (let oy = -S; oy <= S; oy += S) {   // wrap round so the texture tiles
+      const cx = x + ox, cy = y + oy;
+      if (cx + r < 0 || cy + r < 0 || cx - r > S || cy - r > S) continue;
+      const g = c.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0, `rgba(${col},${a.toFixed(3)})`); g.addColorStop(0.55, `rgba(${col},${(a * 0.55).toFixed(3)})`); g.addColorStop(1, `rgba(${col},0)`);
+      c.fillStyle = g; c.fillRect(cx - r, cy - r, r * 2, r * 2);
+    }
+  }
+  return cv;
+}
+// tiles = the renderer's padded grid of visible tiles (gcols wide, with a one-tile border)
+G.mottleGround = function (ctx, tiles, gcols, tx0, ty0, tx1, ty1, camX, camY) {
+  if (!mottleCv) mottleCv = makeMottle();
+  let pat = mottlePats.get(ctx);
+  if (!pat) { pat = ctx.createPattern(mottleCv, 'repeat'); mottlePats.set(ctx, pat); }
+  if (!pat) return;
+  const T = G.TILE, c = Math.cos(MOTTLE.turn), s = Math.sin(MOTTLE.turn);
+  // world point (wx, wy) sits at (wx - camX, wy - camY) on the canvas: the pattern turns about the world's origin
+  if (pat.setTransform) pat.setTransform(new DOMMatrix([c, s, -s, c, -camX, -camY]));
+  ctx.beginPath();
+  for (let ty = ty0; ty <= ty1; ty++) {
+    let run = null;   // join each row's land tiles into long rectangles (tile numbers can be negative)
+    for (let tx = tx0; tx <= tx1 + 1; tx++) {
+      const land = tx <= tx1 && !G.TILES[tiles[(ty - ty0 + 1) * gcols + (tx - tx0 + 1)].type].water;
+      if (land && run === null) run = tx;
+      else if (!land && run !== null) { ctx.rect(run * T - camX, ty * T - camY, (tx - run) * T, T); run = null; }
+    }
+  }
+  ctx.fillStyle = pat; ctx.fill();
+};
 
 // The colour of a piece of ground. Under snow, faded land keeps a thinner,
 // patchier cover than coloured land, so you can still see where the colour reaches.

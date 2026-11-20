@@ -30,6 +30,7 @@ import smoke_photo
 import smoke_dunes
 import smoke_stars
 import smoke_isles
+import smoke_review28
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "tools" / "screenshots"
@@ -361,6 +362,7 @@ def play(page, errors):
         smoke_photo.run(page, SHOTS, errors)   # Night 24: photo mode, the album, the animated title
         smoke_stars.run(page, SHOTS, errors)   # Night 26: the star chart, its banners, the Stars page, the Star lantern
         smoke_isles.run(page, SHOTS, errors)   # Night 27: the far isles, shells, coral, Shell lantern + chime, crabs, turtles, the glowing tide
+        smoke_review28.run(page, SHOTS, errors)   # Night 28: review-night fixes (no chequer, secret recipes, folding bag, merged star banners, phone HUD)
 
 
 if __name__ == "__main__":

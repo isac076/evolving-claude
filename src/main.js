@@ -39,6 +39,7 @@ window.G = window.G || {};
   };
   G.state = state;   // handy for debugging in the browser console
   const ui = new G.UI(state);
+  G.ui = ui;   // for tests and the console (Night 28)
   const map = new G.Minimap(state);
   const goals = new G.Goals(state, ui);
   const journal = new G.Journal(state, ui);   // discoveries journal (J) + the memory card (Night 11)

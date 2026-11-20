@@ -108,6 +108,16 @@ body:not(.playing) #hud, body.photo #hud { opacity: 0; visibility: hidden; trans
 #btn-pickup { margin-top: 10px; width: 100%; padding: 9px; border-radius: 10px; background: rgba(255, 215, 122, .08); border: 1px dashed rgba(255, 215, 122, .4); font-size: 14px; }
 #btn-pickup:hover { background: rgba(255, 215, 122, .18); }
 #btn-pickup small { color: var(--ink-dim); }
+/* Night 28: a folding bag */
+#inventory.compact .slot.extra, #inventory .slot.less { display: none; }
+#inventory.compact.open .slot.extra, body.craft-open #inventory.compact .slot.extra { display: flex; }
+#inventory.compact .slot.more { display: flex; }
+#inventory.compact.open .slot.more, body.craft-open #inventory .slot.more { display: none; }
+#inventory.compact.open .slot.less { display: flex; }
+body.craft-open #inventory .slot.less { display: none; }
+#inventory .slot.more, #inventory .slot.less { pointer-events: auto; cursor: pointer; border: 1px dashed var(--edge); color: var(--ink-dim); font: inherit; font-size: 12px; font-style: italic; }
+#inventory .slot.more:hover, #inventory .slot.less:hover { color: var(--gold); border-color: rgba(255, 215, 122, .5); }
+.slot.more { display: none; }
 .slot.tool { border: 1px solid rgba(255, 215, 122, .45); background: rgba(255, 215, 122, .1); color: var(--gold); }
 body.removing #game { cursor: pointer; }
 
@@ -207,7 +217,7 @@ body.map-open #minimap, body.craft-open #minimap, body.market-open #minimap { op
 
 @media (max-width: 600px) {
   #minimap { width: 110px; height: 110px; }
-  #goals { top: auto; bottom: 150px; width: min(260px, calc(100vw - 120px)); }
+  #goals { top: auto; bottom: 150px; width: min(250px, calc(100vw - 150px)); }   /* clear of the touch buttons (Night 28) */
 }
 @media (max-width: 960px) and (min-width: 601px) { #toast { top: 190px; } }
 @media (min-width: 761px) { body.craft-open #bottom { right: 350px; } }
@@ -288,7 +298,12 @@ body.no-hints #hint { display: none; }
 @media (prefers-reduced-motion: reduce) { #music-caption::before { animation: none; } }
 
 /* ---------- friends' wishes (Night 10) ---------- */
-.recipe.locked, .craft-group.locked { display: none; }
+.recipe.locked, .craft-group.locked, .recipe.unseen { display: none; }
+/* Night 28: secrets in the craft list */
+.recipe .tag.new { display: none; color: #ffe7a8; border-color: rgba(255, 215, 122, .55); background: rgba(255, 215, 122, .12); }
+.recipe.fresh .tag.new { display: inline; }
+.recipe.fresh { border-color: rgba(255, 215, 122, .35); }
+.craft-more { margin: -2px 4px 2px; font-size: 12px; font-style: italic; color: var(--ink-dim); opacity: .8; }
 #wishes {
   position: absolute; left: 14px; top: 62px; width: min(250px, calc(100vw - 210px)); padding: 8px 12px 9px;
   opacity: 0; transform: translateX(-12px); transition: opacity .6s, transform .6s, top .5s ease;
@@ -305,7 +320,13 @@ body.no-hints #hint { display: none; }
 .wish.ready span, .wish.ready b { color: var(--gold); text-shadow: 0 0 8px rgba(255, 210, 120, .5); }
 .wish.unknown span { font-style: italic; color: var(--ink-dim); }
 .wish-more { font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
-@media (max-width: 600px) { #wishes { top: auto; width: min(240px, calc(100vw - 120px)); font-size: 12px; } }
+@media (max-width: 600px) { #wishes { top: auto; width: min(240px, calc(100vw - 150px)); font-size: 12px; } }
+/* Night 28: larger text zooms the HUD by 1.18, and vw counts before the zoom: keep clear of the minimap and touch buttons */
+@media (max-width: 600px) {
+  body.big-text #status { max-width: calc(100vw / 1.18 - 156px); }
+  body.big-text #goals { width: calc(100vw / 1.18 - 150px); }
+  body.big-text #wishes { width: calc(100vw / 1.18 - 150px); }
+}
 
 /* ---------- journal + memory stones (Night 11) ---------- */
 #btn-journal { pointer-events: auto; background: none; border: 0; padding: 0 2px; margin: -4px -2px -4px -6px; display: flex; opacity: .8; }

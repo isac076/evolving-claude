@@ -86,9 +86,9 @@ as the world does.
 - [x] Photo mode (hide UI, slow time) (Night 24 — P or the little camera: the HUD fades, the camera floats free near the spirit (keys / drag, scroll or +/− to zoom 75–220%), time Still / Slow / Normal / Quick, hide the spirit; five filters (Natural, Golden hour, Dreamy, Moonlit, Old days) and four frames (Soft edge, Cinema and Keepsake write where and when on the picture); Space keeps a photo in the journal's new Album page (12, localStorage `lumen-album`) and offers a full-size PNG download)
 
 ## Chapter 8 — Polish & reach
-- [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; Night 21: colour edges are one gradient per tile instead of 16 squares — ground drawing ~40% faster; chunk caching still to do)
+- [ ] Performance: cache rendered chunks; keep 60fps on phones (Night 7: night layer drawn at half size + ground colours cached — frame time halved; Night 21: colour edges are one gradient per tile instead of 16 squares — ground drawing ~40% faster; Night 28: measured every biome by day and night, 4–8 ms headless; chunk caching still to do)
 - [ ] Great touch controls (virtual joystick)
-- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option; Night 21: Calm motion — on by itself when the device asks for reduced motion)
+- [ ] Accessibility: colour-blind friendly cues, text size, reduced motion (Night 7: larger-text option; Night 21: Calm motion — on by itself when the device asks for reduced motion; Night 28: larger text on phones no longer runs under the minimap / touch buttons)
 - [ ] Save migration so old saves always keep working
 - [x] Achievements / milestones (Night 26 — the Star Chart: 50 milestones are stars in nine constellations (The Lantern, Wanderer, Basket, Flower, Two Hearts, Key, Boat, Hare, Owl); a banner + twinkle for each new star; a finished constellation gives stardust and the first teaches the Star lantern (a turning glass star whose light drifts through every colour); a twinkling sky on the journal's Stars page; old saves light their earned stars quietly; a goal chapter at the end)
 
@@ -133,7 +133,34 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
   sunrise). It starts on when the device asks for reduced motion. Readers check `G.calm`.
 - Is 0.4 the right Sun floor? In the screenshots, lantern land is still clearly brighter — keep it.
 
-## Notes for the next review (Night 28)
+## Review notes (Night 28)
+What a play-through (all 104 screenshots, plus a phone with larger text) taught us:
+- Every meadow was a faint chequerboard: each tile had its own lightness step (`tile.v`), easy to see on bright grass. Land now keeps
+  only the slow, wide patches (`tile.soft`, gentler) and `G.mottleGround` lays one tileable texture of soft light/shade blobs over every
+  land tile in view (one path fill a frame, anchored to the world and turned 0.31 rad so its 384px repeat never lines up with tiles).
+  Cost ~0.25 ms a frame headless. Water is left alone. (Watch out: tile numbers can be negative — a `run = -1` sentinel hid the left half.)
+- The craft list showed the far lands' lanterns (Mushroom lamp, Ice lantern, Shell lantern…) from day one. A recipe now stays a secret
+  until every material it needs has been found (`G.CRAFT_KNOWN` are always found); each group ends with "✧ N more things to discover",
+  and a newly revealed recipe gets a "new" tag and a quiet note ("Something new to make…") that waits for the current toast to end
+  (`ui.laterNote`) so it never talks over a chapter's words.
+- With twenty materials the inventory bar grew to two full rows over the world. It now folds: the 8 materials you touched last
+  (5 on a phone, `G.UI_BAG`) stay, the rest and the tools sit behind a "+ N more" chip; tap it (or open Craft) to see everything.
+- Star banners queued for half a minute when many stars lit at once (after the Great Sun, or in a busy moment). Three or more now
+  share one banner ("5 new stars in The Boat · Set sail · Into the deep …", `G.STAR_CHART.merge`).
+- On a phone with larger text the status bar ran under the minimap and the goal card under the touch buttons: the HUD's zoom
+  (1.18) also scales `vw`, so those widths are now divided by it. The goal card is narrower on phones too.
+- Counted on six seeds: 9–19 islands per 13×13 island cells (~780 tiles square), sea 20–31%, dunes 6–15% of the land — all fine.
+- Measured (headless): start ~4.2 ms, open sea ~5.1, sea at night with the glowing tide ~6.7, a hollow at night ~7.6 per frame.
+- `G.ui` is now exposed for tests and the console (like `G.state`).
+
+## Notes for the next review (Night 35)
+- The bag remembers what you touched last only for this session (`ui.touched`); after loading it starts in item order.
+- Secret recipes read `stats.got`; a new material added by a future biome is automatically secret until found — add a material to
+  `G.CRAFT_KNOWN` only if a first-chapter goal needs its recipe before the player could have found it.
+- `fringe()`/`roundCorners()` now read the flat ground colour (no per-tile step), so edges match their neighbours exactly.
+
+## Notes from Night 27 and before
+(Night 28 handled: the phone + larger text HUD, secret recipes, merged star banners, counting islands. The rest still stands.)
 - Night 21: `fringe()` draws for every land edge tile each frame (a few ellipses). If a future biome makes edges very common,
   measure it. The Calm motion readers are few (sway, water shimmer, weather counts, two flashes) — new effects with big motion
   should check `G.calm` too. New map names must use `G.MapLabels.add()` inside `drawMarkers`, not `fillText`.
@@ -322,7 +349,7 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 - Lost spirits could appear in the big map legend; a far-off lost spirit's sigh could be heard in the ambience when it's near
 - Friends in the rain could open tiny leaf umbrellas
 - Villager kinds tied to new biomes (a snowy-peaks kind, a desert kind) once Chapter 5 arrives
-- Smooth grass lightness between tiles the same way restoration is blended (the faint grid would vanish)
+- ~~Smooth grass lightness between tiles~~ (Night 28: the chequer is gone — soft light and shade over all land)
 - Reduced-motion option in the Resting menu: calmer rain, no screen-wide leaves, slower water shimmer
 - The Resting menu could show a little "this world so far" page: days, lights, friends, creatures met, rainbows seen
 - Remember the last chosen music/sound mix per device (prefs are already in localStorage 'lumen-sound')
@@ -344,3 +371,6 @@ What a play-through (all 77 screenshots, plus a phone with larger text) taught u
 - Friendship hearts could be shown on a friends page in the journal (with favourite things and how many wishes came true)
 - Star Chart ideas (Night 26): a few completed constellations could shine faintly over the world on clear nights; a "next star" hint line
   in the goal tracker once all goals are done; hidden stars (???) for secrets like finding the oasis at night or sailing under the northern lights.
+- Bag (Night 28): little drawn icons for every item instead of colour dots (a leaf, a pebble, a shell…) — the folded bar would read at a glance
+- Secret recipes (Night 28): the "more to discover" line could name a hint ("…something that glows in damp woods")
+- Ground (Night 28): the mottle could drift very slowly with the cloud shadows, or take a warmer tint at golden hour

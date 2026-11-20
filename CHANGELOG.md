@@ -2,6 +2,12 @@
 
 What changed each night, newest first.
 
+## Night 28 — 2026-11-20 — Soft meadows and a tidier bag
+A review night. The grass no longer looks like a faint chessboard — meadows now have soft patches of light and shade that flow
+across the land. The craft list keeps the far lands' lanterns a secret until you find what they're made of (a "new" tag shows when
+one appears), the item bar folds into one row with a "+ more" button, many new stars share one banner, and on phones with larger
+text the top bar and goal card no longer hide under the map and buttons.
+
 ## Night 27 — 2026-11-19 — The Far Isles
 Little islands now rise out of the open sea, and one always waits within a sail of the start (the goal tracker points the way). Each is a
 ring of pale coral sand around palms and red hibiscus, in a bright turquoise lagoon: pick up seashells, peek into tide pools, and gather

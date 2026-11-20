@@ -66,7 +66,8 @@ def run(page, shots, errors):
         const s = G.state, c = s.chart, b = document.getElementById('star-banner');
         for (const id of ['sail', 'deep', 'shore', 'whale', 'sailed']) if (!s.stats.chart[id]) return 'star ' + id + ' did not light';
         if (!b.classList.contains('show')) return 'no banner';
-        if (!/A new star/.test(b.textContent)) return 'banner says: ' + b.textContent;
+        if (!/[0-9]+ new stars/.test(b.textContent)) return 'five stars at once should share one banner, it says: ' + b.textContent;
+        if (c.queue.some(q => !q.done)) return 'single star banners still queued: ' + c.queue.length;
         if (!s.stats.chartDone.includes('boat')) return 'The Boat is not complete';
         if (!(s.inv.stardust >= 3)) return 'no stardust: ' + s.inv.stardust;
         if (!s.stats.unlocked.includes('starlantern')) return 'the Star lantern was not taught';

@@ -137,6 +137,7 @@ window.G = window.G || {};
     gift: { stardust: 3 },                    // for every complete constellation
     teach: 'starlantern',                     // the first complete constellation teaches this recipe
     banner: 4.2,                              // seconds a new star's banner stays
+    merge: 3,                                 // this many stars at once share one banner (Night 28)
   };
 
   G.STARS_SAYS = {

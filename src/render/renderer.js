@@ -104,6 +104,7 @@ G.Renderer = class {
       nb[0] = tiles[i - gcols]; nb[1] = tiles[i + 1]; nb[2] = tiles[i + gcols]; nb[3] = tiles[i - 1];
       G.drawGround(ctx, tiles[i], tx * T - camX, ty * T - camY, fAt(tx, ty), time, tx, ty, cornersAt(tx, ty), nb);
     }
+    G.mottleGround(ctx, tiles, gcols, tx0, ty0, tx1, ty1, camX, camY);   // soft light and shade over the land (Night 28)
     // foam breathing along the shores (Night 14)
     const n8 = new Array(8);
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {

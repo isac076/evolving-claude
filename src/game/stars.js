@@ -43,7 +43,14 @@ G.StarChart = class {
     for (const L of s.world.lights) if (L.type === 'starlantern') L.hue = G.starHue(s.time, Math.floor(L.x / G.TILE), Math.floor(L.y / G.TILE));
     if (this.showT > 0 && (this.showT -= dt) <= 0) { this.el.classList.remove('show'); this.showT = -0.6; }   // a breath between banners
     else if (this.showT < 0 && (this.showT += dt) >= 0) this.showT = 0;
-    if (this.showT === 0 && this.queue.length) this.banner(this.queue.shift());
+    if (this.showT === 0 && this.queue.length) {
+      // Night 28: three or more stars at once share one banner (they used to queue up for half a minute)
+      const stars = this.queue.filter(b => !b.done);
+      if (!this.queue[0].done && stars.length >= G.STAR_CHART.merge) {
+        this.queue = this.queue.filter(b => b.done);
+        this.banner({ many: stars, star: stars[stars.length - 1].star, con: stars[stars.length - 1].con });
+      } else this.banner(this.queue.shift());
+    }
     if ((this.timer -= dt) > 0) return;
     this.timer = G.STAR_CHART.every;
     this.look(false);
@@ -86,7 +93,7 @@ G.StarChart = class {
   // the banner at the top: a new star, or a whole constellation
   banner(b) {
     const s = this.state, p = s.player, el = this.el, hue = b.con.hue;
-    const first = !b.done && G.StarChart.count(s) === 1;
+    const first = !b.done && G.StarChart.count(s) === (b.many ? b.many.length : 1);
     el.style.setProperty('--hue', hue);
     el.classList.toggle('whole', !!b.done);
     if (b.done) {
@@ -94,6 +101,13 @@ G.StarChart = class {
       G.Sound.play('constellation');
       this.h.ui.toast(G.STARS_SAYS.done(b.con), 6);
       this.h.burst(p.x, p.y - 20, `hsla(${hue},90%,80%,A)`, 30);
+    } else if (b.many) {
+      const names = b.many.map(m => m.star.name), cons = new Set(b.many.map(m => m.con.name));
+      const list = names.length > 3 ? names.slice(0, 3).join(' · ') + ' …' : names.join(' · ');
+      el.innerHTML = `<i></i><div><small>${b.many.length} new stars${cons.size === 1 ? ' in ' + b.con.name : ' in ' + cons.size + ' constellations'}</small><b>${list}</b><span>Open the journal (J) to see them</span></div>`;
+      G.Sound.play('star', { n: G.StarChart.count(s) });
+      this.h.burst(p.x, p.y - 24, `hsla(${hue},90%,85%,A)`, 22);
+      if (first) this.h.ui.toast(G.STARS_SAYS.first, 8);
     } else {
       el.innerHTML = `<i></i><div><small>A new star in ${b.con.name}</small><b>${b.star.name}</b><span>${b.star.text}</span></div>`;
       G.Sound.play('star', { n: G.StarChart.count(s) });
@@ -101,6 +115,6 @@ G.StarChart = class {
       if (first) this.h.ui.toast(G.STARS_SAYS.first, 8);
     }
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-    this.showT = G.STAR_CHART.banner + (b.done ? 1.5 : 0);
+    this.showT = G.STAR_CHART.banner + (b.done ? 1.5 : b.many ? 1 : 0);
   }
 };
